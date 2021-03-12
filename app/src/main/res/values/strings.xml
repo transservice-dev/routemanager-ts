@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Управление вывозами</string>
+
+    <string name="connectionPref">Настройки подключения</string>
+    <string name="commonPref">Общие настройки</string>
+    <string name="servicePref">Сервисные функции</string>
+
+    <string name="settingsLable">Настройки</string>
+    <string name="serverAddress">Имя/адрес сервера</string>
+    <string name="PortText">Порт</string>
+    <string name="passText">Пароль</string>
+    <string name="URLName_Description">имя сервера для получения данных</string>
+    <string name="UrlPort_Description">порт сервера для подключения</string>
+    <string name="UrlAuthPass_Description">Пароль для подключения к серверу</string>
+    <string name="routePref">Маршрут</string>
+    <string name="routePref_Description">Выбранный маршрут</string>
+    <string name="routeTitle">Маршрут</string>
+    <string name="regionTitle">Регион</string>
+    <string name="vehicleNumberTitle">ТС</string>
+    <string name="datePrefTitle">Дата</string>
+    <string name="sendLog">Отправить лог</string>
+    <string name="updateApp">Обновить приложение</string>
+    <string name="update">Обновить</string>
+    <string name="clearCache">Удалить кэш</string>
+    <string name="home">Главная</string>
+    <string name="list">Список</string>
+    <string name="photos">Фото</string>
+    <string name="settings">Настройки</string>
+    <string name="searchTitle">Поиск</string>
+    <string name="addupdateroute">Добавить/Изменить</string>
+    <string name="pointsAtAll_title">Точек всего</string>
+    <string name="all_title">Всего</string>
+    <string name="done_title">Выполнено</string>
+    <string name="closeRoute">Закрыть маршрут</string>
+    <string name="openClose">Показать/Скрыть</string>
+    <string name="vehicle_long_title">Транспортое средство</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="region_title">Регион</string>
+    <string name="vehicle_shorttitle">ТС</string>
+    <string name="vehicle_title">Транспортное средство</string>
+    <string name="date_title">Дата</string>
+
+</resources>

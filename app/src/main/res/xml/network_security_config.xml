@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network_security_config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">192.168.105.24</domain>
+        <domain includeSubdomains="true">188.234.242.63</domain>
+        <trust-anchors>
+            <certificates src="@raw/apache_selfsigned"/>
+        </trust-anchors>
+    </domain-config>
+</network_security_config>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.PreferenceCategory android:title="@string/connectionPref">
+
+        <androidx.preference.EditTextPreference
+            android:key="URL_NAME"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/URLName_Description"
+            android:title="@string/serverAddress"
+            app:defaultValue="188.234.242.63"
+            app:useSimpleSummaryProvider="true" />
+        <androidx.preference.EditTextPreference
+            android:defaultValue="444"
+            android:inputType="number"
+            android:key="URL_PORT"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/PortText"
+            app:useSimpleSummaryProvider="true" />
+        <androidx.preference.EditTextPreference
+            android:defaultValue="z5FYg733jGUwjmabuGdmZvfAkDHnh2Wj"
+            android:inputType="textPassword"
+            android:key="URL_AUTHPASS"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/UrlAuthPass_Description"
+            android:title="@string/passText" />
+
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory android:title="@string/commonPref">
+        <androidx.preference.EditTextPreference
+            android:defaultValue="Default value"
+            android:key="ROUTE"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/routePref_Description"
+            android:title="@string/routePref"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false"/>
+        <androidx.preference.EditTextPreference
+            android:defaultValue="Default value"
+            android:key="REGION"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/regionTitle"
+            android:title="@string/regionTitle"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false"/>
+        <androidx.preference.EditTextPreference
+            android:defaultValue=""
+            android:key="ROUTEREF"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/routeTitle"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false"/>
+        <androidx.preference.EditTextPreference
+            android:defaultValue="Default value"
+            android:key="VEHICLE"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/vehicleNumberTitle"
+            android:title="@string/vehicleNumberTitle"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false"/>
+        <androidx.preference.EditTextPreference
+            android:defaultValue="Default value"
+            android:key="DATE"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/datePrefTitle"
+            android:title="@string/datePrefTitle"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="true"/>
+        <androidx.preference.SwitchPreference
+            android:id="@+id/sw_useRouteForSearch"
+            android:defaultValue="false"
+            android:key="SEARCH_BY_ROUTE"
+            android:summary="Искать путевые с привязкой по маршруту"
+            android:title="Привязка по маршруту"
+            app:isPreferenceVisible="false"/>
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory android:title="@string/servicePref">
+        <Preference
+            android:title="@string/sendLog"
+            android:key="@string/sendLog" />
+        <Preference
+            android:title="@string/update"
+            android:key="@string/update" />
+        <Preference
+            android:title="@string/clearCache"
+            android:key="@string/clearCache" />
+    </androidx.preference.PreferenceCategory>
+</androidx.preference.PreferenceScreen>
