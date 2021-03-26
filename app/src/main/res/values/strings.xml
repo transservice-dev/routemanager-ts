@@ -18,10 +18,9 @@
     <string name="regionTitle">Регион</string>
     <string name="vehicleNumberTitle">ТС</string>
     <string name="datePrefTitle">Дата</string>
-    <string name="sendLog">Отправить лог</string>
+    <string name="sendLog">Отправить отчет об ошибке</string>
     <string name="updateApp">Обновить приложение</string>
     <string name="update">Обновить</string>
-    <string name="clearCache">Удалить кэш</string>
     <string name="home">Главная</string>
     <string name="list">Список</string>
     <string name="photos">Фото</string>
@@ -31,6 +30,7 @@
     <string name="pointsAtAll_title">Точек всего</string>
     <string name="all_title">Всего</string>
     <string name="done_title">Выполнено</string>
+    <string name="confirm_title">Готово</string>
     <string name="closeRoute">Закрыть маршрут</string>
     <string name="openClose">Показать/Скрыть</string>
     <string name="vehicle_long_title">Транспортое средство</string>
@@ -40,5 +40,25 @@
     <string name="vehicle_shorttitle">ТС</string>
     <string name="vehicle_title">Транспортное средство</string>
     <string name="date_title">Дата</string>
+    <string name="on_call_title">По заявке</string>
+    <string name="pointStatusDescription">Статус выполнения точки</string>
+    <string name="show_full_list_title">Показывать полный список</string>
+    <string name="photo_before_title">Фото до</string>
+    <string name="set_countfact_title">Установить факт</string>
+    <string name="photo_after_title">Фото после</string>
+    <string name="switch_camera_button_alt">Переключить камеру</string>
+    <string name="capture_button_alt">Фото</string>
+    <string name="picture_cancel">ПОВТОР</string>
+    <string name="picture_confirm">ОК</string>
+    <string name="ok">ОК</string>
+    <string name="send_files">Отправить</string>
+    <string name="share_button_alt">Поделиться</string>
+    <string name="back_button_alt">Назад</string>
+    <string name="share_hint">Поделиться</string>
+    <string name="clearCacheFiles">Очистить кеш</string>
+    <string name="clearCache">Очистить кеш</string>
+    <string name="title_activity_error">ErrorActivity</string>
+    <string name="crash">Авария!</string>
+    <string name="restart_title">Перезагрузить</string>
 
 </resources>

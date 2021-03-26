@@ -1,24 +1,26 @@
 package ru.transservice.routemanager.ui.routesettings
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.selects.whileSelect
+import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.ItemRegionListBinding
 
 class RegionListAdapter(val listener: (RegionItem) -> Unit) : RecyclerView.Adapter<RegionListAdapter.RegionItemViewHolder>() {
 
     var items: List<RegionItem> = listOf()
+    var selectedPos = RecyclerView.NO_POSITION
 
     class RegionItemViewHolder(val binding: ItemRegionListBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: RegionItem, listener: (RegionItem) -> Unit) {
+        fun bind(item: RegionItem, isSelected:Boolean) {
             binding.tvName.text = item.name
-            binding.tvName.setOnClickListener {
-                listener(item)
-            }
+            binding.root.isSelected = isSelected
         }
     }
 
@@ -28,8 +30,16 @@ class RegionListAdapter(val listener: (RegionItem) -> Unit) : RecyclerView.Adapt
         return RegionItemViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: RegionItemViewHolder, position: Int) =
-        holder.bind(items[position], listener)
+    override fun onBindViewHolder(holder: RegionItemViewHolder, position: Int) {
+        holder.bind(items[position], position == selectedPos)
+        holder.binding.root.setOnClickListener {
+            notifyItemChanged(selectedPos)
+            selectedPos = holder.layoutPosition
+            notifyItemChanged(selectedPos)
+            listener(items[selectedPos])
+        }
+    }
+
 
     override fun getItemCount(): Int = items.size
 
@@ -60,4 +70,9 @@ class RegionListAdapter(val listener: (RegionItem) -> Unit) : RecyclerView.Adapt
         diffResult.dispatchUpdatesTo(this)
 
     }
+
+    fun getItemPosition(regionItem: RegionItem): Int{
+        return items.indexOf(regionItem)
+    }
+
 }

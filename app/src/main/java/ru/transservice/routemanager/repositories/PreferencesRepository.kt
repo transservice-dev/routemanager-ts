@@ -1,6 +1,7 @@
 package ru.transservice.routemanager.repositories
 
 import android.content.SharedPreferences
+import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import ru.transservice.routemanager.AppClass
@@ -8,6 +9,7 @@ import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
 import ru.transservice.routemanager.data.local.entities.Task
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,11 +29,26 @@ object PreferencesRepository {
         PreferenceManager.getDefaultSharedPreferences(ctx)
     }
 
+    fun getUrlName(): String {
+        return prefs.getString(URL_NAME,"") as String
+    }
+
+    fun getUrlPort(): String {
+        return prefs.getString(URL_PORT,"") as String
+    }
+
+    fun getUrlPass(): String {
+        return prefs.getString(URL_AUTHPASS,"") as String
+    }
 
     fun getVehicle(): VehicleItem? {
         val currentValue = prefs.getString(VEHICLE,null)
         return currentValue?.let {
-            Gson().fromJson(currentValue,VehicleItem::class.java)
+            try {
+                Gson().fromJson(currentValue,VehicleItem::class.java)
+            }catch (e: Exception){
+                null
+            }
         }
 
     }
@@ -39,25 +56,44 @@ object PreferencesRepository {
     fun getRegion(): RegionItem? {
         val currentValue = prefs.getString(REGION,null)
         return currentValue?.let {
-            Gson().fromJson(currentValue,RegionItem::class.java)
+            try {
+                Gson().fromJson(currentValue,RegionItem::class.java)
+            }catch (e: Exception){
+                null
+            }
         }
     }
 
     fun getRoute(): RouteItem? {
         val currentValue = prefs.getString(ROUTE,null)
         return currentValue?.let {
-            Gson().fromJson(currentValue,RouteItem::class.java)
+            try {
+                Gson().fromJson(currentValue,RouteItem::class.java)
+            }catch (e: Exception){
+                null
+            }
         }
     }
 
     fun getDate(): Date? {
         val currentValue = prefs.getString(ROUTE_DATE,null)
         return currentValue?.let {
-            SimpleDateFormat("yyyy.MM.dd",
-                Locale("ru")).parse(it)
+          try { SimpleDateFormat("yyyy.MM.dd",
+                Locale("ru")).parse(it) }
+          catch (e: Exception){
+              null
+          }
         }
     }
 
+    fun getTask(): Task {
+        return Task(
+            "",
+            getVehicle(),
+            getRoute(),
+            getDate() ?: Date()
+        )
+    }
 
     private fun putValue(pair: Pair<String,Any>) = with(prefs.edit()) {
         val key = pair.first

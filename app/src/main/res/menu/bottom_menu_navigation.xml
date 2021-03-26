@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:title="@string/home"
-        android:icon="@drawable/ic_baseline_home_24"
+        android:icon="@drawable/ic_home_24"
         android:id="@+id/home"/>
     <item android:id="@+id/list"
-        android:icon="@drawable/ic_baseline_list_24"
+        android:icon="@drawable/ic_list_24"
         android:title="@string/list"/>
     <item android:id="@+id/photos"
-        android:icon="@drawable/ic_baseline_photo_library_24"
+        android:icon="@drawable/ic_photo_library_24"
         android:title="@string/photos"/>
     <item android:id="@+id/settings"
-        android:icon="@drawable/ic_baseline_settings_24"
+        android:icon="@drawable/ic_settings_24"
         android:title="@string/settings"/>
 
 

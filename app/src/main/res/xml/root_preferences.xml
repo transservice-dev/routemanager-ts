@@ -67,8 +67,7 @@
             app:useSimpleSummaryProvider="true"
             app:isPreferenceVisible="false"/>
         <androidx.preference.EditTextPreference
-            android:defaultValue="Default value"
-            android:key="DATE"
+            android:key="ROUTE_DATE"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="@string/datePrefTitle"
@@ -93,5 +92,8 @@
         <Preference
             android:title="@string/clearCache"
             android:key="@string/clearCache" />
+        <Preference
+            android:title="@string/clearCacheFiles"
+            android:key="@string/clearCacheFiles" />
     </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>

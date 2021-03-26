@@ -13,14 +13,13 @@ import ru.transservice.routemanager.databinding.ItemVehicleListBinding
 class VehicleListAdapter(val listener: (VehicleItem) -> Unit) : RecyclerView.Adapter<VehicleListAdapter.VehicleItemViewHolder>() {
 
     var items: List<VehicleItem> = listOf()
+    var selectedPos = RecyclerView.NO_POSITION
 
     class VehicleItemViewHolder(val binding: ItemVehicleListBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: VehicleItem, listener: (VehicleItem) -> Unit) {
-            binding.tvName.text = item.name
-            binding.tvName.setOnClickListener {
-                listener(item)
-            }
+        fun bind(item: VehicleItem, isSelected:Boolean) {
+            binding.tvName.text = item.number
+            binding.root.isSelected = isSelected
         }
     }
 
@@ -30,8 +29,16 @@ class VehicleListAdapter(val listener: (VehicleItem) -> Unit) : RecyclerView.Ada
         return VehicleItemViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: VehicleItemViewHolder, position: Int) =
-        holder.bind(items[position], listener)
+    override fun onBindViewHolder(holder: VehicleItemViewHolder, position: Int) {
+        holder.bind(items[position], position == selectedPos)
+        holder.binding.root.setOnClickListener {
+            notifyItemChanged(selectedPos)
+            selectedPos = holder.layoutPosition
+            notifyItemChanged(selectedPos)
+            listener(items[selectedPos])
+        }
+    }
+
 
     override fun getItemCount(): Int = items.size
 
@@ -61,5 +68,9 @@ class VehicleListAdapter(val listener: (VehicleItem) -> Unit) : RecyclerView.Ada
         items = data
         diffResult.dispatchUpdatesTo(this)
 
+    }
+
+    fun getItemPosition(vehicleItem: VehicleItem): Int{
+        return items.indexOf(vehicleItem)
     }
 }

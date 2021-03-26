@@ -1,13 +1,11 @@
 package ru.transservice.routemanager.ui.routesettings
 
 import android.net.LinkAddress
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
+import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.repositories.PreferencesRepository
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
@@ -18,11 +16,18 @@ class RouteSettingsViewModel(): ViewModel() {
 
     private val prefRepository = PreferencesRepository
     private val repository = RootRepository
-    private val regionList: MutableLiveData<List<RegionItem>> = MutableLiveData()
     private var currentRegion = MutableLiveData(prefRepository.getRegion())
     private var currentVehicle = MutableLiveData(prefRepository.getVehicle())
     private var currentRoute = MutableLiveData(prefRepository.getRoute())
     private var currentDate = MutableLiveData(prefRepository.getDate())
+    private val query = MutableLiveData("")
+    val mediatorListRegionResult = MediatorLiveData<LoadResult<List<RegionItem>>>()
+    val mediatorListVehicleResult = MediatorLiveData<LoadResult<List<VehicleItem>>>()
+    private var vehicleList: MutableLiveData<LoadResult<List<VehicleItem>>> = MutableLiveData()
+    private var regionList: MutableLiveData<LoadResult<List<RegionItem>>> = MutableLiveData()
+
+    private var editingIsAvailable = MutableLiveData(true)
+
 
     class RouteSettingsViewModelFactory: ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -46,43 +51,112 @@ class RouteSettingsViewModel(): ViewModel() {
     }
 
     fun getDate(): MutableLiveData<Date?> {
-        return  if (currentDate == null) MutableLiveData(Date()) else currentDate!!
+        return currentDate
     }
 
-    fun loadRegions(): MutableLiveData<LoadResult<List<RegionItem>>> {
-        val result: MutableLiveData<LoadResult<List<RegionItem>>> =
-            MutableLiveData(LoadResult.Loading())
-        repository.getRegions { regionResList ->
-            result.postValue(LoadResult.Success(regionResList.map { it.toRegionItem() }))
+    fun getEditingIsAvailable(): MutableLiveData<Boolean>{
+        repository.isTaskLoaded {
+            editingIsAvailable.postValue(!it)
         }
-        return result
+        return editingIsAvailable
+    }
+    fun loadRegions(): MutableLiveData<LoadResult<List<RegionItem>>> {
+        regionList.value = LoadResult.Loading()
+        repository.loadRegions { regionResList ->
+            val list = regionResList
+                    .map { it.toRegionItem() }
+                    .sortedBy { it.name }
+            regionList.postValue(LoadResult.Success(list))
+        }
+        return regionList
     }
 
     fun loadVehicle(): MutableLiveData<LoadResult<List<VehicleItem>>> {
-        val result: MutableLiveData<LoadResult<List<VehicleItem>>> =
-            MutableLiveData(LoadResult.Loading())
+        vehicleList.value = LoadResult.Loading()
         currentRegion.value?.let{
-            repository.getVehiclesByRegion(currentRegion.value!!) { vehicleResList ->
-                result.postValue(LoadResult.Success(vehicleResList.map { it.toVehicleItem() }))
+            repository.loadVehiclesByRegion(currentRegion.value!!) { vehicleResList ->
+                val list = vehicleResList
+                        .map { it.toVehicleItem() }
+                        .sortedBy { it.number }
+                vehicleList.postValue(LoadResult.Success(list))
             }
         }
-        return result
+        return vehicleList
     }
 
     fun setRegion(regionItem: RegionItem){
         currentRegion.value = regionItem
         prefRepository.saveRegion(regionItem)
+        updateCurrentTask()
     }
 
     fun setVehicle(vehicleItem: VehicleItem){
         currentVehicle.value = vehicleItem
         prefRepository.saveVehicle(vehicleItem)
+        updateCurrentTask()
     }
 
     fun setDate(date: Date){
         currentDate.value = date
         prefRepository.saveDate(date)
+        updateCurrentTask()
     }
 
+    private fun updateCurrentTask(){
+        repository.updateCurrentTask()
+    }
+
+    fun handleSearchQuery(text: String) {
+        query.value = text
+    }
+
+    fun addSourcesVehicle(){
+        val filterF = {
+            val queryStr = query.value!!
+            var vehicles: List<VehicleItem> = listOf()
+            vehicleList.value?.let{
+                it.data?.let { list ->
+                   vehicles = list
+                }
+            }
+            if (vehicles.isNotEmpty()) {
+                mediatorListVehicleResult.value = if (queryStr.isNotEmpty())
+                    LoadResult.Success(vehicles
+                            .filter { it.name.contains(queryStr, true) })
+                else LoadResult.Success(vehicles)
+            }
+        }
+
+        mediatorListVehicleResult.addSource(vehicleList) { filterF.invoke() }
+        mediatorListVehicleResult.addSource(query) { filterF.invoke() }
+    }
+
+    fun addSourcesRegion() {
+        val filterF = {
+            val queryStr = query.value!!
+            var regions: List<RegionItem> = listOf()
+            regionList.value?.let {
+                it.data?.let { list ->
+                    regions = list
+                }
+            }
+            if (regions.isNotEmpty()) {
+                mediatorListRegionResult.value = if (queryStr.isNotEmpty())
+                    LoadResult.Success(regions
+                            .filter { it.name.contains(queryStr, true) })
+                else LoadResult.Success(regions)
+            }
+        }
+
+        mediatorListRegionResult.addSource(regionList) { filterF.invoke() }
+        mediatorListRegionResult.addSource(query) { filterF.invoke() }
+    }
+
+    fun removeSources(){
+        mediatorListVehicleResult.removeSource(vehicleList)
+        mediatorListVehicleResult.removeSource(query)
+        mediatorListRegionResult.removeSource(regionList)
+        mediatorListRegionResult.removeSource(query)
+    }
 
 }

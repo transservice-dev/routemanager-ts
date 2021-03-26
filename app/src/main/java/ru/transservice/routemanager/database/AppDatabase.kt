@@ -5,11 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import ru.transservice.routemanager.data.local.entities.PointDestination
+import ru.transservice.routemanager.data.local.entities.PointFile
+import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.Task
 
 @Database(
-    entities = [PointDestination::class, Task::class],
+    entities = [PointItem::class, Task::class, PointFile::class],
     version = 1,
     exportSchema = false
 )

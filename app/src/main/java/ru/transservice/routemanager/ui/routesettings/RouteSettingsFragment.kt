@@ -2,19 +2,19 @@ package ru.transservice.routemanager.ui.routesettings
 
 import android.app.DatePickerDialog
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.children
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentRouteSettingsBinding
-import ru.transservice.routemanager.service.LoadResult
-import ru.transservice.routemanager.ui.startscreen.StartScreenFragmentDirections
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,21 +24,21 @@ class RouteSettingsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: RouteSettingsViewModel
     lateinit var navController: NavController
+    private var snackbarMessage: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
 
         }
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         initViewModel()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentRouteSettingsBinding.inflate(inflater,container,false)
+        _binding = FragmentRouteSettingsBinding.inflate(inflater, container, false)
         return binding.root    }
 
     override fun onDestroyView() {
@@ -48,13 +48,13 @@ class RouteSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
         binding.tvRegion.setOnClickListener {
-           navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToRegionListFragment(null))
+           navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToRegionListFragment(viewModel.getRegion().value))
         }
 
         binding.tvVehicle.setOnClickListener {
-            navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToVehicleListFragment())
+            navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToVehicleListFragment(viewModel.getVehicle().value))
         }
 
 
@@ -77,13 +77,13 @@ class RouteSettingsFragment : Fragment() {
 
         binding.tvDate.setOnClickListener {
             DatePickerDialog(requireContext(), dateSetListener,
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)).show()
+                    cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH),
+                    cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
         viewModel.getRegion().observe(viewLifecycleOwner, Observer {
-           binding.tvRegion.text = it?.name
+            binding.tvRegion.text = it?.name
         })
 
         viewModel.getVehicle().observe(viewLifecycleOwner, Observer {
@@ -95,16 +95,52 @@ class RouteSettingsFragment : Fragment() {
             val sdf = SimpleDateFormat(myFormat, Locale("ru"))
             binding.tvDate.text = sdf.format(cal.time)
         })
+
+        viewModel.getEditingIsAvailable().observe(viewLifecycleOwner, {
+            with(binding.root){
+                isClickable = it
+                isEnabled = it
+                if (this is ViewGroup){
+                    this.children.forEach { childView ->
+                        childView.isClickable = it
+                        childView.isEnabled = it
+                    }
+                }
+            }
+            if (!binding.root.isClickable) {
+                snackbarMessage = Snackbar.make(binding.root,
+                        "Существует активное задание, редактирование настроек запрещено. Завершите маршрут для смены настроек",
+                        Snackbar.LENGTH_INDEFINITE)
+                snackbarMessage?.let {
+                    val snackTextView = it.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                    snackTextView.maxLines = 4
+                    it.setAction(resources.getString(R.string.ok), object : View.OnClickListener{
+                        override fun onClick(p0: View?) {
+                            it.dismiss()
+                        }
+                    })
+                    it.show()
+                }
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        snackbarMessage?.let {
+            it.dismiss()
+        }
     }
 
     fun initViewModel(){
-        viewModel  = ViewModelProvider(this, RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
-            RouteSettingsViewModel::class.java)
+        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
+                RouteSettingsViewModel::class.java)
     }
+
     companion object {
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
             RouteSettingsFragment().apply {
                 arguments = Bundle().apply {
 

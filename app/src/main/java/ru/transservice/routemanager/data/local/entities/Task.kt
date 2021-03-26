@@ -17,10 +17,16 @@ data class Task(
     val vehicle:VehicleItem? = null,
     @Embedded(prefix = "route_")
     val route:RouteItem? = null,
-    val routeDate: Date = Date()
+    val routeDate: Date = Date(),
+    val search_type: SearchType = SearchType.BY_VEHICLE
 ){
     var countPoint: Int = 0
     var countPointDone: Int = 0
     var dateStart: Date? = null
     var dateEnd: Date? = null
+}
+
+enum class SearchType(val id: Int){
+    BY_ROUTE(1),
+    BY_VEHICLE(0)
 }

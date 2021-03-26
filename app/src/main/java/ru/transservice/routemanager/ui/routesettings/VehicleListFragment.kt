@@ -1,16 +1,17 @@
 package ru.transservice.routemanager.ui.routesettings
 
 import android.os.Bundle
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentRegionListBinding
 import ru.transservice.routemanager.databinding.FragmentVehicleListBinding
@@ -23,6 +24,7 @@ class VehicleListFragment : Fragment() {
     private lateinit var vehicleAdapter: VehicleListAdapter
     private lateinit var viewModel: RouteSettingsViewModel
     lateinit var navController: NavController
+    private val args: VehicleListFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +32,7 @@ class VehicleListFragment : Fragment() {
 
         }
         initViewModel()
+        setHasOptionsMenu(true)
         navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
 
         vehicleAdapter = VehicleListAdapter {
@@ -37,17 +40,25 @@ class VehicleListFragment : Fragment() {
             navController.navigate(VehicleListFragmentDirections.actionVehicleListFragmentToRouteSettingsFragment())
         }
 
+    }
 
-        viewModel.loadVehicle().observe(this, Observer {
-            when (it) {
-                is LoadResult.Loading -> {
-                    //TODO splash screen loading
-                }
-                is LoadResult.Success ->{
-                    vehicleAdapter.updateItems(it.data ?: listOf())
-                }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as SearchView
+        searchView.queryHint = "Введите наименование"
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.handleSearchQuery(query!!)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearchQuery(newText!!)
+                return true
             }
         })
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onCreateView(
@@ -68,6 +79,25 @@ class VehicleListFragment : Fragment() {
             )
             adapter = vehicleAdapter
         }
+        viewModel.mediatorListVehicleResult.observe(viewLifecycleOwner, {
+            when (it) {
+                is LoadResult.Loading -> {
+                    //TODO splash screen loading
+                }
+                is LoadResult.Success -> {
+                    vehicleAdapter.updateItems(it.data ?: listOf())
+                    if (vehicleAdapter.selectedPos == RecyclerView.NO_POSITION) {
+                        args.vehicle?.let {
+                            val pos = vehicleAdapter.getItemPosition(it)
+                            vehicleAdapter.selectedPos = pos
+                            with(binding.rvVehicleList) {
+                                scrollToPosition(pos)
+                            }
+                        }
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroyView() {
@@ -77,14 +107,18 @@ class VehicleListFragment : Fragment() {
 
 
     fun initViewModel(){
-        viewModel  = ViewModelProvider(this, RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
+        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
             RouteSettingsViewModel::class.java)
+        viewModel.loadVehicle()
+        viewModel.removeSources()
+        viewModel.addSourcesRegion()
+        viewModel.addSourcesVehicle()
     }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
             VehicleListFragment().apply {
                 arguments = Bundle().apply {
 

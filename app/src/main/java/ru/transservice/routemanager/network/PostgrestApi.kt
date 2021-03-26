@@ -1,16 +1,13 @@
 package ru.transservice.routemanager.network
 
+import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
-import ru.transservice.routemanager.data.remote.res.RegionRes
-import ru.transservice.routemanager.data.remote.res.RouteRes
+import retrofit2.http.*
+import ru.transservice.routemanager.data.remote.res.*
 import ru.transservice.routemanager.data.remote.res.task.TaskRequestBody
 import ru.transservice.routemanager.data.remote.res.task.TaskRes
-import ru.transservice.routemanager.data.remote.res.VehicleRes
+import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 
 interface PostgrestApi {
 
@@ -28,4 +25,17 @@ interface PostgrestApi {
 
     @POST("rpc/getTask")
     suspend fun getTask(@Body taskRequestBody: TaskRequestBody): Response<TaskRes>
+
+    @GET("{urlString}")
+    suspend fun getApk(@Path("urlString" , encoded = true) urlString: String): Response<ResponseBody>
+
+    @POST("rpc/loadFiles")
+    suspend fun uploadFiles(@Body filesRequest: FilesUploadRequest ): Response<ResponseBody>
+
+    @POST("rpc/loadTaskResult")
+    suspend fun uploadTask(@Body taskUploadRequest: TaskUploadRequest): Response<ResponseBody>
+
+    @POST("rpc/setDocStatus")
+    suspend fun setStatus(@Body statusUploadRequest: StatusUploadRequest): Response<ResponseBody>
+
 }

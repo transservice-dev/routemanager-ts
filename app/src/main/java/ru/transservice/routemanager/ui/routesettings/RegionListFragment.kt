@@ -1,19 +1,22 @@
 package ru.transservice.routemanager.ui.routesettings
 
+import android.graphics.Region
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Adapter
 import android.widget.LinearLayout
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.R
+import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.FragmentRegionListBinding
 import ru.transservice.routemanager.service.LoadResult
 
@@ -25,6 +28,7 @@ class RegionListFragment : Fragment() {
     private lateinit var regionAdapter: RegionListAdapter
     private lateinit var viewModel: RouteSettingsViewModel
     lateinit var navController: NavController
+    private val args: RegionListFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,25 +36,33 @@ class RegionListFragment : Fragment() {
 
         }
         initViewModel()
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
+        setHasOptionsMenu(true)
 
+        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         regionAdapter = RegionListAdapter {
             viewModel.setRegion(it)
             navController.navigate(RegionListFragmentDirections.actionRegionListFragmentToRouteSettingsFragment())
         }
 
+    }
 
-        viewModel.loadRegions().observe(this, Observer {
-            when (it) {
-                is LoadResult.Loading -> {
-                    //TODO splash screen loading
-                }
-                is LoadResult.Success ->{
-                    regionAdapter.updateItems(it.data ?: listOf())
-                }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as SearchView
+        searchView.queryHint = "Введите наименование"
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.handleSearchQuery(query!!)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearchQuery(newText!!)
+                return true
             }
         })
-
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onCreateView(
@@ -63,11 +75,32 @@ class RegionListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         with(binding.rvRegionsList){
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(DividerItemDecoration(context,DividerItemDecoration.VERTICAL))
             adapter = regionAdapter
         }
+
+        viewModel.mediatorListRegionResult.observe(viewLifecycleOwner, {
+            when (it) {
+                is LoadResult.Loading -> {
+                    //TODO splash screen loading
+                }
+                is LoadResult.Success -> {
+                    regionAdapter.updateItems(it.data ?: listOf())
+                    if (regionAdapter.selectedPos == RecyclerView.NO_POSITION) {
+                        args.region?.let {
+                            val pos = regionAdapter.getItemPosition(it)
+                            regionAdapter.selectedPos = pos
+                            with(binding.rvRegionsList) {
+                                scrollToPosition(pos)
+                            }
+                        }
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroyView() {
@@ -78,7 +111,7 @@ class RegionListFragment : Fragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
             RegionListFragment().apply {
                 arguments = Bundle().apply {
 
@@ -87,7 +120,11 @@ class RegionListFragment : Fragment() {
     }
 
     fun initViewModel(){
-        viewModel  = ViewModelProvider(this, RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
+        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
         RouteSettingsViewModel::class.java)
+        viewModel.loadRegions()
+        viewModel.removeSources()
+        viewModel.addSourcesRegion()
+        viewModel.addSourcesVehicle()
     }
 }

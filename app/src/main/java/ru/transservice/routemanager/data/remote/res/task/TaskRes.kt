@@ -1,6 +1,6 @@
 package ru.transservice.routemanager.data.remote.res.task
 
-import ru.transservice.routemanager.data.local.entities.PointDestination
+import ru.transservice.routemanager.data.local.entities.PointItem
 import java.util.*
 
 data class TaskRes(
@@ -40,24 +40,24 @@ data class TaskRowRes(
     var reasonComment: String,
     val comment: String
 ){
-    fun toPointDestination(): PointDestination{
-        return PointDestination(docUID,
+    fun toPointDestination(): PointItem{
+        return PointItem(docUID,
         lineUID,
         rowNumber,
-        addressName,
+        addressName.trim(),
         addressLon,
         addressLat,
-        containerName,
+        containerName.trim(),
         containerSize,
-        agentName,
+        agentName.trim(),
         countPlan,
         countFact,
         countOver,
         done,
         tripNumber,
         polygon,
-        routeName,
-        comment
+        routeName.trim(),
+        comment.trim()
         )
     }
 }

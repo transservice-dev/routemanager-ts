@@ -6,6 +6,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.routesettings.RouteSettingsFragment">
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="tv_title,tv_region,tv_vehicle,tv_date" />
 
     <TextView
         android:id="@+id/tv_title"
@@ -28,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_small16"
         android:padding="@dimen/margin_small16"
-        android:background="@drawable/round_rect_white"
+        android:background="@drawable/bg_round_rect_white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_title"
@@ -42,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_small16"
         android:padding="@dimen/margin_small16"
-        android:background="@drawable/round_rect_white"
+        android:background="@drawable/bg_round_rect_white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_region"
@@ -56,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_small16"
         android:padding="@dimen/margin_small16"
-        android:background="@drawable/round_rect_white"
+        android:background="@drawable/bg_round_rect_white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_vehicle"
