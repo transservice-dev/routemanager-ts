@@ -29,6 +29,7 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
     var geoIsRequired = MutableLiveData(false)
     val fileBeforeIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
     val fileAfterIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
+    val fileCantDoneIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
     private val query = MutableLiveData("")
     private val fullList = MutableLiveData(true)
 
@@ -50,9 +51,12 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         loadPointList()
     }
 
-    fun initPointData(){
+    fun initPointData() {
         setFilesInfo()
         updateGeoIsRequired()
+        if (reasonComment.isEmpty()) {
+            reasonComment = currentPoint.value?.reasonComment ?: ""
+        }
     }
 
     fun loadPointList() : MutableLiveData<List<PointItem>>{
@@ -74,12 +78,14 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     fun setCurrentPoint(point: PointItem){
         currentPoint.value = point
+        reasonComment = point.reasonComment
     }
 
     fun setFilesInfo(){
         currentPoint.value?.let {
             getFileAfterIsDone()
             getFileBeforeIsDone()
+            getFileCantDoneIsDone()
         }
     }
 
@@ -97,6 +103,12 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         return fileAfterIsDone
     }
 
+    fun getFileCantDoneIsDone(): LiveData<Boolean> {
+        repository.getPointFilesByOrder(currentPoint.value!!, PhotoOrder.PHOTO_CANTDONE){
+            fileCantDoneIsDone.postValue(it.isNotEmpty())
+        }
+        return fileCantDoneIsDone
+    }
 
     fun setPointFilesGeodata(location: Location) {
         repository.getGeolessPointFiles(currentPoint.value!!){ list ->
@@ -153,17 +165,16 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
                 resultPoint.done = true
                 resultPoint.timestamp = Date()
                 updateCurrentPoint(resultPoint)
-                /*Toast.makeText(requireContext(), "Точка выполнена!", Toast.LENGTH_LONG)
-                    .show()*/
+                Toast.makeText(getApplication(), "Точка выполнена!", Toast.LENGTH_LONG)
+                    .show()
             }
 
             if (currentFileOrder == PhotoOrder.PHOTO_CANTDONE) {
-                if (resultPoint.reasonComment.isEmpty()) {
-                    resultPoint.reasonComment = (reasonComment)
-                }
                 resultPoint.timestamp = Date()
                 updateCurrentPoint(resultPoint)
             }
+
+            uploadPointFiles()
         }
     }
 
@@ -172,6 +183,12 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         currentPoint.value = pointItem
         currentPoint.value?.let {
             repository.updatePoint(currentPoint.value!!)
+        }
+    }
+
+    fun uploadPointFiles(){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (geoIsRequired.value == false) repository.uploadFilesOnSchedule()
         }
     }
 
@@ -192,7 +209,7 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
             val queryStr = query.value!!
             val points: List<PointItem> =
                     if (pointList.value == null) listOf() else pointList.value!!
-            if (points.isNotEmpty()) {
+            //if (points.isNotEmpty()) {
                 mediatorListResult.value = when {
                     queryStr.isNotEmpty() && fullList.value == false -> points
                             .filter { it.addressName.contains(queryStr,true) }
@@ -203,7 +220,7 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
                             .filter { !it.done }
                     else -> points
                 }
-            }
+            //}
         }
 
         mediatorListResult.addSource(pointList) { filterF.invoke() }
@@ -218,6 +235,6 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
     }
 
     companion object {
-        private const val TAG = "Route_Manager: TaskList_View_Model"
+        private const val TAG = "${AppClass.TAG}: TaskList_View_Model"
     }
 }

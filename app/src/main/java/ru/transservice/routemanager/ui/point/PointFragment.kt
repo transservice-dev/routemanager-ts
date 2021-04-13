@@ -52,7 +52,6 @@ class PointFragment : Fragment() {
         pointStatus = args.pointAction
         initViewModel(args.point)
         initFragmentFactDialogListener()
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         gps = GPSTracker.getGPSTracker(requireContext().applicationContext)
     }
 
@@ -75,15 +74,21 @@ class PointFragment : Fragment() {
         _binding = null
     }
 
+    override fun onResume() {
+        super.onResume()
+        //initViews()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         initButtonsActions()
         initLiveDataObservers()
     }
 
     companion object {
 
-        private const val TAG = "Route_Manager: PointFragment"
+        private const val TAG = "${AppClass.TAG}: PointFragment"
 
         @JvmStatic
         fun newInstance() =
@@ -111,10 +116,15 @@ class PointFragment : Fragment() {
                 commentLayout.visibility = if (it.comment == "") View.GONE else View.VISIBLE
                 tvCountFact.text = if (it.countFact == -1.0) "" else it.countFact.toString()
                 reasonInput.visibility = View.GONE
-                reasonSpinner.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.VISIBLE else View.GONE
+                /*reasonSpinner.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.VISIBLE else View.GONE
                 btnSetFact.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE
-                btnPhotoAfter.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE
+                btnPhotoAfter.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE*/
                 btnPointDone.text = if (pointStatus == PointStatuses.CANNOT_DONE) resources.getString(R.string.confirm_title) else resources.getString(R.string.done_title)
+
+                layoutCantDone.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.VISIBLE else View.GONE
+                buttonsToDo.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE
+
+                btnSetFact.visibility = if (it.noEditFact) View.GONE else View.VISIBLE
 
                 val reasonArray = AppConfig.FAILURE_REASONS
 
@@ -127,16 +137,16 @@ class PointFragment : Fragment() {
                 arrayAdapter.setNotifyOnChange(true)
                 reasonSpinner.adapter = arrayAdapter
 
-                if (it.reasonComment != "") {
-                    if (reasonArray.contains(it.reasonComment)) {
+                if (viewModel.reasonComment != "") {
+                    if (reasonArray.contains(viewModel.reasonComment)) {
                         val spinnerPosition: Int =
-                                (reasonSpinner.adapter as ArrayAdapter<String>).getPosition(it.reasonComment)
+                                (reasonSpinner.adapter as ArrayAdapter<String>).getPosition(viewModel.reasonComment)
                         reasonSpinner.setSelection(spinnerPosition)
                     } else {
                         val spinnerPosition: Int =
                                 (reasonSpinner.adapter as ArrayAdapter<String>).getPosition(FailureReasons.OTHER.reasonTitle)
                         reasonSpinner.setSelection(spinnerPosition)
-                        reasonInput.setText(pointItem.reasonComment)
+                        reasonInput.setText(viewModel.reasonComment)
                     }
                 } else {
                     val spinnerPosition: Int =
@@ -153,32 +163,30 @@ class PointFragment : Fragment() {
     private fun initButtonsActions(){
         with(binding){
             btnPhotoBefore.setOnClickListener {
-                takePicture(
-                    if (pointStatus != PointStatuses.CANNOT_DONE) {
-                        PhotoOrder.PHOTO_BEFORE
-                    } else {
-                        PhotoOrder.PHOTO_CANTDONE
-                    }
-                )
+                takePicture(PhotoOrder.PHOTO_BEFORE)
+            }
+
+            btnPhotoCantdone.setOnClickListener {
+                takePicture(PhotoOrder.PHOTO_CANTDONE)
             }
 
             btnPhotoAfter.setOnClickListener {
-                if (viewModel.getFileBeforeIsDone().value!!
-                    && viewModel.getCurrentPoint().value!!.countFact != -1.0
-                ) {
-                    takePicture(PhotoOrder.PHOTO_AFTER)
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Предыдущие действия не выполнены",
-                        Toast.LENGTH_LONG
-                    ).show()
+                viewModel.getCurrentPoint().value?.let {
+                    when {
+                        it.countFact != -1.0 && viewModel.getFileBeforeIsDone().value!! -> takePicture(PhotoOrder.PHOTO_AFTER)
+                        it.noEditFact && viewModel.getFileBeforeIsDone().value!! -> takePicture(PhotoOrder.PHOTO_AFTER)
+                        else ->  Toast.makeText(
+                                requireContext(),
+                                "Предыдущие действия не выполнены",
+                                Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
 
             btnSetFact.setOnClickListener {
                 viewModel.getCurrentPoint().value?.let{
-                    if (viewModel.fileBeforeIsDone.value!!) {
+                    if (viewModel.fileBeforeIsDone.value!! || it.noPhotoAllowed) {
                         val dialog = FactDialog.newInstance(viewModel.getCurrentPoint().value!!)
                         dialog.show(childFragmentManager, "factDialog")
                     } else {
@@ -188,19 +196,37 @@ class PointFragment : Fragment() {
             }
 
             ivDonePhotoBefore.setOnClickListener {
-                navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.PHOTO_BEFORE))
+                navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.DONT_SET))
             }
 
             ivDonePhotoAfter.setOnClickListener {
-                navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.PHOTO_AFTER))
+                navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.DONT_SET))
+            }
+
+            ivDonePhotoCantdone.setOnClickListener {
+                navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.PHOTO_CANTDONE))
             }
 
             btnPointDone.setOnClickListener {
-                viewModel.getCurrentPoint().value?.let {
-                    if (it.done || it.reasonComment != "") {
-                        requireActivity().onBackPressed()
-                    }else{
-                        Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
+                viewModel.getCurrentPoint().value?.let { pointItem ->
+                    when {
+                        pointItem.done -> {
+                            viewModel.uploadPointFiles()
+                            requireActivity().onBackPressed()
+                        }
+                        viewModel.reasonComment != "" -> {
+                            val resultPoint = viewModel.getCurrentPoint().value!!
+                                .copy()
+                                .also {
+                                    it.reasonComment = viewModel.reasonComment
+                                    if (it.timestamp == null){
+                                        it.timestamp = Date()
+                                    }
+                                }
+                            viewModel.updateCurrentPoint(resultPoint)
+                            requireActivity().onBackPressed()
+                        }
+                        else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -220,10 +246,7 @@ class PointFragment : Fragment() {
                         reasonInput.visibility = ViewGroup.VISIBLE
                     } else {
                         viewModel.getCurrentPoint().value?.let {
-                            val resultPoint = viewModel.getCurrentPoint().value!!
-                                .copy()
-                                .also { it.reasonComment = item }
-                            viewModel.updateCurrentPoint(resultPoint)
+                            viewModel.reasonComment = item
                         }
                         reasonInput.visibility = ViewGroup.GONE
                         reasonInput.text?.clear()
@@ -237,10 +260,7 @@ class PointFragment : Fragment() {
 
             reasonInput.setOnEditorActionListener { v, actionId, event ->
                 if(actionId == EditorInfo.IME_ACTION_DONE){
-                    val resultPoint = viewModel.getCurrentPoint().value!!
-                        .copy()
-                        .also { it.reasonComment = v.text.toString() }
-                    viewModel.updateCurrentPoint(resultPoint)
+                    viewModel.reasonComment = v.text.toString()
                     true
                 } else {
                     false
@@ -268,6 +288,10 @@ class PointFragment : Fragment() {
 
         viewModel.getFileBeforeIsDone().observe(viewLifecycleOwner, Observer {
             binding.ivDonePhotoBefore.visibility = if (it == true) View.VISIBLE else View.GONE
+        })
+
+        viewModel.getFileCantDoneIsDone().observe(viewLifecycleOwner, Observer {
+            binding.ivDonePhotoCantdone.visibility = if (it == true) View.VISIBLE else View.GONE
         })
 
         viewModel.getCurrentPoint().observe(viewLifecycleOwner, Observer {
@@ -332,4 +356,6 @@ class PointFragment : Fragment() {
 
         }
     }
+
+
 }

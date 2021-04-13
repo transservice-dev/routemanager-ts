@@ -3,20 +3,19 @@ package ru.transservice.routemanager.ui.startscreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
-import ru.transservice.routemanager.data.local.RegionItem
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.Task
-import ru.transservice.routemanager.repositories.PreferencesRepository
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
-import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 class StartScreenViewModel(): ViewModel() {
 
     private val repository = RootRepository
-    private val currentTask = Transformations.map(repository.getCurrentTask()) {
+    private val currentTask = Transformations.map(repository.getTask()) {
         return@map it
     }
+    val version get() = AppClass.appVersion
 
     private val uploadResult: MutableLiveData<LoadResult<Boolean>> = MutableLiveData()
 
@@ -31,8 +30,8 @@ class StartScreenViewModel(): ViewModel() {
 
     }
 
-    fun syncTaskData(reload: Boolean = false): MutableLiveData<LoadResult<Task>>{
-        val result: MutableLiveData<LoadResult<Task>> =
+    fun syncTaskData(reload: Boolean = false): MutableLiveData<LoadResult<Int>>{
+        val result: MutableLiveData<LoadResult<Int>> =
             MutableLiveData(LoadResult.Loading())
         repository.syncData { loadResult ->
             result.postValue(loadResult)
@@ -42,15 +41,10 @@ class StartScreenViewModel(): ViewModel() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun finishRoute(): MutableLiveData<LoadResult<Boolean>> {
-        try {
-            uploadResult.value = LoadResult.Loading()
-            repository.uploadResult { loadResult ->
-                uploadResult.postValue(loadResult)
-            }
-        }catch (e: Exception){
-            uploadResult.value = LoadResult.Error("Ошибка при выгрузке данных ;{e.message ?: \"Неизвестная ошибка\"}")
+        uploadResult.value = LoadResult.Loading()
+        repository.uploadResult { loadResult ->
+            uploadResult.postValue(loadResult)
         }
-
         return uploadResult
     }
 
@@ -58,7 +52,12 @@ class StartScreenViewModel(): ViewModel() {
         return currentTask
     }
 
+    fun updateTaskParams() {
+        repository.updateCurrentTask()
+    }
+
     fun getUploadResult(): MutableLiveData<LoadResult<Boolean>> {
         return uploadResult
     }
+
 }

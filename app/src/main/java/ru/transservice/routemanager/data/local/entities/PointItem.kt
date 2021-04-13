@@ -29,10 +29,12 @@ data class PointItem(
     val tripNumber: Int,
     val polygon: Boolean,
     val routeName: String,
-    val comment: String
+    val comment: String,
+    val noPhotoAllowed: Boolean = false,
+    val noEditFact: Boolean = false,
+    var reasonComment: String = ""
 ) : Serializable {
     var timestamp: Date? = null
-    var reasonComment: String = ""
     var status : PointStatuses = PointStatuses.NOT_VISITED
 
     @Ignore

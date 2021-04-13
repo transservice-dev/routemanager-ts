@@ -48,8 +48,12 @@ class MainActivity : AppCompatActivity() {
 
     private val mPrefsListener =
             SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-                if (key == "URL_NAME" || key == "URL_PORT" || key == "URL_AUTHPASS") {
+                if (key == "URL_NAME" || key == "URL_PORT" || key == "URL_AUTHPASS" ) {
                     RootRepository.setPreferences()
+                }
+
+                if (key == "SEARCH_BY_ROUTE") {
+                    RootRepository.updateCurrentTask()
                 }
             }
 
@@ -65,7 +69,8 @@ class MainActivity : AppCompatActivity() {
         swipeLayout = binding.swipe
         createNotificationChannel()
         initNavMenuButtons()
-
+        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
+        RootRepository.setPreferences()
 
         /*onBackPressedDispatcher.addCallback(this){
             if(backPressedBlock){
@@ -175,7 +180,7 @@ class MainActivity : AppCompatActivity() {
                         try {
                             navController.navigate(R.id.settingsFragment)
                         } catch (e: Exception) {
-                            Log.d("nav error ", "e: $e")
+                            Log.d(TAG, "nav error: $e")
                             return@OnNavigationItemSelectedListener false
                         }
 
@@ -237,7 +242,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val TAG = "Route_manager: MainActivity"
+        const val TAG = "${AppClass.TAG}: MainActivity"
     }
 
 }

@@ -23,10 +23,13 @@ class RouteSettingsViewModel(): ViewModel() {
     private val query = MutableLiveData("")
     val mediatorListRegionResult = MediatorLiveData<LoadResult<List<RegionItem>>>()
     val mediatorListVehicleResult = MediatorLiveData<LoadResult<List<VehicleItem>>>()
+    val mediatorListRouteResult = MediatorLiveData<LoadResult<List<RouteItem>>>()
     private var vehicleList: MutableLiveData<LoadResult<List<VehicleItem>>> = MutableLiveData()
     private var regionList: MutableLiveData<LoadResult<List<RegionItem>>> = MutableLiveData()
+    private var routeList: MutableLiveData<LoadResult<List<RouteItem>>> = MutableLiveData()
 
     private var editingIsAvailable = MutableLiveData(true)
+    val searchByRoute get() = prefRepository.getSearchBYRoute()
 
 
     class RouteSettingsViewModelFactory: ViewModelProvider.Factory {
@@ -60,6 +63,15 @@ class RouteSettingsViewModel(): ViewModel() {
         }
         return editingIsAvailable
     }
+
+    fun openEdititng(){
+        editingIsAvailable.value = true
+    }
+
+    fun forbidEdititng(){
+        editingIsAvailable.value = false
+    }
+
     fun loadRegions(): MutableLiveData<LoadResult<List<RegionItem>>> {
         regionList.value = LoadResult.Loading()
         repository.loadRegions { regionResList ->
@@ -84,6 +96,19 @@ class RouteSettingsViewModel(): ViewModel() {
         return vehicleList
     }
 
+    fun loadRoutes(): MutableLiveData<LoadResult<List<RouteItem>>> {
+        routeList.value = LoadResult.Loading()
+        currentRegion.value?.let{
+            repository.loadRoutesByRegion(currentRegion.value!!) { routeResList ->
+                val list = routeResList
+                    .map { it.toRouteItem() }
+                    .sortedBy { it.name }
+                routeList.postValue(LoadResult.Success(list))
+            }
+        }
+        return routeList
+    }
+
     fun setRegion(regionItem: RegionItem){
         currentRegion.value = regionItem
         prefRepository.saveRegion(regionItem)
@@ -93,6 +118,12 @@ class RouteSettingsViewModel(): ViewModel() {
     fun setVehicle(vehicleItem: VehicleItem){
         currentVehicle.value = vehicleItem
         prefRepository.saveVehicle(vehicleItem)
+        updateCurrentTask()
+    }
+
+    fun setRoute(routeItem: RouteItem){
+        currentRoute.value = routeItem
+        prefRepository.saveRoute(routeItem)
         updateCurrentTask()
     }
 
@@ -131,6 +162,27 @@ class RouteSettingsViewModel(): ViewModel() {
         mediatorListVehicleResult.addSource(query) { filterF.invoke() }
     }
 
+    fun addSourcesRoute(){
+        val filterF = {
+            val queryStr = query.value!!
+            var routes: List<RouteItem> = listOf()
+            routeList.value?.let{
+                it.data?.let { list ->
+                    routes = list
+                }
+            }
+            if (routes.isNotEmpty()) {
+                mediatorListRouteResult.value = if (queryStr.isNotEmpty())
+                    LoadResult.Success(routes
+                        .filter { it.name.contains(queryStr, true) })
+                else LoadResult.Success(routes)
+            }
+        }
+
+        mediatorListRouteResult.addSource(routeList) { filterF.invoke() }
+        mediatorListRouteResult.addSource(query) { filterF.invoke() }
+    }
+
     fun addSourcesRegion() {
         val filterF = {
             val queryStr = query.value!!
@@ -155,8 +207,12 @@ class RouteSettingsViewModel(): ViewModel() {
     fun removeSources(){
         mediatorListVehicleResult.removeSource(vehicleList)
         mediatorListVehicleResult.removeSource(query)
+
         mediatorListRegionResult.removeSource(regionList)
         mediatorListRegionResult.removeSource(query)
+
+        mediatorListRouteResult.removeSource(routeList)
+        mediatorListRouteResult.removeSource(query)
     }
 
 }

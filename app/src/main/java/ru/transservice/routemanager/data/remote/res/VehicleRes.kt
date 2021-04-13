@@ -11,6 +11,6 @@ data class VehicleRes(
     val regionUID: String
 ){
     fun toVehicleItem(): VehicleItem{
-        return VehicleItem(name.trim(),uid, number)
+        return VehicleItem(name.trim(),uid, number.trim())
     }
 }

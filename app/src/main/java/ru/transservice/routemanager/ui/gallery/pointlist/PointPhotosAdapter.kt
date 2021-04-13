@@ -54,21 +54,23 @@ class PointPhotosAdapter(val pointItem: PointItem, val activity: MainActivity) :
                showPhotosOrSelect(root,position)
             }
             ivPointPhoto.setOnLongClickListener {
-                setSelectionMode(root)
+                setSelectionMode(root,position)
+
             }
             root.setOnClickListener {
                 showPhotosOrSelect(root, position)
             }
             root.setOnLongClickListener {
-                setSelectionMode( it)
+                setSelectionMode( it, position)
             }
         }
     }
 
 
-    private fun setSelectionMode(view: View): Boolean {
+    private fun setSelectionMode(view: View,position: Int): Boolean {
         viewModel.selectionMode.value = true
         view.isSelected = true
+        viewModel.selectedItems.add(items[position])
         return viewModel.selectionMode.value ?: false
     }
 

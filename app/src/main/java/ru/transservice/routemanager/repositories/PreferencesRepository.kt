@@ -8,6 +8,7 @@ import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
+import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.data.local.entities.Task
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -75,6 +76,10 @@ object PreferencesRepository {
         }
     }
 
+    fun getSearchBYRoute(): Boolean {
+        return prefs.getBoolean(SEARCH_BY_ROUTE,false) as Boolean
+    }
+
     fun getDate(): Date? {
         val currentValue = prefs.getString(ROUTE_DATE,null)
         return currentValue?.let {
@@ -91,7 +96,8 @@ object PreferencesRepository {
             "",
             getVehicle(),
             getRoute(),
-            getDate() ?: Date()
+            getDate() ?: Date(),
+            if (getSearchBYRoute()) SearchType.BY_ROUTE else SearchType.BY_VEHICLE
         )
     }
 

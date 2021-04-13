@@ -41,8 +41,8 @@ data class TaskRowRes(
     val comment: String
 ){
     fun toPointDestination(): PointItem{
-        return PointItem(docUID,
-        lineUID,
+        return PointItem(docUID.trim(),
+        lineUID.trim(),
         rowNumber,
         addressName.trim(),
         addressLon,

@@ -9,7 +9,7 @@ import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.repositories.RootRepository
 import java.lang.IllegalArgumentException
 
-class PhotoListViewModel(val pointItem: PointItem?) : ViewModel() {
+class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
 
     private val repository = RootRepository
     private var pointList: MutableLiveData<List<PointItem>> = MutableLiveData()
@@ -34,7 +34,7 @@ class PhotoListViewModel(val pointItem: PointItem?) : ViewModel() {
 
     fun loadPointList() : MutableLiveData<List<PointItem>>{
        if (pointItem != null){
-          pointList.postValue(listOf(pointItem))
+          pointList.postValue(listOf(pointItem!!))
        }else{
            repository.getPointsWithFiles {
                pointList.postValue(it)

@@ -36,10 +36,7 @@ import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.extensions.simulateClick
-import ru.transservice.routemanager.databinding.FragmentPointBinding
 import ru.transservice.routemanager.ui.permission.PermissionFragment
-import ru.transservice.routemanager.ui.point.PointFragmentArgs
-import ru.transservice.routemanager.ui.point.PointViewModel
 import java.io.File
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
@@ -613,7 +610,7 @@ class CameraFragment : Fragment() {
 
     companion object {
 
-        private const val TAG = "Route_Manager: Camera"
+        private const val TAG = "${AppClass.TAG}: Camera"
         private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val PHOTO_EXTENSION = ".jpg"
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
@@ -644,7 +641,7 @@ class CameraFragment : Fragment() {
         fName = fName.replace("-", "_")
         fName = fName.replace("\"", "")
 
-        return if (fName.length > 148) "${fName.substring(0,147)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
+        return if (fName.length > 140) "${fName.substring(0,140)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
     }
 
     private fun animateFocus(x: Float, y: Float) {

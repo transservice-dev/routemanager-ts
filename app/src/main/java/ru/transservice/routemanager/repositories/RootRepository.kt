@@ -2,7 +2,6 @@ package ru.transservice.routemanager.repositories
 
 import android.os.Build
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -11,19 +10,13 @@ import androidx.lifecycle.MutableLiveData
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.HandlerDispatcher
-import org.json.JSONArray
-import org.json.JSONObject
 import retrofit2.HttpException
 import retrofit2.Response
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointFile
-import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.data.local.entities.Task
+import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.data.remote.res.*
 import ru.transservice.routemanager.data.remote.res.task.TaskRequestBody
 import ru.transservice.routemanager.data.remote.res.task.TaskRes
@@ -31,25 +24,25 @@ import ru.transservice.routemanager.data.remote.res.task.TaskRowRes
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 import ru.transservice.routemanager.database.DaoInterface
 import ru.transservice.routemanager.extensions.longFormat
-import ru.transservice.routemanager.network.PostgrestApi
+import ru.transservice.routemanager.extensions.shortFormat
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.service.LoadResult
+import ru.transservice.routemanager.utils.Utils
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.IllegalArgumentException
 import java.security.Key
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
 object RootRepository {
 
-    private const val TAG = "Route_Manager: RootRepository"
+    private const val TAG = "${AppClass.TAG}: RootRepository"
 
     var urlName = ""
     var urlPort = ""
     var baseUrl = ""
     var authPass = ""
-    var deviceName = ""
     var currentVehicle: VehicleItem? = null
     var currentRoute: RouteItem? = null
     var currentDate: Date? = null
@@ -57,10 +50,24 @@ object RootRepository {
     private val dbDao: DaoInterface = AppClass.getDatabase()!!.dbDao()
     private val prefRepository = PreferencesRepository
 
+    val deviceName: String get() {
+        var value = ""
+        currentTask.value?.let {
+            val vehicleRouteName = if (it.search_type == SearchType.BY_VEHICLE) {
+                Utils.vehicleNumToLatin(it.vehicle?.number ?: "")
+            }else{
+                Utils.transliteration(it.route?.name ?: "")
+            }
+            value = "$vehicleRouteName ${Utils.transliteration(prefRepository.getRegion()?.name ?: "")}"
+        }
+        return value
+    }
+
     private val errHandler = CoroutineExceptionHandler{ _, exception ->
         println("Caught $exception")
         Log.e(TAG, "Caught $exception")
         Log.e(TAG, " ${exception.stackTraceToString()}" )
+
     }
 
     private val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
@@ -77,7 +84,6 @@ object RootRepository {
             if (task!=null) currentTask.postValue(task) else
                 currentTask.postValue(prefRepository.getTask())
         }
-
     }
 
     fun setPreferences() {
@@ -115,12 +121,12 @@ object RootRepository {
             if (response.isSuccessful && response.body()!=null) {
                 LoadResult.Success(true)
             } else {
-                Log.e("RootRepository", "$methodName Error: ${response.code()} ${response.errorBody()}")
-                LoadResult.Error("Error: ${response.code()} ${response.errorBody()}")
+                Log.e("RootRepository", "$methodName Error: ${response.code()} ${response.errorBody().toString()}")
+                LoadResult.Error("Error: ${response.code()} ${response.errorBody().toString()}")
             }
         } catch (e: HttpException) {
             Log.e("RootRepository", "$methodName Exception ${e.message} ${e.stackTraceToString()}")
-            LoadResult.Error("Ошибка сети. Http exception ${e.message}")
+            LoadResult.Error("Ошибка сети. Http exception ${e.message}",e)
         } catch (e: Throwable) {
             Log.e("RootRepository", "$methodName Unknown exception ${e.message} ${e.stackTraceToString()}")
             LoadResult.Error("Неизвестная ошибка ${e.message}")
@@ -166,10 +172,10 @@ object RootRepository {
         }
     }
 
-    fun loadRoutesByRegion(regionRes: RegionRes,complete: (vehicles: List<RouteRes>) -> Unit){
+    fun loadRoutesByRegion(regionItem: RegionItem,complete: (vehicles: List<RouteRes>) -> Unit){
         scope.launch {
             Log.d(TAG, "Loading Routes START")
-            val response = RetrofitClient.getPostgrestApi().getRoutesByRegion("eq.${regionRes.uid}")
+            val response = RetrofitClient.getPostgrestApi().getRoutesByRegion("eq.${regionItem.uid}")
             if (responseResult(response) is LoadResult.Success) {
                 if (!response.body().isNullOrEmpty()) {
                     Log.d(TAG, "Loading Routes FINISHED")
@@ -179,29 +185,36 @@ object RootRepository {
         }
     }
 
-    fun loadTask(complete: (taskRes: TaskRes) -> Unit) {
-        scope.launch {
+    suspend fun loadTask(): LoadResult<TaskRes> {
+        return if (currentTask.value != null) {
             Log.d(TAG, "Loading Task START")
-            currentTask.value?.let {
-                val taskRequestBody = TaskRequestBody(
-                    it.routeDate.longFormat(),
-                    "",
-                    it.vehicle!!.uid ?: "",
-                    it.route?.uid ?: "",
-                    it.search_type.id
-                )
-                val response = RetrofitClient
+            val taskRequestBody = TaskRequestBody(
+                currentTask.value!!.routeDate.longFormat(),
+                currentTask.value!!.deviceId,
+               currentTask.value!!.vehicle?.uid ?: "",
+                currentTask.value!!.route?.uid ?: "",
+                currentTask.value!!.search_type.id
+            )
+            val response = RetrofitClient
                     .getPostgrestApi()
                     .getTask(taskRequestBody)
-                if (responseResult(response) is LoadResult.Success) {
-                    if (response.body() != null) {
-                        Log.d(TAG, "Loading Task FINISHED")
-                        complete.invoke(response.body()!!)
-                    }
+            val result = responseResult(response)
+            if (result is LoadResult.Success) {
+                if (response.body() != null) {
+                    Log.d(TAG, "Loading Task FINISHED")
+                    LoadResult.Success(response.body()!!)
+                } else {
+                    Log.d(TAG, "Loading Task FINISHED. Response body is Empty")
+                    LoadResult.Error("Пустой ответ от сервера")
                 }
+            } else {
+                Log.e(TAG, "Loading Task CANCELED with error. Network request is NOT successful. ${result.errorMessage}")
+                LoadResult.Error("Ошибка получения данных ${result.errorMessage}")
             }
+        } else {
+            Log.e(TAG, "Error loading task: current task is NULL")
+            LoadResult.Error("Ошибка получения параметров задания")
         }
-
     }
 
     fun isTaskLoaded(complete: (isLoaded: Boolean) -> Unit){
@@ -210,138 +223,141 @@ object RootRepository {
         }
     }
 
-    fun setDocStatus(){
-
-    }
-
-    fun syncData(complete: (loadResult: LoadResult<Task>) -> Unit){
-        //try {
-            scope.launch {
-                loadTask { taskRes ->
+    fun syncData(complete: (loadResult: LoadResult<Int>) -> Unit){
+        scope.launch {
+            try {
+                val taskResult = loadTask()
+                if (taskResult is LoadResult.Success) {
+                    val taskRes = taskResult.data!!
                     if (taskRes.result.status == 1) {
                         //Data recieved
                         // 1. Write data into local db
-                        insertPointRows(taskRes.data) {
-                            // 2. Write task into local db
-                            insertTask(taskRes.data) {
-                                //3. Set doc status in postgres
-                                // TODO
+                        val insertResult = insertPointRows(taskRes.data)
+                        // 2. Write task into local db
+                        val task = insertTask(taskRes.data)
+                        if (task != null) {
+                            //3. Set doc status in postgres
+                            val statusResult = setStatus(task, 1)
+                            if (statusResult is LoadResult.Success){
                                 //4. Notify about successful loading
-                                currentTask.postValue(it)
-                                complete(LoadResult.Success(it))
+                                currentTask.postValue(task)
+                                complete(LoadResult.Success(insertResult))
+                            }else{
+                                complete(LoadResult.Error("Загрузка данных завершилась с ошибкой. Ошибка установки статуса"))
                             }
+                        } else {
+                            complete(LoadResult.Error("Ошибка записи задания в базу"))
                         }
                     } else {
                         // Error with getting data from server. Show messsage
                         complete(LoadResult.Error(taskRes.result.message))
                     }
+                } else {
+                    complete(LoadResult.Error(taskResult.errorMessage ?: ""))
                 }
-            }
-        /*}catch (e: java.lang.Exception){
-            // Exception error Something goes wrong
-            complete(LoadResult.Error(e.message ?: "Что-то пошло не так"))
-        }*/
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun uploadResult(complete: (loadResult: LoadResult<Boolean>) -> Unit) {
-
-        scope.launch {
-            try {
-                Log.d(TAG, "uploading result START")
-                delay(2000)
-                Looper.prepare()
-                val handler = HandlerCompat.createAsync(Looper.myLooper()!!)
-                Looper.loop()
-                //1. upload files first
-                handler.post{uploadFiles(handler) { resultFiles ->
-                    if (resultFiles) {
-                        // Files uploaded successfully
-                        //2. upload task
-                        uploadTask { resultTask ->
-                            if (resultTask is LoadResult.Success) {
-                                // Task uploaded successfully
-                                //3. set status
-                                resultTask.data?.get(0)?.let {
-                                    setStatus(it.docUID, 2) { resultStatus ->
-                                        if (resultStatus is LoadResult.Success) {
-                                            Log.d(TAG, "uploading result FINISHED")
-                                            //deleteDataFromDB()
-                                            updateCurrentTask()
-                                            complete(resultStatus)
-                                        } else {
-                                            Log.d(
-                                                TAG,
-                                                "uploading result CANCELED with error: ${resultStatus.errorMessage}"
-                                            )
-                                            complete(resultStatus)
-                                        }
-
-                                    }
-                                }
-
-                            } else {
-                                Log.d(
-                                    TAG,
-                                    "uploading result CANCELED with error: ${resultTask.errorMessage}"
-                                )
-                                complete(LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
-                            }
-                        }
-                    } else {
-                        Log.d(
-                            TAG,
-                            "uploading result CANCELED with error: Error while uploading files"
-                        )
-                        complete(LoadResult.Error("Ошибка при выгрузке файлов"))
-                    }
-                }}
             } catch (e: java.lang.Exception) {
-                Log.d(TAG,"Ошибка при выгрузке данных ;{e.message ?: \"Неизвестная ошибка\"}")
-                complete(LoadResult.Error("Ошибка при выгрузке данных ;{e.message ?: \"Неизвестная ошибка\"}"))
-
+                // Exception error Something goes wrong
+                Log.e(TAG, "Error while loading task: $e ${e.stackTraceToString()}")
+                complete(LoadResult.Error(e.message ?: "Что-то пошло не так.", e))
             }
         }
     }
 
-
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun uploadResult(complete: (loadResult: LoadResult<Boolean>) -> Unit) {
+        scope.launch {
+            Log.d(TAG, "uploading result START")
+            delay(2000)
+            try {
+                //1. upload files first
+                val resultFiles = uploadFiles()
+                if (resultFiles is LoadResult.Success) {
+                    // Files uploaded successfully
+                    //2. upload task
+                    val resultTask = uploadTask()
+                    if (resultTask is LoadResult.Success) {
+                        // Task uploaded successfully
+                        //3. set status
+                        resultTask.data?.get(0)?.let {
+                            val resultStatus = setStatus(getTaskFromDB(), 2)
+                            if (resultStatus is LoadResult.Success) {
+                                Log.d(TAG, "uploading result FINISHED")
+                                deleteDataFromDB()
+                                updateCurrentTask()
+                                complete(resultStatus)
+                            } else {
+                                Log.e(
+                                    TAG,
+                                    "uploading result CANCELED with error: ${resultStatus.errorMessage}"
+                                )
+                                complete(resultStatus)
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            TAG,
+                            "uploading result CANCELED with error: ${resultTask.errorMessage}"
+                        )
+                        complete(LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
+                    }
+                } else {
+                    Log.e(
+                        TAG,
+                        "uploading result CANCELED with error: Error while uploading files: : ${resultFiles.errorMessage}"
+                    )
+                    complete(LoadResult.Error("Ошибка при выгрузке файлов"))
+                }
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "Error while uploading task: $e ${e.stackTraceToString()}")
+               complete(LoadResult.Error("Ошибка при выгрузке данных", e))
+            }
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun uploadFiles(handler: Handler =  mainThreadHandler,deleteUploaded: Boolean = true, complete: (result: Boolean) -> Unit) {
+    fun uploadFilesOnSchedule(){
         scope.launch {
-            val data = dbDao.getRouteNotUploadedPointFiles()
-            if (data.isNotEmpty()){
-                val portionSize = 20
-                val iterationCount = (data.size.toFloat()/portionSize)
-                var startPos = 0
-                var endPos =  if (portionSize - 1 > (data.size - 1)) {
-                    data.size - 1
-                } else {portionSize-1}
-                var i = 0
-                var result: Boolean
-                do {
-                    i++
-                    val uploadedFiles = ArrayList<Long>()
-                    val resultPortion = uploadFilesPortion(data,startPos,endPos,uploadedFiles)
-                    if (resultPortion is LoadResult.Success) {
-                        if (deleteUploaded) {
-                            dbDao.deleteFiles(uploadedFiles)
-                        }else {
-                            dbDao.updatePointFileUploadStatus(uploadedFiles,true)
-                        }
-                    }
-                    result = resultPortion.data ?: false
-                    startPos = endPos + 1
-                    endPos += portionSize
-                    if (endPos > (data.size - 1)) {
-                        endPos = data.size - 1
-                    }
-                } while (i<iterationCount && result)
+            uploadFiles(false)
+        }
+    }
 
-                handler.post {complete(result)}
-            }else{
-                handler.post {complete(true)}
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun uploadFiles(deleteUploaded: Boolean = true): LoadResult<Boolean> {
+
+        val data = dbDao.getRouteNotUploadedPointFiles()
+        if (data.isNotEmpty()) {
+            val portionSize = 20
+            val iterationCount = (data.size.toFloat() / portionSize)
+            var startPos = 0
+            var endPos = if (portionSize - 1 > (data.size - 1)) {
+                data.size - 1
+            } else {
+                portionSize - 1
             }
+            var i = 0
+            var result: Boolean
+            do {
+                i++
+                val uploadedFiles = ArrayList<Long>()
+                val resultPortion = uploadFilesPortion(data, startPos, endPos, uploadedFiles)
+                if (resultPortion is LoadResult.Success) {
+                    if (deleteUploaded) {
+                        dbDao.deleteFiles(uploadedFiles)
+                    } else {
+                        dbDao.updatePointFileUploadStatus(uploadedFiles, true)
+                    }
+                }
+                result = resultPortion.data ?: false
+                startPos = endPos + 1
+                endPos += portionSize
+                if (endPos > (data.size - 1)) {
+                    endPos = data.size - 1
+                }
+            } while (i < iterationCount && result)
+
+            return if (result) LoadResult.Success(true) else LoadResult.Error("Ошибка выгрузки файлов")
+        } else {
+            return LoadResult.Success(true)
         }
     }
 
@@ -400,13 +416,12 @@ object RootRepository {
         }
         return if (result) LoadResult.Success(true) else LoadResult.Error(
             "Ошибка при выгрузке файлов",
-            false
+            data = false
         )
     }
 
+    suspend fun uploadTask():LoadResult<List<PointItem>> {
 
-    fun uploadTask(complete: (result: LoadResult<List<PointItem>>) -> Unit) {
-        scope.launch {
             Log.d(TAG, "uploading task START")
             val taskList = dbDao.getPointList()
             val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
@@ -414,41 +429,52 @@ object RootRepository {
                 .getPostgrestApi()
                 .uploadTask(taskUploadRequest)
             val result = responseResult(response)
-            if (result is LoadResult.Success) {
+            return if (result is LoadResult.Success) {
                 if (response.body() != null) {
                     Log.d(TAG, "uploading task FINISHED")
-                    mainThreadHandler.post{complete(LoadResult.Success(taskList))}
+                    LoadResult.Success(taskList)
                 } else
-                    mainThreadHandler.post{complete(LoadResult.Error("Ошибка при выгрузке задания"))}
+                    LoadResult.Error("Ошибка при выгрузке задания")
             } else
-                mainThreadHandler.post{complete(LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}"))}
-        }
+                LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
     }
 
-    fun setStatus(docUID: String, status: Int, complete: (result: LoadResult<Boolean>) -> Unit) {
-        scope.launch {
+    suspend fun setStatus(task: Task, status: Int): LoadResult<Boolean>{
+
             Log.d(TAG, "set status START")
-            val dList: ArrayList<StatusUploadBody> = arrayListOf(StatusUploadBody(docUID,status))
+            val dList: ArrayList<StatusUploadBody> = arrayListOf(
+                    StatusUploadBody(
+                            task.docUid,status,
+                            task.deviceId,
+                            task.vehicle?.uid ?: "",
+                            "",
+                            task.dateStart?.longFormat() ?: "",
+                            task.dateEnd?.longFormat() ?: ""
+                     ))
             val response = RetrofitClient
                 .getPostgrestApi()
                 .setStatus(StatusUploadRequest(dList))
             val result = responseResult(response)
-            if (result is LoadResult.Success) {
+            return if (result is LoadResult.Success) {
                 if (response.body() != null) {
                     Log.d(TAG, "set status FINISHED")
-                    mainThreadHandler.post{complete(LoadResult.Success(true))}
-                }else
-                    mainThreadHandler.post{complete(LoadResult.Error("Ошибка установки статуса: Вернулся пустой ответ"))}
-            }else
-                mainThreadHandler.post{complete(LoadResult.Error("Ошибка установки статуса: ${result.errorMessage}"))}
-        }
+                    LoadResult.Success(true)
+                }else{
+                    Log.d(TAG, "Error setting status: network result is empty ${result.errorMessage}")
+                    LoadResult.Error("Ошибка установки статуса: Вернулся пустой ответ")
+                }
+            }else{
+                Log.d(TAG, "Error setting status: network result is incorrect ${result.errorMessage}")
+                LoadResult.Error("Ошибка установки статуса: ${result.errorMessage}")
+            }
+
     }
 
     fun loadApkFile(file: File, complete: () -> Unit){
         scope.launch {
             val response = RetrofitClient
-                .getPostgrestApi()
-                .getApk("/apk/app-release.apk")
+                .getApacheConnection()
+                .getApk("/apk/app-release_2.apk")
             if (responseResult(response) is LoadResult.Success) {
                 response.body()?.let {
                     file.outputStream().use { fileOut -> it.byteStream().copyTo(fileOut) }
@@ -463,55 +489,61 @@ object RootRepository {
 
     //region LocalDatabase
 
-    fun insertPointRows(pointList: List<TaskRowRes>, complete: () -> Unit){
-        scope.launch {
-            Log.d(TAG, "Insert point rows START")
-            val insertRes = dbDao.insertPointListWithReplace(pointList.map { it.toPointDestination() })
-            //if (insertRes>0) {
-            Log.d(TAG, "Insert point rows FINISHED")
-                complete()
-            //}
-        }
+    fun insertPointRows(pointList: List<TaskRowRes>): Int{
+        Log.d(TAG, "Insert point rows START")
+        val insertRes = dbDao.insertPointList(pointList.map { it.toPointDestination() })
+        Log.d(TAG, "Insert point rows FINISHED. Inserted ${insertRes} rows")
+        return insertRes
+
     }
 
-    fun insertTask(pointList: List<TaskRowRes>, complete: (task: Task) -> Unit){
-        scope.launch {
-            if (!pointList.isNullOrEmpty()){
-                Log.d(TAG, "Insert Task START")
-                val task = Task(pointList[0].docUID, currentTask.value!!.vehicle, currentTask.value!!.route, currentTask.value!!.routeDate)
+    fun insertTask(pointList: List<TaskRowRes>): Task? {
+        return if (!pointList.isNullOrEmpty()) {
+            Log.d(TAG, "Insert Task START")
+            val task = Task(pointList[0].docUID, currentTask.value!!.vehicle, currentTask.value!!.route, currentTask.value!!.routeDate,currentTask.value!!.search_type)
                     .also { task ->
                         task.dateStart = pointList[0].dateStart
                         task.dateEnd = pointList[0].dateEnd
                         task.countPoint = pointList.filter { !it.polygon }.size
                         task.countPointDone = 0
                     }
-                dbDao.insertTask(task)
-                Log.d(TAG, "Insert Task FINISHED")
-                complete(task)
-            }
-
+            dbDao.insertTask(task)
+            Log.d(TAG, "Insert Task FINISHED")
+            task
+        } else {
+            null
         }
     }
 
-    fun getCurrentTaskFromDB(complete: (task: Task) -> Unit){
+    private fun getCurrentTaskFromDB(complete: (task: Task?) -> Unit){
         scope.launch {
             complete(dbDao.selectTask())
         }
     }
 
-    fun updateCurrentTask(): MutableLiveData<Task>{
-        val taskResult: MutableLiveData<Task> = MutableLiveData(prefRepository.getTask())
-        getCurrentTaskFromDB {
-            task -> taskResult.postValue(task)
-            return@getCurrentTaskFromDB
-        }
-        currentTask.value = taskResult.value
-        return taskResult
+    private fun getTaskFromDB(): Task {
+        return dbDao.selectTask()
     }
 
-    fun getCurrentTask(): MutableLiveData<Task>{
+    fun updateCurrentTask(): MutableLiveData<Task>{
+        //val taskResult: MutableLiveData<Task> = MutableLiveData(prefRepository.getTask())
+        currentTask.postValue(prefRepository.getTask())
+        getCurrentTaskFromDB {
+            //task -> taskResult.postValue(task)
+            task ->
+            task?.let { currentTask.postValue(task) }
+        }
+        //return taskResult
         return currentTask
     }
+
+    fun getTask(): MutableLiveData<Task> {
+        return currentTask
+    }
+
+    /*fun getCurrentTask(): MutableLiveData<Task>{
+        return currentTask
+    }*/
 
     fun getPointList(complete: (pointList: List<PointItem>) -> Unit){
         scope.launch {
@@ -521,7 +553,7 @@ object RootRepository {
 
     fun updatePoint(pointItem: PointItem){
         scope.launch {
-            dbDao.updatePoint(pointItem)
+            dbDao.updatePointWithRoute(pointItem)
         }
     }
 

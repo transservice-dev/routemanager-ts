@@ -6,5 +6,10 @@ class StatusUploadRequest(
 
 class StatusUploadBody(
     val docUID: String,
-    val docStatus: Int
+    val docStatus: Int,
+    val deviceID: String,
+    val vehicleUID: String,
+    val routeUID: String,
+    val dateStart: String,
+    val dateEnd: String
 )

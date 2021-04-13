@@ -33,7 +33,6 @@ class VehicleListFragment : Fragment() {
         }
         initViewModel()
         setHasOptionsMenu(true)
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
 
         vehicleAdapter = VehicleListAdapter {
             viewModel.setVehicle(it)
@@ -71,6 +70,7 @@ class VehicleListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         with(binding.rvVehicleList){
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(

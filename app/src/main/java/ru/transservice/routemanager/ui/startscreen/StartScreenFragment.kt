@@ -6,11 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -19,15 +21,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.google.android.material.snackbar.Snackbar
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
+import ru.transservice.routemanager.MainActivity.Companion.TAG
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
+import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.databinding.FragmentStartScreenBinding
 import ru.transservice.routemanager.extensions.shortFormat
 import ru.transservice.routemanager.service.BackPressedCallback
+import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
+import ru.transservice.routemanager.service.ReportLog
 import ru.transservice.routemanager.ui.splashscreen.SplashScreenFragmentDirections
+import java.lang.Error
 
 class StartScreenFragment : Fragment() {
 
@@ -38,6 +46,22 @@ class StartScreenFragment : Fragment() {
     private var isBtnCloseHidden = true
     private lateinit var notificationBuilder: NotificationCompat.Builder
     private val notificationId: Int = 100
+    private var backPressedTime:Long = 0
+
+    val callbackExit = object : OnBackPressedCallback(true) {
+        lateinit var backToast:Toast
+        override fun handleOnBackPressed() {
+            backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
+            if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                backToast.cancel()
+                requireActivity().moveTaskToBack(true)
+                requireActivity().finish()
+            } else {
+                backToast.show()
+            }
+            backPressedTime = System.currentTimeMillis()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,20 +73,31 @@ class StartScreenFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        requireActivity().onBackPressedDispatcher.addCallback(this, BackPressedCallback.callbackBlock)
+        //Log.d(TAG, "onAttach ${this::class.java}")
+        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //Log.d(TAG, "onResume ${this::class.java}")
+        viewModel.updateTaskParams()
+        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        //Log.d(TAG, "onCreateView ${this::class.java}")
         _binding = FragmentStartScreenBinding.inflate(inflater,container,false)
+
         return binding.root
     }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
+        //Log.d(TAG, "onDestroyView ${this::class.java}")
         _binding = null
     }
 
@@ -81,48 +116,40 @@ class StartScreenFragment : Fragment() {
         viewModel.getTaskParams().observe(viewLifecycleOwner, Observer {
             with(binding) {
                 dateOfRoute.text = it.routeDate.shortFormat()
-                vehicleNumber.text = it.vehicle?.number ?: ""
+                vehicleNumber.text = if (it.search_type == SearchType.BY_VEHICLE) it.vehicle?.number ?: "" else it.route?.name ?: ""
                 updateRouteInfo(true)
             }
         })
 
-
         viewModel.getUploadResult().observe(requireActivity(), {
+            Log.d(TAG, "start observing getUploadResult ${this::class.java}")
             when (it) {
                     is LoadResult.Loading -> {
                         navController.navigate(R.id.splashScreenFragment)
                     }
                     is LoadResult.Success -> {
-                        navController.navigate(SplashScreenFragmentDirections.actionSplashScreenFragmentToStartScreenFragment())
+                        navController.navigate(R.id.startScreenFragment)
                         with(NotificationManagerCompat.from(requireActivity())) {
                             notificationBuilder.setProgress(0, 0, false)
                             notificationBuilder.setContentTitle("Выгрузка завершена")
                             notify(notificationId, notificationBuilder.build())
                         }
-
-                    /*Snackbar.make(binding.root,
-                            "Данные выгружены успешно!",
-                            Snackbar.LENGTH_SHORT
-                        ).show()*/
+                        Toast.makeText(context, "Данные выгружены успешно!",Toast.LENGTH_LONG).show()
+                        //viewModel.updateCurrentTask()
                     }
                     is LoadResult.Error -> {
-                        navController.navigate(SplashScreenFragmentDirections.actionSplashScreenFragmentToStartScreenFragment())
+                        navController.navigate(R.id.startScreenFragment)
                         with(NotificationManagerCompat.from(requireActivity())) {
                             notificationBuilder.setProgress(0, 0, false)
                             notificationBuilder.setContentTitle("Данные НЕ выгружены")
                             notify(notificationId, notificationBuilder.build())
                         }
-                        Snackbar.make(
-                            binding.root,
-                            "Ошибка загрузки ${it.errorMessage}",
-                            Snackbar.LENGTH_LONG
-                        ).show()
+
+                        ErrorAlert.showAlert("При выгрузке данных произошла ошибка. Отправить отчет об ошибке?", requireContext())
+                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
                     }
                 }
-
         })
-
-
     }
 
     private fun initViewModel(){
@@ -133,6 +160,7 @@ class StartScreenFragment : Fragment() {
     private fun initViews(){
         updateRouteInfo(false)
         binding.closeLayout.visibility = View.GONE
+        binding.tvVersion.text = "Версия ${viewModel.version}"
        //isBtnCloseHidden = false
         //showHideButtonClose()
     }
@@ -140,10 +168,7 @@ class StartScreenFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun initActionButtons(){
         binding.photoLayout.setOnClickListener {
-            /*val test: Boolean? = null
-            if (test!!) {
-                Toast.makeText(context, "test", Toast.LENGTH_SHORT).show()
-            }*/
+            //throw IllegalArgumentException()
             navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToPhotoListFragment(null,PhotoOrder.DONT_SET))
         }
 
@@ -159,15 +184,22 @@ class StartScreenFragment : Fragment() {
             viewModel.syncTaskData().observe(viewLifecycleOwner, Observer {
                 when (it) {
                     is LoadResult.Loading -> {
-                        //TODO splash screen loading
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
                     }
                     is LoadResult.Success -> {
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                        Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
+                        //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
                         viewModel.getTaskParams().value?.let {
                             binding.atAllCount.text = it.countPoint.toString()
                         }
                     }
                     is LoadResult.Error -> {
-                        Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                        if (it.e != null)
+                            ErrorAlert.showAlert("При получении данных произошла ошибка. Отправить отчет об ошибке?", requireContext())
+                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
+                        //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
                     }
                 }
             })
@@ -180,7 +212,7 @@ class StartScreenFragment : Fragment() {
         binding.btnFinishRoute.setOnClickListener {
             val alertBuilder = AlertDialog.Builder(context).apply {
                 setTitle("Подтвердите действие")
-                setTitle("Вы уверены, что хотите завершить маршрут?")
+                setMessage("Вы уверены, что хотите завершить маршрут?")
                 setPositiveButton("Да, заврешить") { _,_ ->
                     with(NotificationManagerCompat.from(requireActivity())) {
                         notificationBuilder.setProgress(100, 0, true)
@@ -274,6 +306,8 @@ class StartScreenFragment : Fragment() {
     }
 
     companion object {
+
+        private const val TAG = "${AppClass.TAG}: StartScreenFragment"
 
         @JvmStatic
         fun newInstance() =

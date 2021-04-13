@@ -1,12 +1,9 @@
 package ru.transservice.routemanager.ui.routesettings
 
-import android.graphics.Region
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
-import android.widget.Adapter
-import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -16,19 +13,19 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.FragmentRegionListBinding
+import ru.transservice.routemanager.databinding.FragmentRouteListBinding
+import ru.transservice.routemanager.databinding.FragmentVehicleListBinding
 import ru.transservice.routemanager.service.LoadResult
 
 
-class RegionListFragment : Fragment() {
-
-    private var _binding: FragmentRegionListBinding? = null
+class RouteListFragment : Fragment() {
+    private var _binding: FragmentRouteListBinding? = null
     private val binding get() = _binding!!
-    private lateinit var regionAdapter: RegionListAdapter
+    private lateinit var routeAdapter: RouteListAdapter
     private lateinit var viewModel: RouteSettingsViewModel
     lateinit var navController: NavController
-    private val args: RegionListFragmentArgs by navArgs()
+    private val args: RouteListFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +35,9 @@ class RegionListFragment : Fragment() {
         initViewModel()
         setHasOptionsMenu(true)
 
-        regionAdapter = RegionListAdapter {
-            viewModel.setRegion(it)
-            navController.navigate(RegionListFragmentDirections.actionRegionListFragmentToRouteSettingsFragment())
+        routeAdapter = RouteListAdapter {
+            viewModel.setRoute(it)
+            navController.navigate(RouteListFragmentDirections.actionRouteListFragmentToRouteSettingsFragment())
         }
 
     }
@@ -68,31 +65,33 @@ class RegionListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentRegionListBinding.inflate(inflater,container,false)
+        _binding = FragmentRouteListBinding.inflate(inflater,container,false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
-        with(binding.rvRegionsList){
+        with(binding.rvRouteList){
             layoutManager = LinearLayoutManager(context)
-            addItemDecoration(DividerItemDecoration(context,DividerItemDecoration.VERTICAL))
-            adapter = regionAdapter
+            addItemDecoration(
+                DividerItemDecoration(context,
+                    androidx.recyclerview.widget.DividerItemDecoration.VERTICAL)
+            )
+            adapter = routeAdapter
         }
-
-        viewModel.mediatorListRegionResult.observe(viewLifecycleOwner, {
+        viewModel.mediatorListRouteResult.observe(viewLifecycleOwner, {
             when (it) {
                 is LoadResult.Loading -> {
                     //TODO splash screen loading
                 }
                 is LoadResult.Success -> {
-                    regionAdapter.updateItems(it.data ?: listOf())
-                    if (regionAdapter.selectedPos == RecyclerView.NO_POSITION) {
-                        args.region?.let {
-                            val pos = regionAdapter.getItemPosition(it)
-                            regionAdapter.selectedPos = pos
-                            with(binding.rvRegionsList) {
+                    routeAdapter.updateItems(it.data ?: listOf())
+                    if (routeAdapter.selectedPos == RecyclerView.NO_POSITION) {
+                        args.route?.let {
+                            val pos = routeAdapter.getItemPosition(it)
+                            routeAdapter.selectedPos = pos
+                            with(binding.rvRouteList) {
                                 scrollToPosition(pos)
                             }
                         }
@@ -107,23 +106,24 @@ class RegionListFragment : Fragment() {
         _binding = null
     }
 
+
+    fun initViewModel(){
+        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
+            RouteSettingsViewModel::class.java)
+        viewModel.loadRoutes()
+        viewModel.removeSources()
+        viewModel.addSourcesRegion()
+        viewModel.addSourcesRoute()
+    }
+
     companion object {
 
         @JvmStatic
         fun newInstance() =
-            RegionListFragment().apply {
+            RouteListFragment().apply {
                 arguments = Bundle().apply {
 
                 }
             }
-    }
-
-    fun initViewModel(){
-        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
-        RouteSettingsViewModel::class.java)
-        viewModel.loadRegions()
-        viewModel.removeSources()
-        viewModel.addSourcesRegion()
-        viewModel.addSourcesVehicle()
     }
 }

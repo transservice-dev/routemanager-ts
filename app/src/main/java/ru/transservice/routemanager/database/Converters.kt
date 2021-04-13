@@ -56,6 +56,7 @@ class Converters {
             return when (photoOrder) {
                 PhotoOrder.PHOTO_BEFORE -> 0
                 PhotoOrder.PHOTO_AFTER -> 1
+                PhotoOrder.PHOTO_CANTDONE ->2
                 else -> -1
             }
         }
@@ -66,6 +67,7 @@ class Converters {
             return when (data) {
                 0 -> PhotoOrder.PHOTO_BEFORE
                 1 -> PhotoOrder.PHOTO_AFTER
+                2 -> PhotoOrder.PHOTO_CANTDONE
                 else -> PhotoOrder.DONT_SET
             }
         }

@@ -16,7 +16,6 @@
 
 package ru.transservice.routemanager.camera
 
-import android.graphics.Point
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -25,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -34,15 +32,13 @@ import androidx.navigation.fragment.navArgs
 import ru.transservice.routemanager.R
 import com.bumptech.glide.Glide
 import com.muslimcompanion.utills.GPSTracker
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
-import ru.transservice.routemanager.ui.point.PointViewModel
 import ru.transservice.routemanager.ui.task.TaskListViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
-import java.util.*
 
 class PhotoFragment : Fragment() {
 
@@ -123,7 +119,7 @@ class PhotoFragment : Fragment() {
     }
 
     companion object {
-        private const val TAG = "Route_Manager: Photo_Preview"
+        private const val TAG = "${AppClass.TAG}: Photo_Preview"
     }
 }
 

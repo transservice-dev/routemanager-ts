@@ -12,8 +12,15 @@ interface DaoInterface {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPointListWithReplace(pointList: List<PointItem>)
 
+    @Transaction
+    fun insertPointList(pointList: List<PointItem>): Int {
+        val currentList = getAllPointList()
+        val newList = insertPointListOnlyNew(pointList)
+        return newList.size - currentList.size
+    }
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertPointListOnlyNew(pointList: List<PointItem>)
+    fun insertPointListOnlyNew(pointList: List<PointItem>): Array<Long>
 
     @Query("SELECT * from pointList_table ORDER BY tripNumber, rowNumber")
     fun getAllPointList(): MutableList<PointItem>
@@ -32,6 +39,19 @@ interface DaoInterface {
 
     @Update
     fun updatePoint(point: PointItem)
+
+    @Query("UPDATE currentRoute_table SET countPointDone = :countPointDone")
+    fun updateCountPointDone(countPointDone: Int)
+
+    @Query("SELECT COUNT(1) as countDone from pointList_table where done AND NOT polygon Group By docUID")
+    fun countPointDone(): Int
+
+    @Transaction
+    fun updatePointWithRoute(point: PointItem) {
+        updatePoint(point)
+        val countDone = countPointDone()
+        updateCountPointDone(countDone)
+    }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPointFile(pointFile: PointFile)

@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.database.AppDatabase
 
 class GPSTracker(private val mContext: Context) : Service(),
@@ -157,7 +158,7 @@ class GPSTracker(private val mContext: Context) : Service(),
         private const val MIN_TIME_BW_UPDATES = (1000 * 60 * 1 // 1 minute
                 ).toLong()
 
-        private const val TAG = "Route_Manager: GPSTracker"
+        private const val TAG = "${AppClass.TAG}: GPSTracker"
 
         private var INSTANCE: GPSTracker? = null
 

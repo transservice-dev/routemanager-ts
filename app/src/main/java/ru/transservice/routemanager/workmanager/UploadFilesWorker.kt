@@ -17,9 +17,7 @@ class UploadFilesWorker(appContext: Context, workerParams: WorkerParameters):
 
     override suspend fun doWork(): Result {
         // Do the work here--in this case, upload the images.
-        repository.uploadFiles{
-
-        }
+        repository.uploadFilesOnSchedule()
         // Indicate whether the work finished successfully with the Result
         return Result.success()
     }

@@ -80,7 +80,7 @@
             android:key="SEARCH_BY_ROUTE"
             android:summary="Искать путевые с привязкой по маршруту"
             android:title="Привязка по маршруту"
-            app:isPreferenceVisible="false"/>
+            app:isPreferenceVisible="true"/>
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory android:title="@string/servicePref">
         <Preference
@@ -92,6 +92,9 @@
         <Preference
             android:title="@string/clearCache"
             android:key="@string/clearCache" />
+        <Preference
+            android:title="@string/restartWorkManager"
+            android:key="RESTART_WORK" />
         <Preference
             android:title="@string/clearCacheFiles"
             android:key="@string/clearCacheFiles" />

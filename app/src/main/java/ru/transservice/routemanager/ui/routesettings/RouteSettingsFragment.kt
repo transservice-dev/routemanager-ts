@@ -57,6 +57,13 @@ class RouteSettingsFragment : Fragment() {
             navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToVehicleListFragment(viewModel.getVehicle().value))
         }
 
+        binding.tvRoute.setOnClickListener {
+            navController.navigate(RouteSettingsFragmentDirections.actionRouteSettingsFragmentToRouteListFragment(viewModel.getRoute().value))
+        }
+
+        binding.tvRoute.visibility = if (viewModel.searchByRoute) View.VISIBLE else View.GONE
+        binding.tvVehicle.visibility = if (viewModel.searchByRoute) View.GONE else View.VISIBLE
+
 
         var cal = Calendar.getInstance()
         cal.time = viewModel.getDate().value ?: Date()
@@ -90,6 +97,10 @@ class RouteSettingsFragment : Fragment() {
             binding.tvVehicle.text = it?.name
         })
 
+        viewModel.getRoute().observe(viewLifecycleOwner, Observer {
+            binding.tvRoute.text = it?.name
+        })
+
         viewModel.getDate().observe(viewLifecycleOwner, Observer {
             val myFormat = "yyyy.MM.dd" // mention the format you need
             val sdf = SimpleDateFormat(myFormat, Locale("ru"))
@@ -97,10 +108,10 @@ class RouteSettingsFragment : Fragment() {
         })
 
         viewModel.getEditingIsAvailable().observe(viewLifecycleOwner, {
-            with(binding.root){
+            with(binding.root) {
                 isClickable = it
                 isEnabled = it
-                if (this is ViewGroup){
+                if (this is ViewGroup) {
                     this.children.forEach { childView ->
                         childView.isClickable = it
                         childView.isEnabled = it
@@ -108,18 +119,29 @@ class RouteSettingsFragment : Fragment() {
                 }
             }
             if (!binding.root.isClickable) {
-                snackbarMessage = Snackbar.make(binding.root,
+                if (snackbarMessage?.isShown != true) {
+                    snackbarMessage = Snackbar.make(
+                        binding.root,
                         "Существует активное задание, редактирование настроек запрещено. Завершите маршрут для смены настроек",
-                        Snackbar.LENGTH_INDEFINITE)
+                        Snackbar.LENGTH_INDEFINITE
+                    )
+                    snackbarMessage?.let {
+                        val snackTextView =
+                            it.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                        snackTextView.maxLines = 10
+                        it.setAction(
+                            resources.getString(R.string.ok),
+                            object : View.OnClickListener {
+                                override fun onClick(p0: View?) {
+                                    it.dismiss()
+                                }
+                            })
+                        it.show()
+                    }
+                }
+            } else {
                 snackbarMessage?.let {
-                    val snackTextView = it.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
-                    snackTextView.maxLines = 4
-                    it.setAction(resources.getString(R.string.ok), object : View.OnClickListener{
-                        override fun onClick(p0: View?) {
-                            it.dismiss()
-                        }
-                    })
-                    it.show()
+                    it.dismiss()
                 }
             }
         })
@@ -135,6 +157,7 @@ class RouteSettingsFragment : Fragment() {
     fun initViewModel(){
         viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
                 RouteSettingsViewModel::class.java)
+        viewModel.forbidEdititng()
     }
 
     companion object {

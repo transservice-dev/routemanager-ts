@@ -9,6 +9,9 @@ import androidx.core.content.FileProvider
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.WorkManager
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.BuildConfig
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
@@ -48,7 +51,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val sendLog = findPreference<Preference>(getString(R.string.sendLog))
 
         sendLog?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val sendLog = ReportLog(requireActivity() as MainActivity)
+            val sendLog = ReportLog(requireContext())
             sendLog.sendLogInFile()
             return@OnPreferenceClickListener true
         }
@@ -68,6 +71,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
             return@OnPreferenceClickListener true
         }
 
+        val restartWork = findPreference<Preference>("RESTART_WORK")
+
+        restartWork?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+
+            doRestartWork(requireActivity() as MainActivity)
+
+            return@OnPreferenceClickListener true
+        }
+
+    }
+
+    private fun doRestartWork(mainActivity: MainActivity) {
+        val workManager = WorkManager.getInstance(AppClass.appliactionContext())
+        workManager.pruneWork()
+        workManager.cancelUniqueWork("uploadFiles")
+        AppClass.setupWorkManager()
     }
 
     private fun clearDir (dir : File, notDeleteFiles : List<String>){

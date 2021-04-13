@@ -37,7 +37,6 @@
                 android:contentDescription="@string/addupdateroute"
                 android:elevation="5dp"
                 android:src="@drawable/ic_add_24"
-                app:layout_constraintEnd_toStartOf="@+id/constraintLayoutRouteInfo"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -338,7 +337,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="@dimen/text_size_small"
+            android:padding="@dimen/margin_small8"
+            android:layout_marginBottom="?attr/actionBarSize"
+            tools:text="Версия приложения" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

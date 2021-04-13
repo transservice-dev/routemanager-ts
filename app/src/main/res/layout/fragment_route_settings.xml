@@ -56,6 +56,22 @@
     </TextView>
 
     <TextView
+        android:id="@+id/tv_route"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_small16"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_round_rect_white"
+        android:hint="@string/routeTitle"
+        android:padding="@dimen/margin_small16"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_vehicle"
+        tools:visibility="visible">
+
+    </TextView>
+
+    <TextView
         android:id="@+id/tv_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,7 +80,7 @@
         android:background="@drawable/bg_round_rect_white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_vehicle"
+        app:layout_constraintTop_toBottomOf="@id/tv_route"
         android:hint="@string/date_title">
 
     </TextView>

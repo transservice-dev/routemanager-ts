@@ -59,7 +59,6 @@ class TaskListFragment : Fragment() {
                 btsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -114,7 +113,6 @@ class TaskListFragment : Fragment() {
         initViews()
         initBottomSheetActions()
         initLiveDataObservers()
-
     }
 
     private fun initLiveDataObservers() {
@@ -154,6 +152,9 @@ class TaskListFragment : Fragment() {
                     resultPoint.done = true
                     resultPoint.timestamp = Date()
                     viewModel.updateCurrentPoint(resultPoint)
+                    viewModel.loadPointList().value?.let {
+                        taskListAdapter.updateItems(it)
+                    }
                 }else{
                     navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.DONE))
                     btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED

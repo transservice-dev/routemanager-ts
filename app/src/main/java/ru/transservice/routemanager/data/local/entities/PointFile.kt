@@ -67,7 +67,7 @@ data class PointFile(
 enum class PhotoOrder(val string: String, val title: String) : Serializable {
     PHOTO_BEFORE("before", "до вывоза"), PHOTO_AFTER("after", "после вывоза"), DONT_SET(
                 "not set",
-                ""
+                "не указано"
         ),
-    PHOTO_CANTDONE("cant_done", "")
+    PHOTO_CANTDONE("cant_done", "невозможно")
 }

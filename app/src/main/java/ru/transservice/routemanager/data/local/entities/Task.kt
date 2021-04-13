@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
+import ru.transservice.routemanager.extensions.shortFormat
 import java.util.*
 
 @Entity(tableName = "currentRoute_table")
@@ -24,6 +25,7 @@ data class Task(
     var countPointDone: Int = 0
     var dateStart: Date? = null
     var dateEnd: Date? = null
+    val deviceId get() = "${vehicle?.number ?: ""}__${docUid}__${dateStart?.shortFormat()}"
 }
 
 enum class SearchType(val id: Int){

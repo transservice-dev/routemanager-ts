@@ -60,5 +60,7 @@
     <string name="title_activity_error">ErrorActivity</string>
     <string name="crash">Авария!</string>
     <string name="restart_title">Перезагрузить</string>
+    <string name="photo_title">ФОТО</string>
+    <string name="restartWorkManager">Перезапустить фоновые задания</string>
 
 </resources>

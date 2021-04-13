@@ -24,6 +24,7 @@ import javax.net.ssl.*
 object RetrofitClient {
 
     val okHttpClient = OkHttpClient.Builder().apply {
+        connectTimeout(60, TimeUnit.SECONDS)
         addInterceptor(
             Interceptor { chain ->
                 val builder = chain.request().newBuilder()
@@ -31,7 +32,7 @@ object RetrofitClient {
                 builder.header("Authorization", "Bearer ${RootRepository.authPass}")
                 builder.header(
                     "User-Agent",
-                    "${RootRepository.deviceName} - ${AppClass.appVersion} ${System.getProperty("http.agent")}"
+                    "${RootRepository.deviceName} - version ${AppClass.appVersion} ${System.getProperty("http.agent")}"
                 )
                 return@Interceptor chain.proceed(builder.build())
             }
@@ -42,15 +43,16 @@ object RetrofitClient {
                 val rawJson: String = response.body()!!.string()
 
                 Log.d(
-                    BuildConfig.APPLICATION_ID,
-                    String.format("raw JSON response is: %s", rawJson)
+                    "${AppClass.TAG}: Retrofit",
+                    """ request url: ${response.request().url()}
+                              request code: ${response.code()}
+                              ${if (!response.isSuccessful) "raw response: $rawJson." else ""} """
                 )
                 // Re-create the response before returning it because body can be read only once
                 return@Interceptor response.newBuilder()
                     .body(ResponseBody.create(response.body()!!.contentType(), rawJson)).build()
             }
         )
-        connectTimeout(20, TimeUnit.SECONDS)
         val sslSettings = customSSL()
         sslSocketFactory(sslSettings.first, sslSettings.second)
     }.build()
@@ -93,6 +95,20 @@ object RetrofitClient {
 
     fun getPostgrestApi() : PostgrestApi{
         return retrofit.create(PostgrestApi::class.java)
+    }
+
+    val okHttpClientApache = OkHttpClient.Builder().apply {
+        connectTimeout(60, TimeUnit.SECONDS)
+        val sslSettings = customSSL()
+        sslSocketFactory(sslSettings.first, sslSettings.second)
+    }.build()
+
+    fun getApacheConnection(): PostgrestApi{
+        val retrofitApache: Retrofit = Retrofit.Builder()
+            .baseUrl(RootRepository.baseUrl)
+            .client(okHttpClientApache)
+            .build()
+        return retrofitApache.create(PostgrestApi::class.java)
     }
 
 }

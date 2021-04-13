@@ -54,7 +54,7 @@ class FactDialog(
         point = args.getSerializable("point") as PointItem
 
         plan = point.countPlan
-        fact = if (point.countFact ==-1.0) {0.0} else {point.countFact}
+        fact = if (point.countFact ==-1.0) {point.countPlan} else {point.countFact}
 
         val tvfact = binding.factTextSet as TextView
         tvfact.text = fact.toString()

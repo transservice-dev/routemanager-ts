@@ -1,13 +1,11 @@
 package ru.transservice.routemanager.ui.task
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.ItemTaskListBinding
 
@@ -23,7 +21,7 @@ class TaskListAdapter(val listener: (PointItem) -> Unit) : RecyclerView.Adapter<
             with(binding){
                 tvPointName.text = if (item.polygon) item.addressName else "${item.rowNumber}. ${item.addressName}"
                 tvContainer.text = item.containerName
-                tvContainerCount.text = item.containerSize.toString()
+                tvContainerCount.text = item.countPlan.toString()
 
                 if (item.done) {
                     ivPointStatus.setImageResource(R.drawable.ic_check_24_small)

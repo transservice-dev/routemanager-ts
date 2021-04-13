@@ -17,6 +17,8 @@ class AppClass: Application(), Configuration.Provider {
         var appVersion: String = ""
         private var instance:AppClass? = null
 
+        const val TAG ="RouteManager"
+
         fun appliactionContext(): Context {
             return instance!!.applicationContext
         }
@@ -42,6 +44,21 @@ class AppClass: Application(), Configuration.Provider {
             return appliactionContext().display?.width?.toInt() ?: 0
             //return (appliactionContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay?.width?.toInt() ?: 0
         }
+
+        fun setupWorkManager(){
+            // Work manager: configure schedule and rules for periodic files upload
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+            val uploadWorkRequest: PeriodicWorkRequest =
+                PeriodicWorkRequestBuilder<UploadFilesWorker>(45, TimeUnit.MINUTES)
+                    .addTag("uploadFiles")
+                    .setConstraints(constraints)
+                    .build()
+            val workManager = WorkManager.getInstance(appliactionContext())
+            workManager.enqueueUniquePeriodicWork("uploadFiles",
+                ExistingPeriodicWorkPolicy.KEEP,uploadWorkRequest)
+        }
     }
 
     init {
@@ -62,7 +79,8 @@ class AppClass: Application(), Configuration.Provider {
 
         //region WorkManager
         // Work manager: configure schedule and rules for periodic files upload
-        val constraints = Constraints.Builder()
+        setupWorkManager()
+        /*val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
         val uploadWorkRequest: PeriodicWorkRequest =
@@ -72,7 +90,7 @@ class AppClass: Application(), Configuration.Provider {
                 .build()
         val workManager = WorkManager.getInstance(applicationContext)
         workManager.enqueueUniquePeriodicWork("uploadFiles",
-            ExistingPeriodicWorkPolicy.KEEP,uploadWorkRequest)
+            ExistingPeriodicWorkPolicy.KEEP,uploadWorkRequest)*/
 
     }
 

@@ -30,7 +30,7 @@ class ErrorActivity : AppCompatActivity() {
         }
         val error = CustomActivityOnCrash.getStackTraceFromIntent(intent)
         if(error != null){
-            Log.d(MainActivity.TAG,error)
+            Log.d(AppClass.TAG,error)
         }
 
         with(binding.btnRestartApp) {

@@ -57,6 +57,7 @@ class PhotoListFragment : Fragment() {
                 }
 
                 requireActivity().startActivity(Intent.createChooser(shareIntent, "Отправка фото"))
+                viewModel.selectedItems.clear()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -100,6 +101,7 @@ class PhotoListFragment : Fragment() {
     private fun initViewModel() {
         viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.PhotoListViewModelFactory(point)).get(
             PhotoListViewModel::class.java)
+        viewModel.pointItem = point
     }
 
     companion object {

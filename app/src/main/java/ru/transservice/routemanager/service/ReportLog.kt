@@ -1,20 +1,22 @@
 package ru.transservice.routemanager.service
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ReportLog(val activity: AppCompatActivity) {
+class ReportLog(val context: Context) {
 
     private fun createLogFile () : File? {
-        val storage = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        val storage = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         val fileName = "log" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU"))
                 .format(Date())
 
@@ -25,13 +27,13 @@ class ReportLog(val activity: AppCompatActivity) {
                     storage
             )
         }catch (e: Exception){
-            Toast.makeText(activity, "Неудалось записать файл", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Неудалось записать файл", Toast.LENGTH_LONG).show()
         }
         return null
     }
 
     private fun setLogInFile (file: File){
-        val command = "logcat " + MainActivity.TAG + ":* -f " + file.absoluteFile
+        val command = "logcat " + AppClass.TAG + ":* -f " + file.absoluteFile
         Runtime.getRuntime().exec(command)
     }
 
@@ -48,7 +50,7 @@ class ReportLog(val activity: AppCompatActivity) {
                 type = "*/*"
             }
 
-            activity.startActivity(Intent.createChooser(shareIntent,"Отправка лога"))
+            context.startActivity(Intent.createChooser(shareIntent,"Отправка лога"))
         }
     }
 

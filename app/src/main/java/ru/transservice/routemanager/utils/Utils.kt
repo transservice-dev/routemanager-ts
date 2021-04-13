@@ -34,7 +34,8 @@ object Utils {
         "ь" to "",
         "э" to "e",
         "ю" to "yu",
-        "я" to "ya"
+        "я" to "ya",
+        "№" to "#"
     )
 
     fun transliteration(payload:String, divider:String = " "):String{
