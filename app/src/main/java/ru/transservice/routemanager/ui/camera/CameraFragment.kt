@@ -17,12 +17,14 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
@@ -422,7 +424,7 @@ class CameraFragment : Fragment() {
                 imageCapture.takePicture(
                     outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                         override fun onError(exc: ImageCaptureException) {
-                            Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+                            Log.e(TAG, "Photo capture failed: ${exc.message} location ${photoFile.absolutePath}", exc)
                         }
 
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -641,7 +643,7 @@ class CameraFragment : Fragment() {
         fName = fName.replace("-", "_")
         fName = fName.replace("\"", "")
 
-        return if (fName.length > 140) "${fName.substring(0,140)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
+        return if (fName.length > 139) "${fName.substring(0,139)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
     }
 
     private fun animateFocus(x: Float, y: Float) {
@@ -662,11 +664,13 @@ class CameraFragment : Fragment() {
             .setListener(object: Animator.AnimatorListener {
                 override fun onAnimationEnd(animator: Animator?) {
                     ivFocus.visibility = View.INVISIBLE
-                    ivFocus.setImageDrawable(resources.getDrawable(R.drawable.ic_focus_start,requireActivity().theme))
+                    ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_start,null))
+                        //resources.getDrawable(R.drawable.ic_focus_start,requireActivity().theme))
                 }
 
                 override fun onAnimationStart(animation: Animator?) {
-                    ivFocus.setImageDrawable(resources.getDrawable(R.drawable.ic_focus_stop,requireActivity().theme))
+                    ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_stop,null))
+                        //resources.getDrawable(R.drawable.ic_focus_stop,requireActivity().theme))
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {

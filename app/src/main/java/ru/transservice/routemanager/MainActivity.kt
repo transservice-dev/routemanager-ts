@@ -7,31 +7,27 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.addCallback
+import android.view.WindowInsets
+import android.view.WindowMetrics
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.bottomnavigation.BottomNavigationMenu
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.remote.res.task.TaskRequestBody
 import ru.transservice.routemanager.databinding.ActivityMainBinding
 import ru.transservice.routemanager.repositories.RootRepository
-import java.text.SimpleDateFormat
 import java.util.*
+
 
 const val KEY_EVENT_ACTION = "key_event_action"
 const val KEY_EVENT_EXTRA = "key_event_extra"
@@ -134,6 +130,16 @@ class MainActivity : AppCompatActivity() {
 
     fun getNotificationChannel() = channel
 
+    fun getDisplayWidth(): Int{
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds.width()
+        } else {
+            val displayMetrics = DisplayMetrics()
+            windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+            displayMetrics.widthPixels
+        }
+    }
+
     /*@SuppressLint("RestrictedApi")
     override fun onBackPressed() {
         if(backPressedBlock){
@@ -170,10 +176,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     R.id.photos -> {
                         val bundle = bundleOf(
-                                "point" to null,
-                                "photoOrder" to PhotoOrder.DONT_SET
+                            "point" to null,
+                            "photoOrder" to PhotoOrder.DONT_SET
                         )
-                        navController.navigate(R.id.photoListFragment,bundle)
+                        navController.navigate(R.id.photoListFragment, bundle)
                         return@OnNavigationItemSelectedListener false
                     }
                     R.id.settings -> {

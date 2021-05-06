@@ -123,14 +123,14 @@ class GPSTracker(private val mContext: Context) : Service(),
         val alertDialog = AlertDialog.Builder(mContext)
 
         // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings")
+        alertDialog.setTitle("Настройки GPS")
 
         // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?")
+        alertDialog.setMessage("Обнаружение местоположения отключено.Перейти к настройке?")
 
         // On pressing Settings button
         alertDialog.setPositiveButton(
-            "Settings"
+            "Настройки"
         ) { dialog, which ->
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             mContext.startActivity(intent)
@@ -163,10 +163,15 @@ class GPSTracker(private val mContext: Context) : Service(),
         private var INSTANCE: GPSTracker? = null
 
         fun getGPSTracker(context: Context): GPSTracker {
+            /*if (INSTANCE == null) {
+                INSTANCE = GPSTracker(context)
+            }
+            return INSTANCE!!*/
             return if (INSTANCE == null) {
+               // INSTANCE = GPSTracker(context)
                 GPSTracker(context)
             }else
-                INSTANCE!!
+                return   INSTANCE!!
         }
     }
 

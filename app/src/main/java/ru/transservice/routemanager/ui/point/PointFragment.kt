@@ -52,7 +52,12 @@ class PointFragment : Fragment() {
         pointStatus = args.pointAction
         initViewModel(args.point)
         initFragmentFactDialogListener()
-        gps = GPSTracker.getGPSTracker(requireContext().applicationContext)
+        gps = GPSTracker.getGPSTracker(requireActivity())
+        gps?.let {
+            if (!it.canGetLocation){
+                it.showSettingsAlert()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -211,7 +216,7 @@ class PointFragment : Fragment() {
                 viewModel.getCurrentPoint().value?.let { pointItem ->
                     when {
                         pointItem.done -> {
-                            viewModel.uploadPointFiles()
+                            //viewModel.uploadPointFiles()
                             requireActivity().onBackPressed()
                         }
                         viewModel.reasonComment != "" -> {

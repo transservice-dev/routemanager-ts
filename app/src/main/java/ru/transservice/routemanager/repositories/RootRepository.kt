@@ -322,6 +322,47 @@ object RootRepository {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    fun uploadFile(pointFile: PointFile){
+        scope.launch {
+            Log.d(TAG, "uploading file ${pointFile.filePath} START")
+            if (!pointFile.exists()) {
+                Log.i(
+                    TAG,
+                    " uploading file : " + pointFile.filePath + "FILE NOT FOUND"
+                )
+                return@launch
+            }
+            val filesArray: ArrayList<FilesRequestBody> = arrayListOf()
+            val photoOrder = if (pointFile.photoOrder == PhotoOrder.PHOTO_BEFORE) {
+                0
+            } else {
+                1
+            }
+            filesArray.add(
+                FilesRequestBody(
+                    pointFile.docUID,
+                    pointFile.lineUID,
+                    pointFile.lat,
+                    pointFile.lon,
+                    pointFile.fileName,
+                    pointFile.fileExtension,
+                    pointFile.timeDate.longFormat(),
+                    photoOrder,
+                    pointFile.getCompresedBase64()
+                )
+            )
+            val response = RetrofitClient
+                .getPostgrestApi()
+                .uploadFiles(FilesUploadRequest(filesArray))
+            if (responseResult(response) is LoadResult.Success) {
+                if (response.body() != null) {
+                    Log.d(TAG, "uploading file ${pointFile.filePath} FINISHED")
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun uploadFiles(deleteUploaded: Boolean = true): LoadResult<Boolean> {
 
         val data = dbDao.getRouteNotUploadedPointFiles()
@@ -505,7 +546,7 @@ object RootRepository {
                         task.dateStart = pointList[0].dateStart
                         task.dateEnd = pointList[0].dateEnd
                         task.countPoint = pointList.filter { !it.polygon }.size
-                        task.countPointDone = 0
+                        task.countPointDone = dbDao.countPointDone()
                     }
             dbDao.insertTask(task)
             Log.d(TAG, "Insert Task FINISHED")

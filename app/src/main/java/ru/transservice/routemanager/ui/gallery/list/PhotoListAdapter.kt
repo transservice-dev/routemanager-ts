@@ -35,7 +35,7 @@ class PhotoListAdapter(val photoOrder: PhotoOrder, val activity: MainActivity) :
                 rvPointsPhotos.layoutParams.height = -2
                 listOfPointFiles.layoutParams.height = -2
                 //settings for recycle view
-                val countOfImages = (AppClass.getDisplayWidth() / 300) // grid size
+                val countOfImages = (activity.getDisplayWidth() / 300) // grid size
                 rvPointsPhotos.layoutManager =
                     GridLayoutManager(AppClass.appliactionContext(), countOfImages)
                 rvPointsPhotos.isVerticalScrollBarEnabled = false

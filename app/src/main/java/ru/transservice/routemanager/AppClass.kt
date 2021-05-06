@@ -39,12 +39,6 @@ class AppClass: Application(), Configuration.Provider {
                 mediaDir else appContext.filesDir
         }
 
-        fun getDisplayWidth(): Int {
-            //return (appliactionContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager).currentWindowMetrics.bounds.width()
-            return appliactionContext().display?.width?.toInt() ?: 0
-            //return (appliactionContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay?.width?.toInt() ?: 0
-        }
-
         fun setupWorkManager(){
             // Work manager: configure schedule and rules for periodic files upload
             val constraints = Constraints.Builder()

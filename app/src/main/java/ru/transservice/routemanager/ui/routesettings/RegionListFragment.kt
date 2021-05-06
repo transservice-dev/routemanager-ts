@@ -15,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.FragmentRegionListBinding
@@ -84,9 +85,10 @@ class RegionListFragment : Fragment() {
         viewModel.mediatorListRegionResult.observe(viewLifecycleOwner, {
             when (it) {
                 is LoadResult.Loading -> {
-                    //TODO splash screen loading
+                    (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
                 }
                 is LoadResult.Success -> {
+                    (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
                     regionAdapter.updateItems(it.data ?: listOf())
                     if (regionAdapter.selectedPos == RecyclerView.NO_POSITION) {
                         args.region?.let {

@@ -153,7 +153,7 @@ class RouteSettingsViewModel(): ViewModel() {
             if (vehicles.isNotEmpty()) {
                 mediatorListVehicleResult.value = if (queryStr.isNotEmpty())
                     LoadResult.Success(vehicles
-                            .filter { it.name.contains(queryStr, true) })
+                            .filter { it.number.contains(queryStr, true) })
                 else LoadResult.Success(vehicles)
             }
         }

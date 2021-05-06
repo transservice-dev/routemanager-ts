@@ -12,7 +12,7 @@ class BackPressedCallback {
 
         val callbackBlock = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-               Log.d("${AppClass.TAG}", "Back button press was blocked")
+               Log.d(AppClass.TAG, "Back button press was blocked")
             }
         }
 

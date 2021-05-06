@@ -59,7 +59,7 @@ class PhotoFragment : Fragment() {
         currentFile = args.fileName?.let { File(it) }
         point = args.point
         pointAction = args.pointAction
-        gps = GPSTracker.getGPSTracker(requireContext().applicationContext)
+        gps = GPSTracker.getGPSTracker(requireActivity())
         //gps = GPSTracker(requireContext())
         initViewModel()
         Log.d(TAG, "current file: ${currentFile?.absolutePath}")
