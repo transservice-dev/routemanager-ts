@@ -121,7 +121,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         requireActivity().window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                 , WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         activity.backPressedBlock = true
-        val storage = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        val storage = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         storage?.let {
             repository.getAllFiles { filesList ->
                 clearDir(storage, filesList.map { it.filePath }.filter { it.isNotEmpty() })
@@ -130,6 +130,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 activity.backPressedBlock = false
             }
         }
+        val storageD = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+        storageD?.let {
+            clearDir(storageD, emptyList())
+        }
+
     }
 
     private fun updateAppFromApk(activity: MainActivity) {
