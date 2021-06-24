@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -14,26 +15,41 @@ import android.provider.Settings
 import android.util.Log
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.database.AppDatabase
+import java.util.*
 
-class GPSTracker(private val mContext: Context) : Service(),
-    LocationListener {
+class GPSTracker(private val mContext: Context) : Service() {
+
     // flag for GPS status
     var isGPSEnabled = false
-
     // flag for network status
     var isNetworkEnabled = false
-
     // flag for GPS status
     var canGetLocation = false
-    var location: Location? = null
-    var latitude = 0.0
-    var longitude = 0.0
+
+    var trackingIsOn = false
+
+    var locationGPS: Location? = null
+    var locationNetwork: Location? = null
+
+    val locationListenerGPS: LocationListener = object : LocationListener {
+        override fun onLocationChanged(newLocation: Location) {
+            locationGPS = newLocation
+            Log.d(TAG, "Location changed: $newLocation ${Date()}")
+        }
+    }
+
+    val locationListenerNetwork: LocationListener = object : LocationListener {
+        override fun onLocationChanged(newLocation: Location) {
+            locationNetwork = newLocation
+            Log.d(TAG, "Location changed: $newLocation ${Date()}")
+        }
+    }
 
     // Declaring a Location Manager
     var locationManager: LocationManager? = null
 
     @SuppressLint("MissingPermission")
-    fun findLocation(): Location? {
+    fun findLocation() {
         try {
             locationManager = mContext
                 .getSystemService(LOCATION_SERVICE) as LocationManager
@@ -43,76 +59,62 @@ class GPSTracker(private val mContext: Context) : Service(),
 
             // getting network status
             isNetworkEnabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
             if (!isGPSEnabled && !isNetworkEnabled) {
                 // no network provider is enabled
+                canGetLocation = false
             } else {
                 canGetLocation = true
-                // First get location from Network Provider
-                if (isNetworkEnabled) {
-                    locationManager!!.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
-                    )
-                    Log.d("Network", "Network")
-                    if (locationManager != null) {
-                        location = locationManager!!
-                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                        if (location != null) {
-                            latitude = location!!.latitude
-                            longitude = location!!.longitude
-                        }
-                    }
-                }
-                // if GPS Enabled get lat/long using GPS Services
+                // First if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
-                    if (location == null) {
+                    locationManager!!.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), locationListenerGPS
+                    )
+                    trackingIsOn = true
+                    Log.d(TAG, "Start tracking GPS location")
+
+                }
+                // Then get location from Network Provider
+                if (isNetworkEnabled) {
+
                         locationManager!!.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER,
+                            LocationManager.NETWORK_PROVIDER,
                             MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), locationListenerNetwork
                         )
-                        Log.d(TAG, "GPS Enabled")
-                        if (locationManager != null) {
-                            location = locationManager!!
-                                .getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                            if (location != null) {
-                                latitude = location!!.latitude
-                                longitude = location!!.longitude
-                            }
-                        }
-                    }
+                        trackingIsOn = true
+                        Log.d(TAG, "Start tracking Network location")
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return location
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getLocation(): Location? {
+        var lastLocation: Location? = null
+        if (locationManager != null) {
+            lastLocation = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (lastLocation == null) {
+                lastLocation = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                Log.d(TAG,"Returned Network Location")
+            }
+        }
+        return lastLocation
     }
 
     fun stopUsingGPS() {
         if (locationManager != null) {
-            locationManager!!.removeUpdates(this@GPSTracker)
+            locationManager!!.removeUpdates(locationListenerGPS)
+            locationManager!!.removeUpdates(locationListenerNetwork)
+            trackingIsOn = false
+            locationGPS = null
+            locationNetwork = null
+            Log.d(TAG, "Stop using GPS")
         }
-        Log.d(TAG, "stop using GPS")
-    }
-
-    fun getLatitudeFromLocation(): Double {
-        if (location != null) {
-            latitude = location!!.latitude
-        }
-
-        // return latitude
-        return latitude
-    }
-
-    fun getLongitudeFromLocation(): Double {
-        if (location != null) {
-            longitude = location!!.longitude
-        }
-
-        // return longitude
-        return longitude
     }
 
     fun canGetLocation(): Boolean {
@@ -140,42 +142,30 @@ class GPSTracker(private val mContext: Context) : Service(),
         alertDialog.show()
     }
 
-    override fun onLocationChanged(location: Location) {
-        //Log.d("Location", "Location changed: $location")
-    }
-    override fun onProviderDisabled(provider: String) {}
-    override fun onProviderEnabled(provider: String) {}
-    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-    override fun onBind(arg0: Intent): IBinder? {
-        return null
-    }
-
     companion object {
         // The minimum distance to change Updates in meters
-        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 10 // 10 meters
-
+        private const val MIN_DISTANCE_CHANGE_FOR_UPDATES: Long = 5 // 5 meter
         // The minimum time between updates in milliseconds
-        private const val MIN_TIME_BW_UPDATES = (1000 * 60 * 1 // 1 minute
+        private const val MIN_TIME_BW_UPDATES = (1000 * 30  // 30 seconds
                 ).toLong()
-
         private const val TAG = "${AppClass.TAG}: GPSTracker"
 
         private var INSTANCE: GPSTracker? = null
 
         fun getGPSTracker(context: Context): GPSTracker {
-            /*if (INSTANCE == null) {
+            if (INSTANCE == null) {
                 INSTANCE = GPSTracker(context)
             }
-            return INSTANCE!!*/
-            return if (INSTANCE == null) {
-               // INSTANCE = GPSTracker(context)
-                GPSTracker(context)
+            return INSTANCE!!
+            /*return if (INSTANCE == null) {
+               //INSTANCE = GPSTracker(context)
+                   GPSTracker(context)
             }else
-                return   INSTANCE!!
+                return   INSTANCE!!*/
         }
     }
 
-    init {
-        findLocation()
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
     }
 }

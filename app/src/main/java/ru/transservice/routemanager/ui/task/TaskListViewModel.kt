@@ -185,6 +185,7 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         currentPoint.value = pointItem
         currentPoint.value?.let {
             repository.updatePoint(currentPoint.value!!)
+            repository.updatePointOnServer(currentPoint.value!!)
         }
     }
 

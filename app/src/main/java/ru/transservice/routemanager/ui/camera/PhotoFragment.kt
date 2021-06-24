@@ -36,6 +36,7 @@ import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
+import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.ui.task.TaskListViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
@@ -47,7 +48,7 @@ class PhotoFragment : Fragment() {
     private lateinit var point: PointItem
     private lateinit var pointAction: PointStatuses
 
-    private lateinit var gps: GPSTracker
+    //private lateinit var gps: GPSTracker
     private var location: Location? = null
     lateinit var navController: NavController
     private val args: PhotoFragmentArgs by navArgs()
@@ -59,11 +60,12 @@ class PhotoFragment : Fragment() {
         currentFile = args.fileName?.let { File(it) }
         point = args.point
         pointAction = args.pointAction
-        gps = GPSTracker.getGPSTracker(requireActivity())
+        //gps = GPSTracker.getGPSTracker(requireActivity())
         //gps = GPSTracker(requireContext())
         initViewModel()
         Log.d(TAG, "current file: ${currentFile?.absolutePath}")
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,14 +79,11 @@ class PhotoFragment : Fragment() {
         val resource = currentFile ?: R.drawable.ic_photo
         val imageView = view.findViewById<ImageView>(R.id.photoPreview)
         //location
-        var location: Location? = null
-        if(gps.canGetLocation()){
-            location = gps.location
-            Log.d(TAG, "location successfully requested lat: ${location?.latitude} lon: ${location?.longitude}")
-        }else
-        {
-            gps.showSettingsAlert()
+        if (NavigationServiceConnection.getlocationAvailable()) {
+        }else{
         }
+        var location: Location? = NavigationServiceConnection.getLocation()
+        //Log.d(TAG, "location successfully requested lat: ${location?.latitude} lon: ${location?.longitude}")
         if (location == null) {
             viewPointModel.geoIsRequired.value = true
         }

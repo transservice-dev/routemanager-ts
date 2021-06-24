@@ -87,7 +87,7 @@ class CameraFragment : Fragment() {
     private lateinit var pointAction: PointStatuses
     private lateinit var fileName: String
     private lateinit var ivFocus: ImageView
-    private var gps: GPSTracker? = null
+    //private var gps: GPSTracker? = null
 
 
     lateinit var navController: NavController
@@ -337,7 +337,7 @@ class CameraFragment : Fragment() {
                         // Values returned from our analyzer are passed to the attached listener
                         // We log image analysis results here - you should do something useful
                         // instead!
-                        Log.d(TAG, "Average luminosity: $luma")
+                        //Log.d(TAG, "Average luminosity: $luma")
                     })
                 }
 

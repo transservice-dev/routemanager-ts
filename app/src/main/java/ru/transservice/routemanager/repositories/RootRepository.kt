@@ -30,6 +30,7 @@ import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.utils.Utils
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.lang.IllegalArgumentException
 import java.security.Key
 import java.util.*
@@ -480,6 +481,30 @@ object RootRepository {
                 LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
     }
 
+    fun updatePointOnServer(pointItem: PointItem){
+        scope.launch {
+            uploadTaskRow(pointItem)
+        }
+    }
+
+    suspend fun uploadTaskRow(pointItem: PointItem):LoadResult<List<PointItem>>{
+        Log.d(TAG, "update task row ${pointItem.addressName} START")
+        val taskList = listOf(pointItem)
+        val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
+        val response = RetrofitClient
+            .getPostgrestApi()
+            .uploadTask(taskUploadRequest)
+        val result = responseResult(response)
+        return if (result is LoadResult.Success) {
+            if (response.body() != null) {
+                Log.d(TAG, "update task row ${pointItem.addressName} FINISHED")
+                LoadResult.Success(taskList)
+            } else
+                LoadResult.Error("Ошибка при выгрузке задания")
+        } else
+            LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
+    }
+
     suspend fun setStatus(task: Task, status: Int): LoadResult<Boolean>{
 
             Log.d(TAG, "set status START")
@@ -490,7 +515,8 @@ object RootRepository {
                             task.vehicle?.uid ?: "",
                             "",
                             task.dateStart?.longFormat() ?: "",
-                            task.dateEnd?.longFormat() ?: ""
+                            task.dateEnd?.longFormat() ?: "",
+                            AppClass.appVersion
                      ))
             val response = RetrofitClient
                 .getPostgrestApi()
@@ -521,6 +547,21 @@ object RootRepository {
                     file.outputStream().use { fileOut -> it.byteStream().copyTo(fileOut) }
                     Log.d(TAG, "Loading Apk FINISHED")
                     mainThreadHandler.post(complete)
+                }
+            }
+        }
+    }
+
+    fun loadSSLCert(complete: (cert: InputStream) -> Unit){
+        scope.launch {
+            val response = RetrofitClient
+                .getApacheConnection()
+                .getApk("/cert/apache-selfsigned.crt")
+            if (responseResult(response) is LoadResult.Success) {
+                response.body()?.let {
+                    Log.d(TAG, "Loading cert FINISHED")
+                    complete.invoke(it.byteStream())
+
                 }
             }
         }

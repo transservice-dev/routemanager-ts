@@ -24,6 +24,7 @@ object PreferencesRepository {
     private const val REGION = "REGION"
     private const val ROUTE_DATE = "ROUTE_DATE"
     private const val SEARCH_BY_ROUTE = "SEARCH_BY_ROUTE"
+    private const val USE_GOOGLE_NAV = "USE_GOOGLE_NAV"
 
     private val prefs: SharedPreferences by lazy {
         val ctx = AppClass.appliactionContext()
@@ -78,6 +79,10 @@ object PreferencesRepository {
 
     fun getSearchBYRoute(): Boolean {
         return prefs.getBoolean(SEARCH_BY_ROUTE,false) as Boolean
+    }
+
+    fun getUseNavGoogle(): Boolean {
+        return prefs.getBoolean(USE_GOOGLE_NAV,false) as Boolean
     }
 
     fun getDate(): Date? {

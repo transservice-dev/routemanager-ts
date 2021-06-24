@@ -81,6 +81,13 @@
             android:summary="Искать путевые с привязкой по маршруту"
             android:title="Привязка по маршруту"
             app:isPreferenceVisible="true"/>
+        <androidx.preference.SwitchPreference
+            android:id="@+id/sw_useGoogleApiNaviagtion"
+            android:defaultValue="true"
+            android:key="USE_GOOGLE_NAV"
+            android:summary="Использовать по возможности навигацию Google"
+            android:title="Навигация по API Google"
+            app:isPreferenceVisible="true"/>
     </androidx.preference.PreferenceCategory>
     <androidx.preference.PreferenceCategory android:title="@string/servicePref">
         <Preference
@@ -95,8 +102,5 @@
         <Preference
             android:title="@string/restartWorkManager"
             android:key="RESTART_WORK" />
-        <Preference
-            android:title="@string/clearCacheFiles"
-            android:key="@string/clearCacheFiles" />
     </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>

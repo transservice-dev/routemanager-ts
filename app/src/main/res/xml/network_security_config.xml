@@ -2,6 +2,7 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.105.24</domain>
+        <domain includeSubdomains="true">192.168.102.113</domain>
         <domain includeSubdomains="true">188.234.242.63</domain>
         <trust-anchors>
             <certificates src="@raw/apache_selfsigned"/>

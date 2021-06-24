@@ -1,34 +1,38 @@
 package ru.transservice.routemanager.ui.task
 
+import android.app.Notification
+import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import android.widget.CompoundButton
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialElevationScale
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
-import ru.transservice.routemanager.databinding.BottomsheetTaskListBinding
-import ru.transservice.routemanager.databinding.FragmentStartScreenBinding
 import ru.transservice.routemanager.databinding.FragmentTaskListBinding
 import ru.transservice.routemanager.extensions.hideKeyboard
+import ru.transservice.routemanager.location.LocationNotification
+import ru.transservice.routemanager.location.NavigationService
+import ru.transservice.routemanager.location.NavigationServiceConnection
 import java.util.*
 
 class TaskListFragment : Fragment() {
@@ -40,13 +44,14 @@ class TaskListFragment : Fragment() {
     private lateinit var taskListAdapter: TaskListAdapter
     private lateinit var btsBehavior: BottomSheetBehavior<View>
 
+    private lateinit var navNotification: Notification
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         exitTransition = MaterialElevationScale(false).setDuration(1000L)
         reenterTransition = MaterialElevationScale(true).setDuration(1000L)
         setHasOptionsMenu(true)
-
         initViewModel()
 
         taskListAdapter = TaskListAdapter {
@@ -103,6 +108,12 @@ class TaskListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        /*if (AppClass.gps!!.trackingIsOn) {
+            AppClass.gps!!.stopUsingGPS()
+        }*/
+        if (NavigationServiceConnection.isActive()) {
+            NavigationServiceConnection.stopTracking()
+        }
         viewModel.loadPointList()
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -144,6 +155,7 @@ class TaskListFragment : Fragment() {
         btsBehavior = BottomSheetBehavior.from(binding.btsPointList.bottomSheetRoute)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun initBottomSheetActions() {
         with(binding.btsPointList){
             ibtnCanDone.setOnClickListener {
@@ -156,6 +168,7 @@ class TaskListFragment : Fragment() {
                         taskListAdapter.updateItems(it)
                     }
                 }else{
+                    NavigationServiceConnection.startTracking()
                     navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.DONE))
                     btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED
                 }
@@ -163,6 +176,7 @@ class TaskListFragment : Fragment() {
             }
 
             ibtnCannotDone.setOnClickListener {
+                NavigationServiceConnection.startTracking()
                 navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.CANNOT_DONE))
             }
 
@@ -269,6 +283,8 @@ class TaskListFragment : Fragment() {
     }
 
     companion object {
+
+        private const val TAG = "${AppClass.TAG}: TaskListFragment"
 
         @JvmStatic
         fun newInstance() =

@@ -62,5 +62,8 @@
     <string name="restart_title">Перезагрузить</string>
     <string name="photo_title">ФОТО</string>
     <string name="restartWorkManager">Перезапустить фоновые задания</string>
+    <string name="notification_title">Отслеживание местоположения</string>
+    <string name="notification_message">Включено отслеживание местоположения</string>
+    <string name="ticker_text">Местоположение</string>
 
 </resources>

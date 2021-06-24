@@ -1,5 +1,6 @@
 package ru.transservice.routemanager.network
 
+import android.os.Environment
 import android.util.Log
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -13,6 +14,7 @@ import ru.transservice.routemanager.BuildConfig
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.repositories.RootRepository
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.InputStream
 import java.security.KeyStore
 import java.security.cert.CertificateFactory
@@ -53,8 +55,10 @@ object RetrofitClient {
                     .body(ResponseBody.create(response.body()!!.contentType(), rawJson)).build()
             }
         )
-        val sslSettings = customSSL()
-        sslSocketFactory(sslSettings.first, sslSettings.second)
+        if (!RootRepository.baseUrl.contains("eko-ekb.ru")) {
+            val sslSettings = customSSL()
+            sslSocketFactory(sslSettings.first, sslSettings.second)
+        }
     }.build()
 
 
@@ -87,7 +91,7 @@ object RetrofitClient {
     var gson = GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
 
-    private val retrofit: Retrofit = Retrofit.Builder()
+    private var retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(RootRepository.baseUrl)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .client(okHttpClient)
@@ -111,4 +115,11 @@ object RetrofitClient {
         return retrofitApache.create(PostgrestApi::class.java)
     }
 
+    fun updateConnectionSettings(){
+        retrofit = Retrofit.Builder()
+            .baseUrl(RootRepository.baseUrl)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .client(okHttpClient)
+            .build()
+    }
 }

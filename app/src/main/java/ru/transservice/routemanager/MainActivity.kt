@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -25,12 +26,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.databinding.ActivityMainBinding
+import ru.transservice.routemanager.location.NavigationService
+import ru.transservice.routemanager.location.NavigationServiceConnection
+import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.repositories.RootRepository
 import java.util.*
 
 
 const val KEY_EVENT_ACTION = "key_event_action"
 const val KEY_EVENT_EXTRA = "key_event_extra"
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,15 +46,29 @@ class MainActivity : AppCompatActivity() {
     var backPressedBlock = false
     private var doubleBackClick = false
     private lateinit var channel: NotificationChannel
+    //var navNotificationChannel: NotificationChannel? = null
+    var locationServiceIntent: Intent? = null
 
     private val mPrefsListener =
             SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
                 if (key == "URL_NAME" || key == "URL_PORT" || key == "URL_AUTHPASS" ) {
                     RootRepository.setPreferences()
+                    RetrofitClient.updateConnectionSettings()
                 }
 
                 if (key == "SEARCH_BY_ROUTE") {
                     RootRepository.updateCurrentTask()
+                }
+
+                if (key == "USE_GOOGLE_NAV") {
+                    val isActive  = NavigationServiceConnection.isActive()
+                    if (isActive){
+                        NavigationServiceConnection.stopTracking()
+                    }
+                    NavigationServiceConnection.setNavClient()
+                    if (isActive){
+                        NavigationServiceConnection.startTracking()
+                    }
                 }
             }
 
@@ -63,7 +82,10 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         swipeLayout = binding.swipe
+        locationServiceIntent = Intent(this,NavigationService::class.java).also {
+                intent -> bindService(intent,NavigationServiceConnection, Context.BIND_AUTO_CREATE) }
         createNotificationChannel()
+        //createNavNotificationChannel()
         initNavMenuButtons()
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
         RootRepository.setPreferences()
@@ -127,6 +149,24 @@ class MainActivity : AppCompatActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
+
+    /*private fun createNavNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            navNotificationChannel = NotificationChannel(
+                "LOCATION_TRACKING",
+                "Отслеживание местоположения",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {  description = "Уведомление о включении отслеживания местоположения" }
+
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(navNotificationChannel!!)
+        }
+
+
+    }*/
+
 
     fun getNotificationChannel() = channel
 

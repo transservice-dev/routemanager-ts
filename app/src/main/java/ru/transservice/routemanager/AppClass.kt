@@ -6,7 +6,9 @@ import android.os.Environment
 import androidx.work.*
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.google.android.material.tabs.TabLayout
+import com.muslimcompanion.utills.GPSTracker
 import ru.transservice.routemanager.database.AppDatabase
+import ru.transservice.routemanager.location.GoogleLocationClient
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -25,6 +27,9 @@ class AppClass: Application(), Configuration.Provider {
 
 
         var db: AppDatabase? = null
+        /*var gps: GPSTracker? = null
+        var gpsGoogle: GoogleLocationClient? = null*/
+
         fun getDatabase(): AppDatabase? {
             return db
         }
@@ -63,6 +68,8 @@ class AppClass: Application(), Configuration.Provider {
         super.onCreate()
         appVersion = BuildConfig.VERSION_NAME
         db= AppDatabase.getDatabase(applicationContext)
+        /*gps = GPSTracker(applicationContext)
+        gpsGoogle = GoogleLocationClient(applicationContext)*/
 
         CaocConfig.Builder.create()
             .enabled(true)

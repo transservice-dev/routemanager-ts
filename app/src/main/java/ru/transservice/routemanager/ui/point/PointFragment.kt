@@ -1,11 +1,9 @@
 package ru.transservice.routemanager.ui.point
 
 import android.content.Intent
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,27 +11,22 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import com.muslimcompanion.utills.GPSTracker
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.AppConfig
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.camera.PhotoFragment
 import ru.transservice.routemanager.data.local.entities.FailureReasons
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.databinding.FragmentPointBinding
-import ru.transservice.routemanager.extensions.hideKeyboard
+import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.ui.task.TaskListViewModel
 import java.util.*
 
@@ -45,24 +38,17 @@ class PointFragment : Fragment() {
     private lateinit var viewModel: TaskListViewModel
     private val args: PointFragmentArgs by navArgs()
     private lateinit var pointStatus: PointStatuses
-    private var gps: GPSTracker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "OnCreate")
         pointStatus = args.pointAction
         initViewModel(args.point)
         initFragmentFactDialogListener()
-        gps = GPSTracker.getGPSTracker(requireActivity())
-        gps?.let {
-            if (!it.canGetLocation){
-                it.showSettingsAlert()
-            }
-        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        gps!!.stopUsingGPS()
     }
 
     override fun onCreateView(
@@ -81,7 +67,6 @@ class PointFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        //initViews()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -305,13 +290,12 @@ class PointFragment : Fragment() {
 
         viewModel.geoIsRequired.observe(viewLifecycleOwner, { required ->
             if (required) {
-                gps?.let {
-                    if (it.canGetLocation) {
-                        Log.d(TAG, "UPDATE LOCATION location successfully requested lat: ${it.location?.latitude} lon: ${it.location?.longitude}")
-                        it.location?.let { location ->
-                            viewModel.setPointFilesGeodata(location)
-                        }
-                    }
+                NavigationServiceConnection.getLocation()?.let {
+                    Log.d(
+                        TAG,
+                        "UPDATE LOCATION location successfully requested lat: ${it.latitude} lon: ${it.longitude}"
+                    )
+                    viewModel.setPointFilesGeodata(it)
                 }
             }
         })
