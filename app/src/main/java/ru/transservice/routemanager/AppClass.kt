@@ -5,10 +5,7 @@ import android.content.Context
 import android.os.Environment
 import androidx.work.*
 import cat.ereza.customactivityoncrash.config.CaocConfig
-import com.google.android.material.tabs.TabLayout
-import com.muslimcompanion.utills.GPSTracker
 import ru.transservice.routemanager.database.AppDatabase
-import ru.transservice.routemanager.location.GoogleLocationClient
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
 import java.util.concurrent.TimeUnit

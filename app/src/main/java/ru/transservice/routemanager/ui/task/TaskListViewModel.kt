@@ -1,13 +1,10 @@
 package ru.transservice.routemanager.ui.task
 
 import android.app.Application
-import android.content.Context
 import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointFile
@@ -17,7 +14,6 @@ import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.util.*
-import kotlin.reflect.jvm.internal.impl.serialization.deserialization.FlexibleTypeDeserializer
 
 class TaskListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -35,13 +31,14 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     val mediatorListResult = MediatorLiveData<List<PointItem>>()
 
+    @Suppress("UNCHECKED_CAST")
     class TaskListViewModelFactory(private val application: Application): ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-           if (modelClass.isAssignableFrom(TaskListViewModel::class.java)) {
-               return TaskListViewModel(application) as T
-           }else{
-               throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
-           }
+            return if (modelClass.isAssignableFrom(TaskListViewModel::class.java)) {
+                TaskListViewModel(application) as T
+            }else{
+                throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
+            }
         }
 
     }
@@ -68,12 +65,6 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     fun getCurrentPoint(): MutableLiveData<PointItem>{
         return currentPoint
-    }
-
-    fun updateCurrentPointDB(){
-        currentPoint.value?.let {
-            repository.updatePoint(currentPoint.value!!)
-        }
     }
 
     fun setCurrentPoint(point: PointItem){
@@ -128,8 +119,10 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun updateGeoIsRequired(){
-        repository.getGeolessPointFiles(currentPoint.value!!) { list ->
-            geoIsRequired.postValue(list.isNotEmpty())
+        currentPoint.value?.let {
+            repository.getGeolessPointFiles(it) { list ->
+                geoIsRequired.postValue(list.isNotEmpty())
+            }
         }
     }
 
@@ -186,12 +179,6 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         currentPoint.value?.let {
             repository.updatePoint(currentPoint.value!!)
             repository.updatePointOnServer(currentPoint.value!!)
-        }
-    }
-
-    fun uploadPointFiles(){
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            if (geoIsRequired.value == false) repository.uploadFilesOnSchedule()
         }
     }
 

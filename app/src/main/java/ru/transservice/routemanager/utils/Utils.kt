@@ -1,7 +1,9 @@
 package ru.transservice.routemanager.utils
 
+import java.util.*
+
 object Utils {
-    private val translitarationDictionary = mapOf<String,String>(
+    private val translitarationDictionary = mapOf(
         "а" to "a",
         "б" to "b",
         "в" to "v",
@@ -49,7 +51,7 @@ object Utils {
                 if (translitarationDictionary.containsKey(mapKey)) {
                     newValue = translitarationDictionary[mapKey].toString()
                     if (it.isUpperCase()) {
-                        newValue = newValue.capitalize()
+                        newValue = newValue.capitalize(Locale.getDefault())
                     }
                 }
                 transliterationText += newValue

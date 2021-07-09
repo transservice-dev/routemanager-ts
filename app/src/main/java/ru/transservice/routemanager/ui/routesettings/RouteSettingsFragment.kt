@@ -65,7 +65,7 @@ class RouteSettingsFragment : Fragment() {
         binding.tvVehicle.visibility = if (viewModel.searchByRoute) View.GONE else View.VISIBLE
 
 
-        var cal = Calendar.getInstance()
+        val cal = Calendar.getInstance()
         cal.time = viewModel.getDate().value ?: Date()
 
         val dateSetListener =
@@ -89,19 +89,19 @@ class RouteSettingsFragment : Fragment() {
                     cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
-        viewModel.getRegion().observe(viewLifecycleOwner, Observer {
+        viewModel.getRegion().observe(viewLifecycleOwner, {
             binding.tvRegion.text = it?.name
         })
 
-        viewModel.getVehicle().observe(viewLifecycleOwner, Observer {
+        viewModel.getVehicle().observe(viewLifecycleOwner, {
             binding.tvVehicle.text = it?.name
         })
 
-        viewModel.getRoute().observe(viewLifecycleOwner, Observer {
+        viewModel.getRoute().observe(viewLifecycleOwner, {
             binding.tvRoute.text = it?.name
         })
 
-        viewModel.getDate().observe(viewLifecycleOwner, Observer {
+        viewModel.getDate().observe(viewLifecycleOwner, {
             val myFormat = "yyyy.MM.dd" // mention the format you need
             val sdf = SimpleDateFormat(myFormat, Locale("ru"))
             binding.tvDate.text = sdf.format(cal.time)
@@ -125,33 +125,25 @@ class RouteSettingsFragment : Fragment() {
                         "Существует активное задание, редактирование настроек запрещено. Завершите маршрут для смены настроек",
                         Snackbar.LENGTH_INDEFINITE
                     )
-                    snackbarMessage?.let {
+                    snackbarMessage?.let { snackbar ->
                         val snackTextView =
-                            it.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                            snackbar.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
                         snackTextView.maxLines = 10
-                        it.setAction(
-                            resources.getString(R.string.ok),
-                            object : View.OnClickListener {
-                                override fun onClick(p0: View?) {
-                                    it.dismiss()
-                                }
-                            })
-                        it.show()
+                        snackbar.setAction(
+                            resources.getString(R.string.ok)
+                        ) { snackbar.dismiss() }
+                        snackbar.show()
                     }
                 }
             } else {
-                snackbarMessage?.let {
-                    it.dismiss()
-                }
+                snackbarMessage?.dismiss()
             }
         })
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        snackbarMessage?.let {
-            it.dismiss()
-        }
+        snackbarMessage?.dismiss()
     }
 
     fun initViewModel(){

@@ -7,14 +7,12 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
+import androidx.fragment.app.Fragment
 import com.google.android.material.transition.MaterialElevationScale
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R

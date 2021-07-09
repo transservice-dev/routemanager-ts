@@ -1,7 +1,6 @@
 package ru.transservice.routemanager.data.local.entities
 
 import androidx.core.text.isDigitsOnly
-import androidx.room.DatabaseView
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.Index
@@ -11,7 +10,7 @@ import java.io.Serializable
 import java.util.*
 import kotlin.math.max
 
-@Entity(tableName = "pointList_table",primaryKeys = ["docUID","lineUID"], indices =arrayOf(Index("docUID","lineUID","docUID","lineUID")))
+@Entity(tableName = "pointList_table",primaryKeys = ["docUID","lineUID"], indices = [Index("docUID","lineUID","docUID","lineUID")])
 data class PointItem(
     val docUID: String,
     val lineUID: String,
@@ -57,7 +56,7 @@ data class PointItem(
 
     //get phone number from comment
     fun getPhoneFromComment () : String{
-        var phoneNumber = "";
+        var phoneNumber = ""
         for (char in this.comment){
             if(char.isDigit() || (char == '+' && phoneNumber == "")) {
                 phoneNumber += char
@@ -130,9 +129,9 @@ enum class PointStatuses : Serializable {
 }
 
 enum class FailureReasons(val reasonTitle: String){
-    NO_GARBEGE("нет ТКО"),
+    NO_GARBAGE("нет ТКО"),
     CARS_ON_POINT("нет проезда к КП (заставлено автомашинами)"),
-    ROAD_REPAER("нет проезда (ремонт дороги)"),
+    ROAD_REPAIR("нет проезда (ремонт дороги)"),
     DOORS_CLOSED("не открывают ворота (шлагбаум)"),
     CLIENT_DENIAL("отказ Потребителя от вывоза ТКО"),
     NO_EQUIPMENT("нет контейнерного оборудования"),

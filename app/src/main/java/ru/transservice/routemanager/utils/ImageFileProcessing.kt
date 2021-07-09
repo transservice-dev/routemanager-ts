@@ -97,7 +97,7 @@ object ImageFileProcessing {
         paint.textSize = originalBitmap.height / 30F
 
         //Вывод адреса
-        var addressText = ""
+        var addressText: String
         var latText = ""
         var lonText = ""
 

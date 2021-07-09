@@ -5,6 +5,4 @@ import java.io.Serializable
 data class RegionItem(
     val name: String,
     val uid: String
-): Serializable {
-
-}
+): Serializable

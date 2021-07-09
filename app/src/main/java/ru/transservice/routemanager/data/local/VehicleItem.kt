@@ -6,6 +6,4 @@ data class VehicleItem(
     val name: String,
     val uid: String,
     val number: String
-): Serializable {
-
-}
+): Serializable

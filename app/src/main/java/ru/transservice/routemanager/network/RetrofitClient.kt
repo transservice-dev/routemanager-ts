@@ -1,6 +1,5 @@
 package ru.transservice.routemanager.network
 
-import android.os.Environment
 import android.util.Log
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -10,11 +9,9 @@ import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.BuildConfig
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.repositories.RootRepository
 import java.io.BufferedInputStream
-import java.io.File
 import java.io.InputStream
 import java.security.KeyStore
 import java.security.cert.CertificateFactory

@@ -24,14 +24,11 @@ import ru.transservice.routemanager.data.remote.res.task.TaskRowRes
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 import ru.transservice.routemanager.database.DaoInterface
 import ru.transservice.routemanager.extensions.longFormat
-import ru.transservice.routemanager.extensions.shortFormat
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.utils.Utils
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
-import java.lang.IllegalArgumentException
 import java.security.Key
 import java.util.*
 import kotlin.collections.ArrayList
@@ -96,8 +93,10 @@ object RootRepository {
 
     fun generateAuthPass(password: String) {
         val token = encodeToken(password)
-        if (token!=null) {
-            authPass = token
+        authPass = if (token!=null) {
+            token
+        }else{
+            "1"
         }
     }
 
@@ -122,8 +121,14 @@ object RootRepository {
             if (response.isSuccessful && response.body()!=null) {
                 LoadResult.Success(true)
             } else {
-                Log.e("RootRepository", "$methodName Error: ${response.code()} ${response.errorBody().toString()}")
-                LoadResult.Error("Error: ${response.code()} ${response.errorBody().toString()}")
+                var errorMessage = ""
+                response.errorBody()?.let { errorMessage = it.byteStream().bufferedReader().use { it.readText() }  }
+                Log.e("RootRepository", "$methodName Error: ${response.code()} $errorMessage")
+                if (response.code() == 401)  {
+                    LoadResult.Error("Ошибка авторизации. Проверьте правильность ввода пароля.",SecurityException())
+                }else{
+                    LoadResult.Error("Error: ${response.code()} $errorMessage")
+                }
             }
         } catch (e: HttpException) {
             Log.e("RootRepository", "$methodName Exception ${e.message} ${e.stackTraceToString()}")
@@ -210,7 +215,7 @@ object RootRepository {
                 }
             } else {
                 Log.e(TAG, "Loading Task CANCELED with error. Network request is NOT successful. ${result.errorMessage}")
-                LoadResult.Error("Ошибка получения данных ${result.errorMessage}")
+                LoadResult.Error("Ошибка получения данных ${result.errorMessage}",result.e)
             }
         } else {
             Log.e(TAG, "Error loading task: current task is NULL")
@@ -254,7 +259,7 @@ object RootRepository {
                         complete(LoadResult.Error(taskRes.result.message))
                     }
                 } else {
-                    complete(LoadResult.Error(taskResult.errorMessage ?: ""))
+                    complete(LoadResult.Error(taskResult.errorMessage ?: "",taskResult.e))
                 }
             } catch (e: java.lang.Exception) {
                 // Exception error Something goes wrong
@@ -358,6 +363,7 @@ object RootRepository {
             if (responseResult(response) is LoadResult.Success) {
                 if (response.body() != null) {
                     Log.d(TAG, "uploading file ${pointFile.filePath} FINISHED")
+                    dbDao.updatePointFileUploadStatus(arrayListOf(pointFile.id), true)
                 }
             }
         }
@@ -574,7 +580,7 @@ object RootRepository {
     fun insertPointRows(pointList: List<TaskRowRes>): Int{
         Log.d(TAG, "Insert point rows START")
         val insertRes = dbDao.insertPointList(pointList.map { it.toPointDestination() })
-        Log.d(TAG, "Insert point rows FINISHED. Inserted ${insertRes} rows")
+        Log.d(TAG, "Insert point rows FINISHED. Inserted $insertRes rows")
         return insertRes
 
     }
@@ -642,7 +648,8 @@ object RootRepository {
     fun insertPointFile(pointFile: PointFile, complete: () -> Unit){
         scope.launch {
             Log.d(TAG, "Insert Point File START ${pointFile.filePath}")
-            dbDao.insertPointFile(pointFile)
+            val id = dbDao.insertPointFile(pointFile)
+            pointFile.id = id
             Log.d(TAG, "Insert Point File FINISHED ${pointFile.filePath}")
             mainThreadHandler.post{complete()}
         }

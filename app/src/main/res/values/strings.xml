@@ -65,5 +65,12 @@
     <string name="notification_title">Отслеживание местоположения</string>
     <string name="notification_message">Включено отслеживание местоположения</string>
     <string name="ticker_text">Местоположение</string>
+    <string name="application_not_found">Требуемое приложение не обнаружено</string>
+    <string name="reasonInputHint">Введите причину невозможности вывоза</string>
+    <string name="defaultFactText">0.0</string>
+    <string name="containerTitle">Контейнер</string>
+    <string name="doneTitle">done</string>
+    <string name="loadingInProcess">Идет выгрузка данных...</string>
+    <string name="beforeTitle">before</string>
 
 </resources>

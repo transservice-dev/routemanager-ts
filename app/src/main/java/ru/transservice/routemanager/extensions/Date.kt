@@ -5,7 +5,7 @@ import java.util.*
 
 fun Date.shortFormat():String {
     return SimpleDateFormat(
-        "YYYY.MM.dd",
+        "yyyy.MM.dd",
         Locale("ru")
     ).format(this)
 }

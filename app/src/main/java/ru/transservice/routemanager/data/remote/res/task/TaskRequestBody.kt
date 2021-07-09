@@ -6,5 +6,4 @@ class TaskRequestBody(
     val vehicleId: String,
     val routeId: String,
     val search_type: Int
-) {
-}
+)

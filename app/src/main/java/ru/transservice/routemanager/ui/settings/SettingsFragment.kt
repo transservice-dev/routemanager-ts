@@ -9,7 +9,6 @@ import androidx.core.content.FileProvider
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.BuildConfig

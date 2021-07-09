@@ -2,16 +2,12 @@ package ru.transservice.routemanager.ui.gallery.list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
-import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.FragmentPointPhotosBinding
 import ru.transservice.routemanager.repositories.RootRepository

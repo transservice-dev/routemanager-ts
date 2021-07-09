@@ -1,13 +1,10 @@
 package ru.transservice.routemanager.ui.routesettings
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.VehicleItem
-import ru.transservice.routemanager.databinding.ItemRegionListBinding
 import ru.transservice.routemanager.databinding.ItemVehicleListBinding
 
 class VehicleListAdapter(val listener: (VehicleItem) -> Unit) : RecyclerView.Adapter<VehicleListAdapter.VehicleItemViewHolder>() {

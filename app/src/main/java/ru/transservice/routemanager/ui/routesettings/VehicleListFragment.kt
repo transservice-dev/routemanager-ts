@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.databinding.FragmentRegionListBinding
 import ru.transservice.routemanager.databinding.FragmentVehicleListBinding
 import ru.transservice.routemanager.service.LoadResult
 
@@ -76,7 +74,7 @@ class VehicleListFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(
                 DividerItemDecoration(context,
-                    androidx.recyclerview.widget.DividerItemDecoration.VERTICAL)
+                    DividerItemDecoration.VERTICAL)
             )
             adapter = vehicleAdapter
         }

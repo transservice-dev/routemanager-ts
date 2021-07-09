@@ -5,13 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.MainActivity
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class ReportLog(val context: Context) {
 

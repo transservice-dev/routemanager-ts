@@ -6,15 +6,12 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.view.WindowInsets
-import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -46,7 +43,6 @@ class MainActivity : AppCompatActivity() {
     var backPressedBlock = false
     private var doubleBackClick = false
     private lateinit var channel: NotificationChannel
-    //var navNotificationChannel: NotificationChannel? = null
     var locationServiceIntent: Intent? = null
 
     private val mPrefsListener =
@@ -85,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         locationServiceIntent = Intent(this,NavigationService::class.java).also {
                 intent -> bindService(intent,NavigationServiceConnection, Context.BIND_AUTO_CREATE) }
         createNotificationChannel()
-        //createNavNotificationChannel()
         initNavMenuButtons()
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
         RootRepository.setPreferences()
@@ -149,24 +144,6 @@ class MainActivity : AppCompatActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-
-    /*private fun createNavNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            navNotificationChannel = NotificationChannel(
-                "LOCATION_TRACKING",
-                "Отслеживание местоположения",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {  description = "Уведомление о включении отслеживания местоположения" }
-
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(navNotificationChannel!!)
-        }
-
-
-    }*/
-
 
     fun getNotificationChannel() = channel
 

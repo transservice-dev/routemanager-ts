@@ -1,13 +1,11 @@
 package ru.transservice.routemanager.ui.gallery.list
 
-import android.text.BoringLayout
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.repositories.RootRepository
-import java.lang.IllegalArgumentException
 
 class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
 

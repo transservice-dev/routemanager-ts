@@ -9,7 +9,7 @@ import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
 import java.lang.IllegalArgumentException
 
-class StartScreenViewModel(): ViewModel() {
+class StartScreenViewModel : ViewModel() {
 
     private val repository = RootRepository
     private val currentTask = Transformations.map(repository.getTask()) {
@@ -19,7 +19,7 @@ class StartScreenViewModel(): ViewModel() {
 
     private val uploadResult: MutableLiveData<LoadResult<Boolean>> = MutableLiveData()
 
-    class StartScreenViewModelFactory(): ViewModelProvider.Factory{
+    class StartScreenViewModelFactory : ViewModelProvider.Factory{
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if(modelClass.isAssignableFrom(StartScreenViewModel::class.java)){
                 return StartScreenViewModel() as T

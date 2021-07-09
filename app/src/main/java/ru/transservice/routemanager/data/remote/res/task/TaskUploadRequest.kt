@@ -1,9 +1,5 @@
 package ru.transservice.routemanager.data.remote.res.task
 
-import android.text.BoringLayout
-import java.util.*
-import kotlin.collections.ArrayList
-
 class TaskUploadRequest(
     val trackList: List<TaskUploadBody>
 )

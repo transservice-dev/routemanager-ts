@@ -52,7 +52,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="4"
-                        android:text="container" />
+                        android:text="@string/containerTitle" />
 
                     <TextView
                         android:id="@+id/tv_container_count"
@@ -171,7 +171,7 @@
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="24dp"
                         android:layout_marginEnd="8dp"
-                        android:text="done"
+                        android:text="@string/doneTitle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/guidelineSetCountFact"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -304,6 +304,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         android:inputType="text"
+                        android:hint="@string/reasonInputHint"
                         android:imeOptions="actionDone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

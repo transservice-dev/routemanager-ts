@@ -4,8 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
@@ -14,13 +12,9 @@ import com.bumptech.glide.Glide
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.databinding.FragmentPointPhotosBinding
 import ru.transservice.routemanager.databinding.ItemPointPhotoBinding
-import ru.transservice.routemanager.repositories.RootRepository
-import ru.transservice.routemanager.ui.gallery.list.PhotoListAdapter
 import ru.transservice.routemanager.ui.gallery.list.PhotoListFragmentDirections
 import ru.transservice.routemanager.ui.gallery.list.PhotoListViewModel
 

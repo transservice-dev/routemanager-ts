@@ -19,7 +19,7 @@
         android:id="@+id/tv_splash_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Идет выгрузка данных..."
+        android:text="@string/loadingInProcess"
         android:textColor="@android:color/black"
         android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="@+id/iv_splash_bg"

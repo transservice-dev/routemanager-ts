@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.transservice.routemanager.camera
+package ru.transservice.routemanager.ui.camera
 
 import android.location.Location
 import android.os.Bundle
@@ -31,7 +31,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import ru.transservice.routemanager.R
 import com.bumptech.glide.Glide
-import com.muslimcompanion.utills.GPSTracker
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.data.local.entities.PointItem
@@ -48,8 +47,6 @@ class PhotoFragment : Fragment() {
     private lateinit var point: PointItem
     private lateinit var pointAction: PointStatuses
 
-    //private lateinit var gps: GPSTracker
-    private var location: Location? = null
     lateinit var navController: NavController
     private val args: PhotoFragmentArgs by navArgs()
 
@@ -79,13 +76,14 @@ class PhotoFragment : Fragment() {
         val resource = currentFile ?: R.drawable.ic_photo
         val imageView = view.findViewById<ImageView>(R.id.photoPreview)
         //location
-        if (NavigationServiceConnection.getlocationAvailable()) {
+        /*if (NavigationServiceConnection.getlocationAvailable()) {
         }else{
-        }
-        var location: Location? = NavigationServiceConnection.getLocation()
-        //Log.d(TAG, "location successfully requested lat: ${location?.latitude} lon: ${location?.longitude}")
+        }*/
+        val location: Location? = NavigationServiceConnection.getLocation()
         if (location == null) {
             viewPointModel.geoIsRequired.value = true
+        }else{
+            Log.d(TAG, "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
         }
 
         //For testing null location
@@ -104,9 +102,7 @@ class PhotoFragment : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.tv_cancel).setOnClickListener {
-            if (currentFile!=null){
-                currentFile!!.delete()
-            }
+            currentFile?.delete()
             navController.popBackStack()
         }
 

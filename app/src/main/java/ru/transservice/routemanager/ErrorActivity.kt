@@ -1,12 +1,9 @@
 package ru.transservice.routemanager
 
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash
-import com.google.android.material.button.MaterialButton
 import ru.transservice.routemanager.databinding.ActivityErrorBinding
 import ru.transservice.routemanager.service.ReportLog
 

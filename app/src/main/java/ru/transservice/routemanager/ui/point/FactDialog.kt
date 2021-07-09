@@ -9,23 +9,18 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.ViewModelProvider
-import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.FragmentFactDialogBinding
-import ru.transservice.routemanager.databinding.FragmentPointBinding
 
 
-class FactDialog(
-) : DialogFragment() {
+class FactDialog : DialogFragment() {
 
     private var _binding: FragmentFactDialogBinding? = null
     private val binding get() = _binding!!

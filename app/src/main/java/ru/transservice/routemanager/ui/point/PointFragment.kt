@@ -1,5 +1,6 @@
 package ru.transservice.routemanager.ui.point
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,7 +13,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -23,7 +23,6 @@ import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.FailureReasons
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.databinding.FragmentPointBinding
 import ru.transservice.routemanager.location.NavigationServiceConnection
@@ -43,18 +42,19 @@ class PointFragment : Fragment() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "OnCreate")
         pointStatus = args.pointAction
-        initViewModel(args.point)
+        initViewModel()
         initFragmentFactDialogListener()
     }
 
     override fun onDestroy() {
+        Log.d(TAG, "onDestroy")
         super.onDestroy()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentPointBinding.inflate(inflater,container,false)
         (requireActivity() as MainActivity).supportActionBar?.show()
         return binding.root
@@ -66,6 +66,7 @@ class PointFragment : Fragment() {
     }
 
     override fun onResume() {
+        Log.d(TAG, "onResume")
         super.onResume()
     }
 
@@ -87,11 +88,9 @@ class PointFragment : Fragment() {
             }
     }
 
-    private fun initViewModel(pointItem: PointItem) {
+    private fun initViewModel() {
         viewModel = ViewModelProvider(requireActivity(), TaskListViewModel.TaskListViewModelFactory(requireActivity().application)).get(TaskListViewModel::class.java)
         viewModel.initPointData()
-    //viewModel = ViewModelProvider(this.requireActivity(), PointViewModel.PointViewModelFactory(pointItem)).get(PointViewModel::class.java)
-        //viewModel.setViewModelData(pointItem)
     }
 
     private fun initViews(){
@@ -140,9 +139,9 @@ class PointFragment : Fragment() {
                     }
                 } else {
                     val spinnerPosition: Int =
-                            (reasonSpinner.adapter as ArrayAdapter<String>).getPosition(FailureReasons.NO_GARBEGE.reasonTitle)
+                            (reasonSpinner.adapter as ArrayAdapter<String>).getPosition(FailureReasons.NO_GARBAGE.reasonTitle)
                     reasonSpinner.setSelection(spinnerPosition)
-                    reasonInput.setText(FailureReasons.NO_GARBEGE.reasonTitle)
+                    reasonInput.setText(FailureReasons.NO_GARBAGE.reasonTitle)
                 }
 
                 btnCall.visibility = if (viewModel.getPhoneNumber()=="") View.GONE else View.VISIBLE
@@ -248,7 +247,7 @@ class PointFragment : Fragment() {
 
             reasonSpinner.onItemSelectedListener = itemSelectedListener
 
-            reasonInput.setOnEditorActionListener { v, actionId, event ->
+            reasonInput.setOnEditorActionListener { v, actionId, _ ->
                 if(actionId == EditorInfo.IME_ACTION_DONE){
                     viewModel.reasonComment = v.text.toString()
                     true
@@ -261,9 +260,14 @@ class PointFragment : Fragment() {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
                     data = Uri.parse("tel:" + viewModel.getPhoneNumber())
                 }
-                if (intent.resolveActivity(requireActivity().packageManager) != null){
+                try {
                     startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(requireContext(),R.string.application_not_found,Toast.LENGTH_LONG).show()
                 }
+                /*if (intent.resolveActivity(requireActivity().packageManager) != null){
+                    startActivity(intent)
+                }*/
             }
 
         }
@@ -272,19 +276,19 @@ class PointFragment : Fragment() {
 
     private fun initLiveDataObservers(){
 
-        viewModel.getFileAfterIsDone().observe(viewLifecycleOwner, Observer {
+        viewModel.getFileAfterIsDone().observe(viewLifecycleOwner, {
             binding.ivDonePhotoAfter.visibility = if (it == true) View.VISIBLE else View.GONE
         })
 
-        viewModel.getFileBeforeIsDone().observe(viewLifecycleOwner, Observer {
+        viewModel.getFileBeforeIsDone().observe(viewLifecycleOwner,  {
             binding.ivDonePhotoBefore.visibility = if (it == true) View.VISIBLE else View.GONE
         })
 
-        viewModel.getFileCantDoneIsDone().observe(viewLifecycleOwner, Observer {
+        viewModel.getFileCantDoneIsDone().observe(viewLifecycleOwner,  {
             binding.ivDonePhotoCantdone.visibility = if (it == true) View.VISIBLE else View.GONE
         })
 
-        viewModel.getCurrentPoint().observe(viewLifecycleOwner, Observer {
+        viewModel.getCurrentPoint().observe(viewLifecycleOwner,  {
             initViews()
         })
 

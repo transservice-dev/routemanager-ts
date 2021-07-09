@@ -1,4 +1,4 @@
-package ru.transservice.routemanager.camera
+package ru.transservice.routemanager.ui.camera
 
 import android.animation.Animator
 import android.annotation.SuppressLint
@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
@@ -17,7 +16,6 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -30,7 +28,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import com.muslimcompanion.utills.GPSTracker
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.AppClass.Companion.getOutputDirectory
 import ru.transservice.routemanager.R
@@ -60,8 +57,6 @@ typealias LumaListener = (luma: Double) -> Unit
  * - Photo taking
  * - Image analysis
  */
-
-val EXTENSION_WHITELIST = arrayOf("JPG")
 
 class CameraFragment : Fragment() {
 
@@ -265,7 +260,7 @@ class CameraFragment : Fragment() {
     /** Initialize CameraX, and prepare to bind the camera use cases  */
     private fun setUpCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener( {
 
             // CameraProvider
             cameraProvider = cameraProviderFuture.get()
@@ -397,7 +392,7 @@ class CameraFragment : Fragment() {
             }
         }*/
 
-        ivFocus = controls.findViewById<ImageView>(R.id.iv_focus)
+        ivFocus = controls.findViewById(R.id.iv_focus)
         // Listener for button used to capture photo
         controls.findViewById<ImageButton>(R.id.camera_capture_button).setOnClickListener {
 
@@ -432,19 +427,16 @@ class CameraFragment : Fragment() {
                             Log.d(TAG, "Photo capture succeeded: $savedUri")
 
                             // We can only change the foreground Drawable using API level 23+ API
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                // Update the gallery thumbnail with latest picture taken
-                                view!!.post {
-                                    navController.navigate(
-                                        CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
-                                            photoFile.absolutePath,
-                                            point, pointAction
-                                        )
+                            // Update the gallery thumbnail with latest picture taken
+                            view!!.post {
+                                navController.navigate(
+                                    CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
+                                        photoFile.absolutePath,
+                                        point, pointAction
                                     )
-                                }
-                                //setGalleryThumbnail(savedUri)
+                                )
                             }
-
+                            //setGalleryThumbnail(savedUri)
                         }
                     })
 
@@ -472,9 +464,9 @@ class CameraFragment : Fragment() {
             }
 
             val icon = if (camera!!.cameraInfo.torchState.value == TorchState.ON){
-                resources.getDrawable(R.drawable.ic_flash_on, requireActivity().theme)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_flash_on, requireActivity().theme)
             }else{
-                resources.getDrawable(R.drawable.ic_flash_off, requireActivity().theme)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_flash_off, requireActivity().theme)
             }
             flashMode.setImageDrawable(icon)
         }
@@ -613,7 +605,6 @@ class CameraFragment : Fragment() {
     companion object {
 
         private const val TAG = "${AppClass.TAG}: Camera"
-        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val PHOTO_EXTENSION = ".jpg"
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0

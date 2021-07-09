@@ -1,14 +1,11 @@
 package ru.transservice.routemanager
 
 import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
-import ru.transservice.routemanager.data.remote.res.RegionRes
 import ru.transservice.routemanager.repositories.RootRepository
 
 /**

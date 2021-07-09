@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,26 +15,22 @@ import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
-import ru.transservice.routemanager.MainActivity.Companion.TAG
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.databinding.FragmentStartScreenBinding
 import ru.transservice.routemanager.extensions.shortFormat
-import ru.transservice.routemanager.service.BackPressedCallback
 import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
-import ru.transservice.routemanager.service.ReportLog
-import ru.transservice.routemanager.ui.splashscreen.SplashScreenFragmentDirections
-import java.lang.Error
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class StartScreenFragment : Fragment() {
 
@@ -99,6 +94,7 @@ class StartScreenFragment : Fragment() {
         super.onDestroyView()
         //Log.d(TAG, "onDestroyView ${this::class.java}")
         _binding = null
+        Log.d(TAG, "onDestroyView")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -112,8 +108,9 @@ class StartScreenFragment : Fragment() {
         initViews()
         initActionButtons()
         initNotificationManager()
+        Log.d(TAG, "OnViewCreated")
 
-        viewModel.getTaskParams().observe(viewLifecycleOwner, Observer {
+        viewModel.getTaskParams().observe(viewLifecycleOwner, {
             with(binding) {
                 dateOfRoute.text = it.routeDate.shortFormat()
                 vehicleNumber.text = if (it.search_type == SearchType.BY_VEHICLE) it.vehicle?.number ?: "" else it.route?.name ?: ""
@@ -144,12 +141,22 @@ class StartScreenFragment : Fragment() {
                             notificationBuilder.setContentTitle("Данные НЕ выгружены")
                             notify(notificationId, notificationBuilder.build())
                         }
-
-                        ErrorAlert.showAlert("При выгрузке данных произошла ошибка. Отправить отчет об ошибке?", requireContext())
+                        val errorDescription = errorDescription(it)
+                        ErrorAlert.showAlert("$errorDescription Отправить отчет об ошибке?", requireContext())
                         Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
                     }
                 }
         })
+    }
+
+    private fun <T>errorDescription(loadResult: LoadResult<T>): String {
+        val errorDescription = when (loadResult.e) {
+            is UnknownHostException -> "Ошибка: неизвестное имя сервера. Проверьте наличие интернета на устройстве."
+            is SocketTimeoutException -> "Ошибка соединения. Проверьте наличие интернета на устройстве."
+            is SecurityException -> "Ошибка авторизации. Проверьте правильность ввода пароля."
+            else -> "При выгрузке/загрузке данных произошла ошибка."
+        }
+        return errorDescription
     }
 
     private fun initViewModel(){
@@ -181,7 +188,7 @@ class StartScreenFragment : Fragment() {
         }
 
         binding.btnLoad.setOnClickListener{
-            viewModel.syncTaskData().observe(viewLifecycleOwner, Observer {
+            viewModel.syncTaskData().observe(viewLifecycleOwner, {
                 when (it) {
                     is LoadResult.Loading -> {
                         (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
@@ -196,8 +203,13 @@ class StartScreenFragment : Fragment() {
                     }
                     is LoadResult.Error -> {
                         (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
-                        if (it.e != null)
-                            ErrorAlert.showAlert("При получении данных произошла ошибка. Отправить отчет об ошибке?", requireContext())
+                        if (it.e != null) {
+                            val errorDescription = errorDescription(it)
+                            ErrorAlert.showAlert(
+                                "$errorDescription Отправить отчет об ошибке?",
+                                requireContext()
+                            )
+                        }
                         Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
                         //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
                     }
@@ -244,7 +256,7 @@ class StartScreenFragment : Fragment() {
             .setContentTitle("Выгрузка данных")
             .setContentText("Выгрузка данных маршрута и фотографий")
             .setSmallIcon(R.drawable.ic_logo_mini)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
     }

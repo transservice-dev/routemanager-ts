@@ -1,13 +1,9 @@
 package ru.transservice.routemanager.ui.routesettings
 
-import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.selects.whileSelect
-import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.ItemRegionListBinding
 

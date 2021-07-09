@@ -1,7 +1,5 @@
 package ru.transservice.routemanager.ui.task
 
-import android.app.Notification
-import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -14,7 +12,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -30,8 +27,6 @@ import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.databinding.FragmentTaskListBinding
 import ru.transservice.routemanager.extensions.hideKeyboard
-import ru.transservice.routemanager.location.LocationNotification
-import ru.transservice.routemanager.location.NavigationService
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import java.util.*
 
@@ -43,8 +38,6 @@ class TaskListFragment : Fragment() {
     private lateinit var viewModel: TaskListViewModel
     private lateinit var taskListAdapter: TaskListAdapter
     private lateinit var btsBehavior: BottomSheetBehavior<View>
-
-    private lateinit var navNotification: Notification
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +89,7 @@ class TaskListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentTaskListBinding.inflate(inflater,container,false)
         return binding.root
     }
@@ -111,9 +104,7 @@ class TaskListFragment : Fragment() {
         /*if (AppClass.gps!!.trackingIsOn) {
             AppClass.gps!!.stopUsingGPS()
         }*/
-        if (NavigationServiceConnection.isActive()) {
-            NavigationServiceConnection.stopTracking()
-        }
+        stopNavService()
         viewModel.loadPointList()
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -136,7 +127,7 @@ class TaskListFragment : Fragment() {
             taskListAdapter.updateItems(it)
         })
 
-        viewModel.getCurrentPoint().observe(viewLifecycleOwner, Observer {
+        viewModel.getCurrentPoint().observe(viewLifecycleOwner,  {
             with(binding.btsPointList) {
                 tvCurrentPointName.text = it.addressName
             }
@@ -168,7 +159,7 @@ class TaskListFragment : Fragment() {
                         taskListAdapter.updateItems(it)
                     }
                 }else{
-                    NavigationServiceConnection.startTracking()
+                    startNavService()
                     navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.DONE))
                     btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED
                 }
@@ -217,9 +208,22 @@ class TaskListFragment : Fragment() {
                         else
                             Toast.makeText(context, "Выбирете позицию в списке!",Toast.LENGTH_SHORT).show()
                     }
+                    else -> {}
                 }
             }
 
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun startNavService(){
+        (requireActivity() as MainActivity).startForegroundService((requireActivity() as MainActivity).locationServiceIntent)
+        //NavigationServiceConnection.startTracking()
+    }
+
+    private fun stopNavService(){
+        if (NavigationServiceConnection.isActive()) {
+            NavigationServiceConnection.stopTracking()
         }
     }
 

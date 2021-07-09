@@ -1,8 +1,6 @@
 package ru.transservice.routemanager.service
 
-import android.os.Handler
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import ru.transservice.routemanager.AppClass
 

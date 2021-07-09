@@ -54,7 +54,7 @@ interface DaoInterface {
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertPointFile(pointFile: PointFile)
+    fun insertPointFile(pointFile: PointFile): Long
 
     @Query("SELECT * from pointFiles_table where lineUID = :lineUID AND photoOrder =:photoOrder") //ORDER BY addressName ASC")
     fun getPointFilesByOrder(lineUID: String, photoOrder: PhotoOrder): List<PointFile>

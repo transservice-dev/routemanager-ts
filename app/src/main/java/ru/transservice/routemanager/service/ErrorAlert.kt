@@ -1,8 +1,6 @@
 package ru.transservice.routemanager.service
 
 import android.content.Context
-import androidx.appcompat.app.AlertDialog
-import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 
 class ErrorAlert {

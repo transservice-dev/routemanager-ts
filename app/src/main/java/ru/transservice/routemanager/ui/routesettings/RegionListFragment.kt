@@ -1,13 +1,9 @@
 package ru.transservice.routemanager.ui.routesettings
 
-import android.graphics.Region
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
-import android.widget.Adapter
-import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -17,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.databinding.FragmentRegionListBinding
 import ru.transservice.routemanager.service.LoadResult
 

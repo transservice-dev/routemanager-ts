@@ -1,7 +1,6 @@
 package ru.transservice.routemanager.repositories
 
 import android.content.SharedPreferences
-import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import ru.transservice.routemanager.AppClass
@@ -10,7 +9,6 @@ import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
 import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.data.local.entities.Task
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -78,11 +76,11 @@ object PreferencesRepository {
     }
 
     fun getSearchBYRoute(): Boolean {
-        return prefs.getBoolean(SEARCH_BY_ROUTE,false) as Boolean
+        return prefs.getBoolean(SEARCH_BY_ROUTE,false)
     }
 
     fun getUseNavGoogle(): Boolean {
-        return prefs.getBoolean(USE_GOOGLE_NAV,false) as Boolean
+        return prefs.getBoolean(USE_GOOGLE_NAV,false)
     }
 
     fun getDate(): Date? {
@@ -137,7 +135,7 @@ object PreferencesRepository {
 
     fun saveDate(routeDate: Date){
         putValue(ROUTE_DATE to SimpleDateFormat(
-                "YYYY.MM.dd",
+                "yyyy.MM.dd",
             Locale("ru")
         ).format(routeDate) )
     }

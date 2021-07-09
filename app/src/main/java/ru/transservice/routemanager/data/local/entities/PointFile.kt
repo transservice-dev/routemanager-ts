@@ -1,6 +1,5 @@
 package ru.transservice.routemanager.data.local.entities
 
-import android.graphics.Point
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.Entity
@@ -20,7 +19,7 @@ import java.util.*
                 childColumns = ["docUID", "lineUID"],
                 onDelete = ForeignKey.CASCADE
         )],
-        indices = arrayOf(Index("docUID", "lineUID", "docUID", "lineUID"))
+        indices = [Index("docUID", "lineUID", "docUID", "lineUID")]
 )
 data class PointFile(
         val docUID: String,

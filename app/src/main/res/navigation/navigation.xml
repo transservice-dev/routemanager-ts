@@ -117,7 +117,7 @@
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
-        android:name="ru.transservice.routemanager.camera.CameraFragment"
+        android:name="ru.transservice.routemanager.ui.camera.CameraFragment"
         android:label="CameraFragment" >
         <argument
             android:name="point"
@@ -136,7 +136,7 @@
     </fragment>
     <fragment
         android:id="@+id/photoFragment"
-        android:name="ru.transservice.routemanager.camera.PhotoFragment"
+        android:name="ru.transservice.routemanager.ui.camera.PhotoFragment"
         android:label="PhotoFragment" >
         <action
             android:id="@+id/action_photoFragment_to_pointFragment"

@@ -1,7 +1,6 @@
 package ru.transservice.routemanager.network
 
 import okhttp3.ResponseBody
-import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.http.*
 import ru.transservice.routemanager.data.remote.res.*

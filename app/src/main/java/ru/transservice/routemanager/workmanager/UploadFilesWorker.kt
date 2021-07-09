@@ -2,7 +2,6 @@ package ru.transservice.routemanager.workmanager
 
 import android.content.Context
 import android.os.Build
-import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters

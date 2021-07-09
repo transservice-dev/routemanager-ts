@@ -5,7 +5,6 @@ import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.data.local.entities.SearchType
 import java.util.*
-import kotlin.collections.ArrayList
 
 class Converters {
 
@@ -19,7 +18,7 @@ class Converters {
         @TypeConverter
         @JvmStatic
         fun dateToTimestamp(date: Date?): Long? {
-            return date?.time?.toLong()
+            return date?.time
         }
 
         @TypeConverter
