@@ -46,12 +46,16 @@ object Utils {
             if (it.toString()==" ") {
                 transliterationText += divider
             }else{
-                val mapKey = it.toLowerCase().toString()
+                val mapKey = it.lowercaseChar().toString()
                 var newValue: String = it.toString()
                 if (translitarationDictionary.containsKey(mapKey)) {
                     newValue = translitarationDictionary[mapKey].toString()
                     if (it.isUpperCase()) {
-                        newValue = newValue.capitalize(Locale.getDefault())
+                        newValue = newValue.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(
+                                Locale.getDefault()
+                            ) else it.toString()
+                        }
                     }
                 }
                 transliterationText += newValue

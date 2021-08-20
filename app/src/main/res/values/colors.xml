@@ -5,9 +5,11 @@
     <color name="colorPrimaryLight">#FFC107</color>
     <color name="colorPrimaryToDark">#A33817</color>
     <color name="colorGrayBack">#511B1A1A</color>
-    <color name="colorAccent">#F0F0F0</color>
+    <color name="colorAccent">#FFC107</color>
+    <color name="colorGradientLight">#F0F0F0</color>
     <color name="colorPrimaryDarkFade">#80FF5722</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>
     <color name="icActive">#FFFFFFFF</color>
+    <color name="backgroundWhite">#FFFFFFFF</color>
 </resources>

@@ -1,9 +1,13 @@
 package ru.transservice.routemanager.ui.settings
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment
 import android.text.InputType
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.FileProvider
 import androidx.preference.EditTextPreference
@@ -168,6 +172,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
         intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
         startActivity(intent)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+        view?.setBackgroundColor(requireContext().getColor(R.color.backgroundWhite))
+        return view
     }
 
 }

@@ -4,7 +4,7 @@ class TaskUploadRequest(
     val trackList: List<TaskUploadBody>
 )
 
-class TaskUploadBody (
+data class TaskUploadBody (
     val docUID: String,
     val lineUID: String,
     val countFact: Double,

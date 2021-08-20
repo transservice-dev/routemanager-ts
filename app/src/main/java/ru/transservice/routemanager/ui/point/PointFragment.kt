@@ -322,10 +322,10 @@ class PointFragment : Fragment() {
             val result = bundle.getDouble("countFactResult")
             viewModel.getCurrentPoint().value?.let {
                 val resultPoint = viewModel.getCurrentPoint().value!!
-                    .copy()
-                    .also { it.countFact = result }
+                    .copy(countFact = result )
 
-                if (result == 0.0){
+                //Более недействительно: Если факт = 0 тогда считать точку выполненной
+                /*if (result == 0.0){
                     resultPoint.done = true
                 }else {
                     val valueBefore = resultPoint.done
@@ -341,7 +341,7 @@ class PointFragment : Fragment() {
                             Toast.makeText(activity, "Точка выполнена", Toast.LENGTH_LONG).show()
                         }
                     }
-                }
+                }*/
                 resultPoint.setCountOverFromPlanAndFact()
                 resultPoint.timestamp = Date()
                 viewModel.updateCurrentPoint(resultPoint)

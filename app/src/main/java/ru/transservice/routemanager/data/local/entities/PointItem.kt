@@ -84,17 +84,17 @@ data class PointItem(
     }
 
     fun toTaskUploadBody(): TaskUploadBody {
+        //TODO Подумать как реализовать это дело лучше, найти проблему, почему переменные принимают тип INFINITY, убрать из продакшен???
         return TaskUploadBody(
             this.docUID,
             this.lineUID,
-            this.countFact,
-            this.countOver,
+            if (this.countFact.isFinite()) this.countFact else 0.0, //check if countFact and countOver is finite
+            if (this.countOver.isFinite()) this.countOver else 0.0,
             this.done,
             this.reasonComment,
             this.timestamp?.longFormat() ?: ""
         )
     }
-
 }
 
 /*@DatabaseView("SELECT lineUID, rowNumber, addressName, containerName, containerSize, agentName, " +

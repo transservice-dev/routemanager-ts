@@ -473,6 +473,7 @@ object RootRepository {
             Log.d(TAG, "uploading task START")
             val taskList = dbDao.getPointList()
             val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
+            //Log.d(TAG,taskUploadRequest.trackList.toString())
             val response = RetrofitClient
                 .getPostgrestApi()
                 .uploadTask(taskUploadRequest)

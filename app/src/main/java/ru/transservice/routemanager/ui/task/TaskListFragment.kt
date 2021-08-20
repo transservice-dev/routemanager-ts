@@ -167,7 +167,7 @@ class TaskListFragment : Fragment() {
             }
 
             ibtnCannotDone.setOnClickListener {
-                NavigationServiceConnection.startTracking()
+                startNavService()
                 navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.CANNOT_DONE))
             }
 

@@ -45,6 +45,7 @@ object RetrofitClient {
                     "${AppClass.TAG}: Retrofit",
                     """ request url: ${response.request().url()}
                               request code: ${response.code()}
+                              $rawJson
                               ${if (!response.isSuccessful) "raw response: $rawJson." else ""} """
                 )
                 // Re-create the response before returning it because body can be read only once
@@ -86,7 +87,8 @@ object RetrofitClient {
     }
 
     var gson = GsonBuilder()
-        .setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
+        .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        .create()
 
     private var retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(RootRepository.baseUrl)

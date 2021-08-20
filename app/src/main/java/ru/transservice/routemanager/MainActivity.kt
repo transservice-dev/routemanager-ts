@@ -78,8 +78,6 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         swipeLayout = binding.swipe
-        locationServiceIntent = Intent(this,NavigationService::class.java).also {
-                intent -> bindService(intent,NavigationServiceConnection, Context.BIND_AUTO_CREATE) }
         createNotificationChannel()
         initNavMenuButtons()
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
@@ -106,12 +104,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        locationServiceIntent = Intent(this,NavigationService::class.java).also {
+                intent -> bindService(intent,NavigationServiceConnection, Context.BIND_AUTO_CREATE) }
+
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(mPrefsListener)
     }
 
     override fun onStop() {
         super.onStop()
+        unbindService(NavigationServiceConnection)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(mPrefsListener)
     }
@@ -181,15 +183,15 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("RestrictedApi")
     fun initNavMenuButtons(){
         with(binding){
-            bottomMenu.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { menuItem ->
+            bottomMenu.setOnItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.home -> {
                         navController.navigate(R.id.startScreenFragment)
-                        return@OnNavigationItemSelectedListener true
+                        return@setOnItemSelectedListener true
                     }
                     R.id.list -> {
                         navController.navigate(R.id.taskListFragment)
-                        return@OnNavigationItemSelectedListener true
+                        return@setOnItemSelectedListener true
                     }
                     R.id.photos -> {
                         val bundle = bundleOf(
@@ -197,21 +199,21 @@ class MainActivity : AppCompatActivity() {
                             "photoOrder" to PhotoOrder.DONT_SET
                         )
                         navController.navigate(R.id.photoListFragment, bundle)
-                        return@OnNavigationItemSelectedListener false
+                        return@setOnItemSelectedListener false
                     }
                     R.id.settings -> {
                         try {
                             navController.navigate(R.id.settingsFragment)
                         } catch (e: Exception) {
                             Log.d(TAG, "nav error: $e")
-                            return@OnNavigationItemSelectedListener false
+                            return@setOnItemSelectedListener false
                         }
 
-                        return@OnNavigationItemSelectedListener true
+                        return@setOnItemSelectedListener true
                     }
                 }
                 false
-            })
+            }
         }
 
         navController.addOnDestinationChangedListener { _, destanation, _ ->
