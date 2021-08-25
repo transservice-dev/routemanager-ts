@@ -248,7 +248,8 @@ class PointFragment : Fragment() {
             reasonSpinner.onItemSelectedListener = itemSelectedListener
 
             reasonInput.setOnEditorActionListener { v, actionId, _ ->
-                if(actionId == EditorInfo.IME_ACTION_DONE){
+                if(actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_UNSPECIFIED){   //Добавил неопределенное событие для контроля некоторых телефонов
                     viewModel.reasonComment = v.text.toString()
                     true
                 } else {
