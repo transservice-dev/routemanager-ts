@@ -428,8 +428,8 @@ class CameraFragment : Fragment() {
 
                             // We can only change the foreground Drawable using API level 23+ API
                             // Update the gallery thumbnail with latest picture taken
-                            view!!.post {
-                                navController.navigate(
+                            view?.post {
+                                navController?.navigate(
                                     CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
                                         photoFile.absolutePath,
                                         point, pointAction
