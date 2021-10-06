@@ -1,6 +1,7 @@
 package ru.transservice.routemanager.data.local.entities
 
 import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -26,6 +27,10 @@ data class Task(
     var dateStart: Date? = null
     var dateEnd: Date? = null
     val deviceId get() = "${vehicle?.number ?: ""}__${docUid}__${dateStart?.shortFormat()}"
+    @ColumnInfo(defaultValue = "0")
+    var lastTripNumber: Int = 0
+    @ColumnInfo(defaultValue = "0")
+    var polygonByRow = false
 }
 
 enum class SearchType(val id: Int){

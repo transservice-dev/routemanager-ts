@@ -22,7 +22,7 @@ import javax.net.ssl.*
 
 object RetrofitClient {
 
-    val okHttpClient = OkHttpClient.Builder().apply {
+    private val okHttpClient = OkHttpClient.Builder().apply {
         connectTimeout(60, TimeUnit.SECONDS)
         addInterceptor(
             Interceptor { chain ->
@@ -86,7 +86,7 @@ object RetrofitClient {
         return sslContext.socketFactory to (tmf.trustManagers[0]  as X509TrustManager)
     }
 
-    var gson = GsonBuilder()
+    private var gson = GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
         .create()
 
@@ -100,7 +100,7 @@ object RetrofitClient {
         return retrofit.create(PostgrestApi::class.java)
     }
 
-    val okHttpClientApache = OkHttpClient.Builder().apply {
+    private val okHttpClientApache = OkHttpClient.Builder().apply {
         connectTimeout(60, TimeUnit.SECONDS)
         val sslSettings = customSSL()
         sslSocketFactory(sslSettings.first, sslSettings.second)

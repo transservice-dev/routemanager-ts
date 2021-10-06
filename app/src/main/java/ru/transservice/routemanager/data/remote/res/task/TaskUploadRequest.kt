@@ -12,4 +12,8 @@ data class TaskUploadBody (
     val done: Boolean,
     val reasonComment: String,
     val timestamp: String,
+    val polygonUID: String,
+    val polygonName: String,
+    val polygon: Boolean,
+    val tripNumberFact: Int
 )

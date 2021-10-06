@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_gradient_list">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_small8"
+        android:padding="@dimen/margin_small8"
+        android:text="@string/choose_polygon"/>
+
+    <TextView
+        android:id="@+id/tv_polygon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_small8"
+        android:padding="@dimen/margin_small8"
+        android:background="@drawable/bg_rect_white"/>
+
+</LinearLayout>

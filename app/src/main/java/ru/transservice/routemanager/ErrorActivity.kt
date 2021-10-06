@@ -11,7 +11,7 @@ private lateinit var binding: ActivityErrorBinding
 
 class ErrorActivity : AppCompatActivity() {
 
-    var mSavedInstanceState : Bundle? = null
+    private var mSavedInstanceState : Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

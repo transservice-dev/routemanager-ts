@@ -1,9 +1,11 @@
 package ru.transservice.routemanager.data.local.entities
 
 import androidx.core.text.isDigitsOnly
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.Index
+import org.jetbrains.annotations.NotNull
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadBody
 import ru.transservice.routemanager.extensions.longFormat
 import java.io.Serializable
@@ -31,7 +33,15 @@ data class PointItem(
     val comment: String,
     val noPhotoAllowed: Boolean = false,
     val noEditFact: Boolean = false,
-    var reasonComment: String = ""
+    var reasonComment: String = "",
+    @ColumnInfo(defaultValue = "")
+    val polygonUID: String,
+    @ColumnInfo(defaultValue = "")
+    val polygonName: String,
+    @ColumnInfo(defaultValue = "0")
+    val polygonByRow: Boolean,
+    @ColumnInfo(defaultValue = "1000")
+    var tripNumberFact: Int
 ) : Serializable {
     var timestamp: Date? = null
     var status : PointStatuses = PointStatuses.NOT_VISITED
@@ -49,6 +59,41 @@ data class PointItem(
         pointActionsCancelArray.add(PointActions.TAKE_PHOTO_BEFORE)
         pointActionsCancelArray.add(PointActions.SET_REASON)
     }
+
+    // constructor for polygon point
+    constructor (
+        docUID: String,
+        lineUID: String,
+        addressName: String,
+        tripNumber: Int,
+        polygon: Boolean,
+        polygonUID: String
+    ) : this(
+        docUID,
+        lineUID,
+        5000,
+        addressName,
+        0.0,
+        0.0,
+        "",
+        0.0,
+        "",
+        0.0,
+        0.0,
+        0.0,
+        false,
+        tripNumber,
+        polygon,
+        "",
+        "",
+        false,
+        false,
+        "",
+        polygonUID,
+        addressName,
+        false,
+        tripNumber
+    )
 
     fun setCountOverFromPlanAndFact(){
         this.countOver = max(0.0, this.countFact - this.countPlan)
@@ -83,8 +128,16 @@ data class PointItem(
 
     }
 
+    fun isPolygonEmpty(): Boolean {
+       return polygonUID.isNullOrEmpty() || polygonUID == "00000000-0000-0000-0000-000000000000"
+    }
+
+    fun polygonNotFilled(): Boolean {
+        return this.polygonByRow && this.isPolygonEmpty()
+    }
+
     fun toTaskUploadBody(): TaskUploadBody {
-        //TODO Подумать как реализовать это дело лучше, найти проблему, почему переменные принимают тип INFINITY, убрать из продакшен???
+        //TODO Подумать как реализовать это дело лучше, найти проблему, почему переменные принимают тип INFINITY
         return TaskUploadBody(
             this.docUID,
             this.lineUID,
@@ -92,7 +145,11 @@ data class PointItem(
             if (this.countOver.isFinite()) this.countOver else 0.0,
             this.done,
             this.reasonComment,
-            this.timestamp?.longFormat() ?: ""
+            this.timestamp?.longFormat() ?: "",
+            polygonUID,
+            polygonName,
+            polygon,
+            tripNumberFact
         )
     }
 }

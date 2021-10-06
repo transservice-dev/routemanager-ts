@@ -17,6 +17,9 @@ import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -37,6 +40,7 @@ const val KEY_EVENT_EXTRA = "key_event_extra"
 class MainActivity : AppCompatActivity() {
 
     lateinit var navController: NavController
+    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     lateinit var swipeLayout: SwipeRefreshLayout
     lateinit var navMenu: BottomNavigationView
@@ -46,14 +50,14 @@ class MainActivity : AppCompatActivity() {
     var locationServiceIntent: Intent? = null
 
     private val mPrefsListener =
-            SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 if (key == "URL_NAME" || key == "URL_PORT" || key == "URL_AUTHPASS" ) {
                     RootRepository.setPreferences()
                     RetrofitClient.updateConnectionSettings()
                 }
 
                 if (key == "SEARCH_BY_ROUTE") {
-                    RootRepository.updateCurrentTask()
+                    RootRepository.updatePointListData()
                 }
 
                 if (key == "USE_GOOGLE_NAV") {
@@ -77,29 +81,21 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
                 supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.permissionFragment, R.id.startScreenFragment))
+        setupActionBarWithNavController(navController, appBarConfiguration)
         swipeLayout = binding.swipe
         createNotificationChannel()
         initNavMenuButtons()
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
         RootRepository.setPreferences()
 
-        /*onBackPressedDispatcher.addCallback(this){
-            if(backPressedBlock){
-            }
-            if (navController.previousBackStackEntry != null) {
-                navController.popBackStack()
-            }
+        //binding.toolbar.setupWithNavController(navController, AppBarConfiguration(navController.graph))
 
-            if (doubleBackClick) {
-                super.onBackPressed()
-            }
+    }
 
-            doubleBackClick = true
-            Toast.makeText( applicationContext, "Два раза нажмите для выхода", Toast.LENGTH_SHORT).show()
-
-            Handler().postDelayed({ doubleBackClick = false }, 2000)
-        }*/
-
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 
     override fun onStart() {
@@ -133,18 +129,16 @@ class MainActivity : AppCompatActivity() {
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            channel = NotificationChannel(
-                "UPLOAD_ROUTE_DATA",
-                "upload route data",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {  description = "Выгрузка данных и фотографий на сервер" }
+        channel = NotificationChannel(
+            "UPLOAD_ROUTE_DATA",
+            "upload route data",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {  description = "Выгрузка данных и фотографий на сервер" }
 
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     fun getNotificationChannel() = channel

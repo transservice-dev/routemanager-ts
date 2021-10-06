@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
 import com.google.android.material.transition.MaterialElevationScale
 import ru.transservice.routemanager.MainActivity
@@ -38,7 +39,7 @@ class SplashScreenFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentSplashScreenBinding.inflate(inflater,container,false)
         return binding.root
     }
@@ -80,14 +81,13 @@ class SplashScreenFragment : Fragment() {
         }
         animationTextView.start()
 
-
     }
 
 
     companion object {
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
             SplashScreenFragment().apply {
                 arguments = Bundle().apply {
 

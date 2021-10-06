@@ -315,6 +315,19 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <TextView
+                android:id="@+id/tv_polygon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_rect_white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layoutCantDone"
+                android:layout_margin="@dimen/margin_small8"
+                android:padding="@dimen/margin_small8"
+                tools:text="@string/polygon"
+                android:hint="@string/polygon"/>
+
             <Button
                 android:id="@+id/btn_pointDone"
                 android:layout_width="match_parent"
@@ -325,7 +338,7 @@
                 android:text="@string/done_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layoutCantDone" />
+                app:layout_constraintTop_toBottomOf="@id/tv_polygon" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/commentLayout"
@@ -348,17 +361,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/round_button"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
                     android:src="@drawable/ic_call_24_small"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <TextView
                     android:id="@+id/tv_comment_text"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     app:layout_constraintEnd_toStartOf="@id/btn_call"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

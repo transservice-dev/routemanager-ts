@@ -1,7 +1,6 @@
 package ru.transservice.routemanager.ui.settings
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment
 import android.text.InputType

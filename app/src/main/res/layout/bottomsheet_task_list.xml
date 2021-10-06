@@ -90,6 +90,23 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
+        <ImageButton
+            android:id="@+id/ibtn_navigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_button_darkprimary"
+            android:contentDescription="TODO"
+            android:elevation="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ibtn_home"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ibtn_photos"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_make_route"
+            app:tint="@color/colorPrimaryDark" />
+
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/ibtn_home"
             android:layout_width="wrap_content"
@@ -101,26 +118,42 @@
             android:src="@drawable/ic_home_24"
             android:tint="@color/colorPrimaryDark"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ibtn_navigation"
+            app:layout_constraintStart_toEndOf="@id/ibtn_navigation"
+            app:layout_constraintEnd_toStartOf="@+id/ibtn_edit"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
         <ImageButton
-            android:id="@+id/ibtn_navigation"
+            android:id="@+id/ibtn_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/bg_button_darkprimary"
             android:elevation="5dp"
-            android:tint="@color/colorPrimaryDark"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ibtn_home"
+            app:layout_constraintEnd_toStartOf="@id/ibtn_delete"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/ibtn_photos"
+            app:layout_constraintStart_toEndOf="@+id/ibtn_home"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_make_route" />
+            app:srcCompat="@drawable/ic_edit_60"
+            app:tint="@color/colorPrimaryDark" />
+
+        <ImageButton
+            android:id="@+id/ibtn_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_button_darkprimary"
+            android:elevation="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ibtn_edit"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_delete_60"
+            app:tint="@color/colorPrimaryDark" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

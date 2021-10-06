@@ -13,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -24,6 +25,7 @@ import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.FailureReasons
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointStatuses
+import ru.transservice.routemanager.data.local.entities.PolygonItem
 import ru.transservice.routemanager.databinding.FragmentPointBinding
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.ui.task.TaskListViewModel
@@ -37,6 +39,9 @@ class PointFragment : Fragment() {
     private lateinit var viewModel: TaskListViewModel
     private val args: PointFragmentArgs by navArgs()
     private lateinit var pointStatus: PointStatuses
+    private var lastPointDoneStatus: Boolean = false
+
+    private val requestKeyPolygon = "polygonForPoint"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +49,7 @@ class PointFragment : Fragment() {
         pointStatus = args.pointAction
         initViewModel()
         initFragmentFactDialogListener()
+        initPolygonSelectionListener()
     }
 
     override fun onDestroy() {
@@ -104,14 +110,13 @@ class PointFragment : Fragment() {
                 tvCommentText.text = it.comment
                 commentLayout.visibility = if (it.comment == "") View.GONE else View.VISIBLE
                 tvCountFact.text = if (it.countFact == -1.0) "" else it.countFact.toString()
+                tvPolygon.text = if (it.isPolygonEmpty()) "" else it.polygonName
                 reasonInput.visibility = View.GONE
-                /*reasonSpinner.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.VISIBLE else View.GONE
-                btnSetFact.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE
-                btnPhotoAfter.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE*/
                 btnPointDone.text = if (pointStatus == PointStatuses.CANNOT_DONE) resources.getString(R.string.confirm_title) else resources.getString(R.string.done_title)
 
                 layoutCantDone.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.VISIBLE else View.GONE
                 buttonsToDo.visibility = if (pointStatus == PointStatuses.CANNOT_DONE) View.GONE else View.VISIBLE
+                tvPolygon.visibility = if (pointStatus == PointStatuses.CANNOT_DONE || !it.polygonByRow) View.GONE else View.VISIBLE
 
                 btnSetFact.visibility = if (it.noEditFact) View.GONE else View.VISIBLE
 
@@ -184,6 +189,20 @@ class PointFragment : Fragment() {
                 }
             }
 
+            tvPolygon.setOnClickListener {
+                viewModel.getCurrentPoint().value?.let {
+                    if (it.countFact != -1.0 && viewModel.getFileBeforeIsDone().value!! && viewModel.getFileAfterIsDone().value!!) {
+                        navController.navigate(PointFragmentDirections.actionPointFragmentToPolygonListFragment(requestKeyPolygon))
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "Предыдущие действия не выполнены",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+
             ivDonePhotoBefore.setOnClickListener {
                 navController.navigate(PointFragmentDirections.actionPointFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.DONT_SET))
             }
@@ -205,12 +224,12 @@ class PointFragment : Fragment() {
                         }
                         viewModel.reasonComment != "" -> {
                             val resultPoint = viewModel.getCurrentPoint().value!!
-                                .copy()
+                                .copy(reasonComment =  viewModel.reasonComment, tripNumberFact = 2000)
                                 .also {
-                                    it.reasonComment = viewModel.reasonComment
                                     if (it.timestamp == null){
                                         it.timestamp = Date()
                                     }
+                                    it.status = PointStatuses.CANNOT_DONE
                                 }
                             viewModel.updateCurrentPoint(resultPoint)
                             requireActivity().onBackPressed()
@@ -290,6 +309,11 @@ class PointFragment : Fragment() {
         })
 
         viewModel.getCurrentPoint().observe(viewLifecycleOwner,  {
+            if (lastPointDoneStatus != it.done && it.done) {
+                Toast.makeText(requireContext(), "Точка выполнена!", Toast.LENGTH_LONG)
+                    .show()
+                lastPointDoneStatus = it.done
+            }
             initViews()
         })
 
@@ -321,33 +345,17 @@ class PointFragment : Fragment() {
     private fun initFragmentFactDialogListener() {
         childFragmentManager.setFragmentResultListener("countFact",this) { requestKey, bundle ->
             val result = bundle.getDouble("countFactResult")
-            viewModel.getCurrentPoint().value?.let {
-                val resultPoint = viewModel.getCurrentPoint().value!!
-                    .copy(countFact = result )
+            viewModel.setFactForPoint(result)
+        }
+    }
 
-                //Более недействительно: Если факт = 0 тогда считать точку выполненной
-                /*if (result == 0.0){
-                    resultPoint.done = true
-                }else {
-                    val valueBefore = resultPoint.done
-                    resultPoint.done = viewModel.fileAfterIsDone.value ?: false
-                    if (valueBefore != resultPoint.done) {
-                        if (valueBefore) {
-                            Toast.makeText(
-                                activity,
-                                "Снято выполнение с точки, для установки выполнения сделайте фото после",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } else {
-                            Toast.makeText(activity, "Точка выполнена", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }*/
-                resultPoint.setCountOverFromPlanAndFact()
-                resultPoint.timestamp = Date()
-                viewModel.updateCurrentPoint(resultPoint)
-            }
-
+    private fun initPolygonSelectionListener() {
+        // for Fragment (edit polygon)
+        setFragmentResultListener(
+            requestKeyPolygon
+        ) { _, bundle ->
+            val polygon = bundle.get("polygon") as PolygonItem
+            viewModel.setPolygonForPoint(polygon)
         }
     }
 

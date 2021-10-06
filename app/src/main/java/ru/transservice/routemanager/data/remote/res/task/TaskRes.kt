@@ -38,7 +38,10 @@ data class TaskRowRes(
     var timestamp: Date,
     val routeName: String,
     var reasonComment: String,
-    val comment: String
+    val comment: String,
+    val polygonUID: String?,
+    val polygonName: String?,
+    val polygonByRow: Boolean?
 ){
     fun toPointDestination(): PointItem{
         return PointItem(docUID.trim(),
@@ -57,7 +60,11 @@ data class TaskRowRes(
         tripNumber,
         polygon,
         routeName.trim(),
-        comment.trim()
+        comment.trim(),
+            polygonUID = polygonUID ?: "",
+            tripNumberFact = 1000,
+            polygonName = polygonName?.trim() ?: "",
+            polygonByRow = polygonByRow ?: false
         )
     }
 }

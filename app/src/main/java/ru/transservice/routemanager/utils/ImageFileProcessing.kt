@@ -18,7 +18,7 @@ import kotlin.math.abs
 
 object ImageFileProcessing {
 
-    val ExifAttributes = arrayOf(
+    private val ExifAttributes = arrayOf(
             ExifInterface.TAG_APERTURE_VALUE,
             ExifInterface.TAG_DATETIME,
             ExifInterface.TAG_DATETIME_DIGITIZED,

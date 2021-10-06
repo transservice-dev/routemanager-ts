@@ -6,9 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
 import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointFile
-import ru.transservice.routemanager.data.local.entities.PointItem
+import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
@@ -18,14 +16,27 @@ import java.util.*
 class TaskListViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = RootRepository
-    private var pointList: MutableLiveData<List<PointItem>> = MutableLiveData()
+    //private var pointList: MutableLiveData<List<PointItem>> = MutableLiveData()
+
+    private var pointList = Transformations.map(
+        repository.getPointListData()
+    ){
+        it
+    }
+
+    var unloadingAvailable = Transformations.map(
+        repository.getUnloadingAvailable()
+    ){
+        it
+    }
+
     private var currentPoint: MutableLiveData<PointItem> = MutableLiveData()
     var currentFileOrder: PhotoOrder = PhotoOrder.DONT_SET
     var reasonComment: String = ""
     var geoIsRequired = MutableLiveData(false)
     val fileBeforeIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
-    val fileAfterIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
-    val fileCantDoneIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val fileAfterIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val fileCantDoneIsDone: MutableLiveData<Boolean> = MutableLiveData(false)
     private val query = MutableLiveData("")
     private val fullList = MutableLiveData(true)
 
@@ -43,10 +54,10 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     }
 
-    init {
+    /*init {
         Log.d("RouteManager", "${this::class.java}:init loadPointList()")
         loadPointList()
-    }
+    }*/
 
     fun initPointData() {
         setFilesInfo()
@@ -56,12 +67,17 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun loadPointList() : MutableLiveData<List<PointItem>>{
-        repository.getPointList {taskList->
+    fun deletePolygonFromList(pointItem: PointItem) {
+        repository.deletePolygon(pointItem)
+    }
+
+    /*fun loadPointList() : MutableLiveData<List<PointItem>>{
+        /*repository.getPointList {taskList->
             pointList.postValue(taskList)
         }
-        return pointList
-    }
+        return pointList*/
+        return MutableLiveData()
+    }*/
 
     fun getCurrentPoint(): MutableLiveData<PointItem>{
         return currentPoint
@@ -70,9 +86,10 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
     fun setCurrentPoint(point: PointItem){
         currentPoint.value = point
         reasonComment = point.reasonComment
+        Log.d(TAG,"Current point changed ${currentPoint.value}")
     }
 
-    fun setFilesInfo(){
+    private fun setFilesInfo(){
         currentPoint.value?.let {
             getFileAfterIsDone()
             getFileBeforeIsDone()
@@ -118,7 +135,7 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateGeoIsRequired(){
+    private fun updateGeoIsRequired(){
         currentPoint.value?.let {
             repository.getGeolessPointFiles(it) { list ->
                 geoIsRequired.postValue(list.isNotEmpty())
@@ -152,8 +169,16 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         )
 
         repository.insertPointFile(pointFile) {
+            repository.uploadFile(pointFile)
 
-            val resultPoint = currentPoint.value!!.copy()
+            if (currentFileOrder == PhotoOrder.PHOTO_AFTER || currentFileOrder == PhotoOrder.PHOTO_CANTDONE) {
+                currentPoint.value?.let { pointItem ->
+                    val resultPoint = pointItem.copy()
+                    updatePointAndDoneStatus(resultPoint)
+                }
+            }
+
+            /*val resultPoint = currentPoint.value!!.copy()
             if (currentFileOrder == PhotoOrder.PHOTO_AFTER && !currentPoint.value!!.done) {
                 resultPoint.done = true
                 resultPoint.timestamp = Date()
@@ -165,21 +190,40 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
             if (currentFileOrder == PhotoOrder.PHOTO_CANTDONE) {
                 resultPoint.timestamp = Date()
                 updateCurrentPoint(resultPoint)
-            }
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                repository.uploadFile(pointFile)
-            }
+            }*/
         }
     }
 
+    fun setPolygonForPoint(polygon: PolygonItem) {
+        currentPoint.value?.let { pointItem ->
+            val resultPoint = pointItem.copy(polygonUID = polygon.uid, polygonName = polygon.name)
+            updatePointAndDoneStatus(resultPoint)
+        }
+    }
+
+    fun setFactForPoint(fact: Double){
+        currentPoint.value?.let { pointItem ->
+            val resultPoint = pointItem.copy(countFact = fact)
+            resultPoint.setCountOverFromPlanAndFact()
+            updateCurrentPoint(resultPoint)
+        }
+    }
+
+    private fun updatePointAndDoneStatus(point: PointItem) {
+        repository.checkPointForCompletion(point) { canBeDone ->
+            point.done = canBeDone
+            if (point.done) {
+                point.timestamp = Date()
+                point.status = PointStatuses.DONE
+            }
+            updateCurrentPoint(point)
+        }
+    }
 
     fun updateCurrentPoint(pointItem: PointItem){
-        currentPoint.value = pointItem
-        currentPoint.value?.let {
-            repository.updatePoint(currentPoint.value!!)
-            repository.updatePointOnServer(currentPoint.value!!)
-        }
+        currentPoint.postValue(pointItem)
+        repository.updatePoint(pointItem)
+        repository.updatePointOnServer(pointItem)
     }
 
     fun getPhoneNumber() : String{
@@ -192,6 +236,11 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     fun setFullList(value: Boolean){
         fullList.value = value
+    }
+
+    fun changeFullList(): Boolean {
+        fullList.value = ! (fullList.value?: false)
+        return fullList.value ?: true
     }
 
     fun addSources(){
@@ -216,12 +265,14 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         mediatorListResult.addSource(pointList) { filterF.invoke() }
         mediatorListResult.addSource(query) { filterF.invoke() }
         mediatorListResult.addSource(fullList) { filterF.invoke() }
+        //mediatorListResult.addSource(currentPoint) {filterF.invoke()}
     }
 
     fun removeSources(){
         mediatorListResult.removeSource(pointList)
         mediatorListResult.removeSource(query)
         mediatorListResult.removeSource(fullList)
+        //mediatorListResult.removeSource(currentPoint)
     }
 
     companion object {

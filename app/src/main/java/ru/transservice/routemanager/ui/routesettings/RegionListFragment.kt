@@ -63,7 +63,7 @@ class RegionListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRegionListBinding.inflate(inflater,container,false)
         return binding.root
     }

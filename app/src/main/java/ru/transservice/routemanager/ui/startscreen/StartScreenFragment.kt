@@ -1,5 +1,6 @@
 package ru.transservice.routemanager.ui.startscreen
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
@@ -43,8 +44,9 @@ class StartScreenFragment : Fragment() {
     private val notificationId: Int = 100
     private var backPressedTime:Long = 0
 
-    val callbackExit = object : OnBackPressedCallback(true) {
+    private val callbackExit = object : OnBackPressedCallback(true) {
         lateinit var backToast:Toast
+        @SuppressLint("ShowToast")
         override fun handleOnBackPressed() {
             backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
             if (backPressedTime + 2000 > System.currentTimeMillis()) {
@@ -75,17 +77,16 @@ class StartScreenFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         //Log.d(TAG, "onResume ${this::class.java}")
-        viewModel.updateTaskParams()
+        //viewModel.updateTaskParams()
         requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         //Log.d(TAG, "onCreateView ${this::class.java}")
         _binding = FragmentStartScreenBinding.inflate(inflater,container,false)
-
         return binding.root
     }
 
@@ -197,8 +198,8 @@ class StartScreenFragment : Fragment() {
                         (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
                         Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
                         //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
-                        viewModel.getTaskParams().value?.let {
-                            binding.atAllCount.text = it.countPoint.toString()
+                        viewModel.getTaskParams().value?.let { task->
+                            binding.atAllCount.text = task.countPoint.toString()
                         }
                     }
                     is LoadResult.Error -> {

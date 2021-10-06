@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -42,8 +43,8 @@ import java.io.File
 
 class PhotoFragment : Fragment() {
 
-    var currentFile: File? = null
-    lateinit var viewPointModel: TaskListViewModel
+    private var currentFile: File? = null
+    private lateinit var viewPointModel: TaskListViewModel
     private lateinit var point: PointItem
     private lateinit var pointAction: PointStatuses
 
@@ -54,11 +55,15 @@ class PhotoFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // get the same viewModel as point_action fragment
-        currentFile = args.fileName?.let { File(it) }
+        currentFile = File(args.fileName)
         point = args.point
         pointAction = args.pointAction
         //gps = GPSTracker.getGPSTracker(requireActivity())
         //gps = GPSTracker(requireContext())
+        if (currentFile == null) {
+            Toast.makeText(requireContext(), "Ошибка получения фото, неверное имя файла",Toast.LENGTH_LONG).show()
+            navController.popBackStack()
+        }
         initViewModel()
         Log.d(TAG, "current file: ${currentFile?.absolutePath}")
     }

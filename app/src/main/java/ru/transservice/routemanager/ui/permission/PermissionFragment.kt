@@ -23,7 +23,7 @@ private val PERMISSIONS_REQUIRED = arrayOf(
 
 class PermissionFragment : Fragment() {
 
-    val requestPermissionLauncher =
+    private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             var allGranted = true
             permissions.entries.forEach {

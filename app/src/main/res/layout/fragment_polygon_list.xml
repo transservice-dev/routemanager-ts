@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:contextClickable="false"
+    android:orientation="vertical"
+    tools:context=".ui.routesettings.RegionListFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_polygon_list" />
+
+    <Switch
+        android:id="@+id/swt_showAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:showText="false"
+        android:text="@string/showall_title"
+        android:textAlignment="viewEnd" />
+
+</LinearLayout>

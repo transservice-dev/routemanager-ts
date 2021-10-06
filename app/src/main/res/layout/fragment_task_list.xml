@@ -8,6 +8,14 @@
     android:background="@drawable/bg_gradient_list"
     tools:context=".ui.task.TaskListFragment">
 
+    <!--<com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/swt_fullList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/show_full_list_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_task_list"/> -->
+
     <TextView
         android:id="@+id/tv_pointName"
         android:layout_width="0dp"
@@ -31,6 +39,7 @@
         android:paddingVertical="5dp"
 
         android:clipToPadding="false"/>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:id="@+id/point_action_layout"

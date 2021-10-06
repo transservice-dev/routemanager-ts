@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <item
         android:id="@+id/action_search"
         android:title="@string/searchTitle"
         android:icon="@drawable/ic_search_24"
         app:actionLayout="@layout/search_view_layout"
         app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item
+        android:id="@+id/action_polygon"
+        android:title="@string/polygon_trip"
+        android:icon="@drawable/ic_landscape_24"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_fulllist"
+        android:title="@string/fullList"
+        android:titleCondensed="@string/fullList"
+        android:visible="false"
+        app:actionLayout="@layout/switch_item"
+        app:showAsAction="ifRoom" />
+
 </menu>

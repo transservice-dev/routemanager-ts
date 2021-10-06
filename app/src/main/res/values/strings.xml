@@ -34,8 +34,6 @@
     <string name="closeRoute">Закрыть маршрут</string>
     <string name="openClose">Показать/Скрыть</string>
     <string name="vehicle_long_title">Транспортое средство</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="region_title">Регион</string>
     <string name="vehicle_shorttitle">ТС</string>
     <string name="vehicle_title">Транспортное средство</string>
@@ -70,7 +68,22 @@
     <string name="defaultFactText">0.0</string>
     <string name="containerTitle">Контейнер</string>
     <string name="doneTitle">done</string>
-    <string name="loadingInProcess">Идет выгрузка данных...</string>
+    <string name="loadingInProcess">Идет выгрузка данных…</string>
     <string name="beforeTitle">before</string>
+    <string name="choose_polygon">Выберите полигон</string>
+    <string name="polygon">Полигон</string>
+    <string name="polygon_trip">Свалка</string>
+    <string name="add_polygon">Добавить полигон</string>
+    <string name="points_list">Задание</string>
+    <string name="point_completion">Выполнение точки</string>
+    <string name="polygons">Полигоны</string>
+    <string name="Photo_gallery">Просмотр фотографий</string>
+    <string name="route_settings">Настройки ТС</string>
+    <string name="regions">Регионы</string>
+    <string name="vehicles">Транспортные средства</string>
+    <string name="routes_title">Маршруты</string>
+    <string name="showall_title">Показать все</string>
+    <string name="make_picture_after">Сделать фото после</string>
+    <string name="fullList">Полный список</string>
 
 </resources>

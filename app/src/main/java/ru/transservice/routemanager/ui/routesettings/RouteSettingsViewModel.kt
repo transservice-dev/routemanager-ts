@@ -134,7 +134,7 @@ class RouteSettingsViewModel : ViewModel() {
     }
 
     private fun updateCurrentTask(){
-        repository.updateCurrentTask()
+        repository.updatePointListData()
     }
 
     fun handleSearchQuery(text: String) {

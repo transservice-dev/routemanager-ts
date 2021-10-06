@@ -1,27 +1,28 @@
 package ru.transservice.routemanager.ui.task
 
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.ItemTaskListBinding
 
-class TaskListAdapter(val listener: (PointItem) -> Unit) : RecyclerView.Adapter<TaskListAdapter.TaskListViewHolder>() {
+class TaskListAdapter(val listener: (PointItem) -> Unit) : ListAdapter<PointItem, TaskListAdapter.TaskListViewHolder> (TaskDiffCallback()) {
 
-    var items: List<PointItem> = listOf()
-    var selectedPos = RecyclerView.NO_POSITION
     var selectedItem: PointItem? = null
 
     class TaskListViewHolder(val binding: ItemTaskListBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: PointItem, isSelected: Boolean){
+        fun bind(item: PointItem, listener: (PointItem) -> Unit, selectedItem: PointItem?){
             with(binding){
-                tvPointName.text = if (item.polygon) item.addressName else "${item.rowNumber}. ${item.addressName}"
+                tvPointName.text = if (item.polygon) item.polygonName else "${item.rowNumber}. ${item.addressName}"
                 tvContainer.text = item.containerName
-                tvContainerCount.text = item.countPlan.toString()
+                tvContainerCount.text = if (item.polygon) "Рейс №${item.tripNumberFact}" else item.countPlan.toString()
 
                 if (item.done) {
                     ivPointStatus.setImageResource(R.drawable.ic_check_24_small)
@@ -38,9 +39,30 @@ class TaskListAdapter(val listener: (PointItem) -> Unit) : RecyclerView.Adapter<
                 }else{
                     tvOnCall.visibility = View.GONE
                 }
-            }
-            binding.root.isSelected = isSelected
 
+                if (item.polygon) {
+                    tvPointName.typeface = Typeface.DEFAULT_BOLD
+                    //root.setBackgroundResource(R.drawable.bg_item_task_list_polygon)
+                }else{
+                    tvPointName.typeface = Typeface.DEFAULT
+                    //root.setBackgroundResource(R.drawable.bg_item_task_list_white)
+                }
+            }
+            binding.root.isSelected = item == selectedItem
+            binding.root.setOnClickListener {
+                it.isSelected = true
+                listener(item)
+            }
+        }
+    }
+
+    class TaskDiffCallback : DiffUtil.ItemCallback<PointItem>() {
+        override fun areItemsTheSame(oldItem: PointItem, newItem: PointItem): Boolean {
+            return oldItem?.lineUID == newItem?.lineUID
+        }
+
+        override fun areContentsTheSame(oldItem: PointItem, newItem: PointItem): Boolean {
+            return oldItem.hashCode() == newItem.hashCode()
         }
     }
 
@@ -50,24 +72,10 @@ class TaskListAdapter(val listener: (PointItem) -> Unit) : RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: TaskListViewHolder, position: Int) {
-        val isSelected = when {
-            position == selectedPos && selectedItem == null -> true
-            position == selectedPos && items[position].hashCode() == selectedItem.hashCode() -> true
-            else -> false
-        }
-        holder.bind(items[position],isSelected)
-        holder.binding.root.setOnClickListener {
-            notifyItemChanged(selectedPos)
-            notifyItemChanged(items.indexOf(selectedItem))
-            selectedPos = holder.layoutPosition
-            selectedItem = items[selectedPos]
-            notifyItemChanged(selectedPos)
-            notifyItemChanged(items.indexOf(selectedItem))
-            listener(items[selectedPos])
-        }
+        holder.bind(getItem(position),listener,selectedItem)
     }
 
-    override fun getItemCount(): Int = items.size
+    /*override fun getItemCount(): Int = items.size
 
     fun updateItems(data: List<PointItem>) {
         val diffCallback = object : DiffUtil.Callback() {
@@ -94,5 +102,7 @@ class TaskListAdapter(val listener: (PointItem) -> Unit) : RecyclerView.Adapter<
         items = data
         diffResult.dispatchUpdatesTo(this)
 
-    }
+    }*/
+
+
 }

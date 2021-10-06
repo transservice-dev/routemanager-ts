@@ -16,6 +16,7 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -210,7 +211,7 @@ class CameraFragment : Fragment() {
         val scaleGestureDetector = ScaleGestureDetector(context, scaleGestureListener)
 
         // Tap to focus and Pinch to zoom
-        viewFinder.setOnTouchListener(View.OnTouchListener { v, event ->
+        viewFinder.setOnTouchListener(View.OnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     return@OnTouchListener true
@@ -429,7 +430,13 @@ class CameraFragment : Fragment() {
                             // We can only change the foreground Drawable using API level 23+ API
                             // Update the gallery thumbnail with latest picture taken
                             view?.post {
-                                navController?.navigate(
+                                if (photoFile.absolutePath.isNullOrBlank()) {
+                                    Log.d(TAG,"Error while saving the target file, file name: $fileName")
+                                    Toast.makeText(requireContext(),"Ошибка при сохранении файла, неверное имя файла",Toast.LENGTH_LONG).show()
+                                    return@post
+                                }
+
+                                navController.navigate(
                                     CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
                                         photoFile.absolutePath,
                                         point, pointAction
@@ -633,6 +640,12 @@ class CameraFragment : Fragment() {
         fName = fName.replace(")", "")
         fName = fName.replace("-", "_")
         fName = fName.replace("\"", "")
+        fName = fName.replace("*", "")
+        fName = fName.replace("|", "")
+        fName = fName.replace(">", "")
+        fName = fName.replace("<", "")
+        fName = fName.replace("]", "")
+        fName = fName.replace("[", "")
 
         return if (fName.length > 139) "${fName.substring(0,139)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
     }

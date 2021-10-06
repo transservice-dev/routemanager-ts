@@ -1,9 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_bottom_sheet.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_darkprimary.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_darkprimary_with_states.xml" value="0.21614583333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_gradient_list.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_photo_list_white.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_regionlist_white.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_task_list_polygon.xml" value="0.215625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_task_list_white.xml" value="0.215625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_rect_primary.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_darkPrimary.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_darkprimary.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_gray.xml" value="0.21614583333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_primary.xml" value="0.215625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_primary_light.xml" value="0.215625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_add_24.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_add_32.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_back.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_block_24.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_check_24_small.xml" value="0.32916666666666666" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_landscape_24.xml" value="0.26458333333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_make_route.xml" value="0.32916666666666666" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_navigate_before_24.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_navigation_24.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/activity_main.xml" value="0.16847826086956522" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/bottomsheet_task_list.xml" value="0.21422101449275363" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/dialog_polygon_selection.xml" value="0.28802083333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_camera.xml" value="0.21041666666666667" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_fact_dialog.xml" value="0.17831813576494426" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_gallery.xml" value="0.17831813576494426" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_point.xml" value="0.2" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_polygon_list.xml" value="0.2" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_polygon_selection.xml" value="0.2726449275362319" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_region_list.xml" value="0.2028985507246377" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_route_settings.xml" value="0.2726449275362319" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_task_list.xml" value="0.17346014492753623" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_vehicle_list.xml" value="0.13652482269503546" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_polygon_list.xml" value="0.24139492753623187" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_polygon_row.xml" value="0.2046875" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_region_list.xml" value="0.13652482269503546" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_route_list.xml" value="0.13652482269503546" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_task_list.xml" value="0.15670289855072464" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/search_view_layout.xml" value="0.290625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/switch_item.xml" value="0.290625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/menu/menu_search.xml" value="0.21666666666666667" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="SuppressKotlinCodeStyleNotification">
+    <option name="disableForAll" value="true" />
   </component>
 </project>

@@ -13,7 +13,7 @@ class StartScreenViewModel : ViewModel() {
 
     private val repository = RootRepository
     private val currentTask = Transformations.map(repository.getTask()) {
-        return@map it
+        it
     }
     val version get() = AppClass.appVersion
 
@@ -30,7 +30,7 @@ class StartScreenViewModel : ViewModel() {
 
     }
 
-    fun syncTaskData(reload: Boolean = false): MutableLiveData<LoadResult<Int>>{
+    fun syncTaskData(): MutableLiveData<LoadResult<Int>>{
         val result: MutableLiveData<LoadResult<Int>> =
             MutableLiveData(LoadResult.Loading())
         repository.syncData { loadResult ->
@@ -52,9 +52,9 @@ class StartScreenViewModel : ViewModel() {
         return currentTask
     }
 
-    fun updateTaskParams() {
+    /*fun updateTaskParams() {
         repository.updateCurrentTask()
-    }
+    }*/
 
     fun getUploadResult(): MutableLiveData<LoadResult<Boolean>> {
         return uploadResult

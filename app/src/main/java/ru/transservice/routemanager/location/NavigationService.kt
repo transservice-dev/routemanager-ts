@@ -55,10 +55,8 @@ class NavigationService : Service() {
                     acquire(10*60*1000L /*10 minutes*/)
                 }
             }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(1,createNotification())
-        }
-       // Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        startForeground(1,createNotification())
+        // Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         CoroutineScope(Dispatchers.Default).launch {
             trackerClient.startTrackingLocation()
         }
@@ -78,9 +76,7 @@ class NavigationService : Service() {
                     it.release()
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                stopForeground(true)
-            }
+            stopForeground(true)
             stopSelf()
         } catch (e: Exception) {
             Log.e(TAG,"Service stopped without being started: ${e.message}")

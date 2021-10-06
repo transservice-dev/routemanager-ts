@@ -1,10 +1,7 @@
 package ru.transservice.routemanager.database
 
 import androidx.room.*
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointFile
-import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.data.local.entities.Task
+import ru.transservice.routemanager.data.local.entities.*
 
 @Dao
 interface DaoInterface {
@@ -14,7 +11,7 @@ interface DaoInterface {
 
     @Transaction
     fun insertPointList(pointList: List<PointItem>): Int {
-        val currentList = getAllPointList()
+        val currentList = getOnlyPointsList()
         val newList = insertPointListOnlyNew(pointList)
         return newList.size - currentList.size
     }
@@ -22,19 +19,25 @@ interface DaoInterface {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPointListOnlyNew(pointList: List<PointItem>): Array<Long>
 
-    @Query("SELECT * from pointList_table ORDER BY tripNumber, rowNumber")
+    @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")
     fun getAllPointList(): MutableList<PointItem>
 
-    @Query("SELECT * from pointList_table ORDER BY tripNumber, rowNumber LIMIT 1")
+    @Query("SELECT * from pointList_table WHERE NOT polygon ORDER BY tripNumberFact, tripNumber, rowNumber")
+    fun getOnlyPointsList(): MutableList<PointItem>
+
+    @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber LIMIT 1")
     fun getFirstPoint(): PointItem
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTask(task: Task): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertPolygons(polygons: List<PolygonItem>)
+
     @Query("SELECT * from currentRoute_table LIMIT 1")
     fun selectTask(): Task
 
-    @Query("SELECT * from pointList_table ORDER BY tripNumber, rowNumber")
+    @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")
     fun getPointList(): List<PointItem>
 
     @Update
@@ -100,4 +103,80 @@ interface DaoInterface {
 
     @Query("DELETE FROM currentRoute_table")
     fun deleteCurrentRoute()
+
+    @Query("DELETE FROM polygon_table")
+    fun deletePolygons()
+
+    @Query("SELECT * from polygon_table ORDER BY name")
+    fun getPolygonList(): List<PolygonItem>
+
+    @Query("SELECT * from polygon_table WHERE by_default ORDER BY tripNumber")
+    fun getCurrentPolygonList(): List<PolygonItem>
+
+    @Query("SELECT * from polygon_table WHERE by_default and NOT done ORDER BY tripNumber LIMIT 1")
+    fun getNextPolygon(): PolygonItem
+
+    @Update
+    fun updatePolygon(polygonItem: PolygonItem)
+
+    @Insert
+    fun insertPoint(point: PointItem)
+
+    @Query("UPDATE pointList_table SET tripNumberFact = :value WHERE done and NOT polygon and tripNumberFact = 1000")
+    fun updateTripNumberFact(value: Int)
+
+    @Transaction
+    fun addPolygon(polygon: PointItem){
+        insertPoint(polygon)
+        updateTripNumberFact(polygon.tripNumberFact)
+    }
+
+    @Update
+    fun updateTask(task: Task)
+
+    // Number of points that are done but not unload on polygon
+    @Query("SELECT COUNT(1) as countDone from pointList_table where done AND NOT polygon AND tripNumberFact = 1000 Group By docUID")
+    fun countPointDoneNotUnload(): Int
+
+    //Number of polygon which are not done
+    @Query("SELECT COUNT(1) as countDone from pointList_table where NOT done AND polygon Group By docUID")
+    fun countPolygonsNotDone(): Int
+
+    @Query("SELECT polygonByRow FROM currentRoute_table")
+    fun polygonByRow():Boolean
+
+    @Query("SELECT COUNT(1) FROM polygon_table")
+    fun polygonAvailable():Int
+
+    @Transaction
+    fun unloadingAvailable(): Boolean{
+        val polygonByRow = polygonByRow()
+        if (polygonByRow) return false
+        val countPoints = countPointDoneNotUnload()
+        val countPolygons = countPolygonsNotDone()
+        val countPolygonsAvailable = polygonAvailable()
+        return countPoints > 0 && countPolygons == 0 && countPolygonsAvailable > 0
+    }
+
+    //Delete point with trip number
+    @Query("UPDATE pointList_table SET tripNumberFact = 1000 WHERE tripNumberFact = :tripNumber")
+    fun updatePointsTripNumber(tripNumber: Int)
+
+    //Delete polygon from the point list
+    @Delete
+    fun deletePolygonFromPointList(pointItem: PointItem)
+
+    @Query("SELECT MAX(tripNumberFact) from pointList_table WHERE polygon")
+    fun getLastTripNumber():Int
+
+    @Query("UPDATE currentRoute_table SET lastTripNumber = :tripNumber")
+    fun updateLastTripNumber(tripNumber: Int)
+
+    @Transaction
+    fun deletePolygon(pointItem: PointItem) {
+        updatePointsTripNumber(pointItem.tripNumberFact)
+        deletePolygonFromPointList(pointItem)
+        updateLastTripNumber(getLastTripNumber())
+    }
+
 }

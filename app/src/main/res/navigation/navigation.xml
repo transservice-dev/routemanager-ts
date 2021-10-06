@@ -15,8 +15,8 @@
     <fragment
         android:id="@+id/startScreenFragment"
         android:name="ru.transservice.routemanager.ui.startscreen.StartScreenFragment"
-        android:label="fragment_start_screen"
-        tools:layout="@layout/fragment_start_screen" >
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_start_screen">
         <action
             android:id="@+id/action_startScreenFragment_to_routeSettingsFragment"
             app:destination="@id/routeSettingsFragment" />
@@ -40,8 +40,8 @@
     <fragment
         android:id="@+id/routeSettingsFragment"
         android:name="ru.transservice.routemanager.ui.routesettings.RouteSettingsFragment"
-        android:label="fragment_route_settings"
-        tools:layout="@layout/fragment_route_settings" >
+        android:label="@string/route_settings"
+        tools:layout="@layout/fragment_route_settings">
         <action
             android:id="@+id/action_routeSettingsFragment_to_regionListFragment"
             app:destination="@id/regionListFragment" />
@@ -55,8 +55,8 @@
     <fragment
         android:id="@+id/taskListFragment"
         android:name="ru.transservice.routemanager.ui.task.TaskListFragment"
-        android:label="fragment_task_list"
-        tools:layout="@layout/fragment_task_list" >
+        android:label="@string/points_list"
+        tools:layout="@layout/fragment_task_list">
         <action
             android:id="@+id/action_taskListFragment_to_pointFragment"
             app:destination="@id/pointFragment" />
@@ -66,16 +66,22 @@
         <action
             android:id="@+id/action_taskListFragment_to_photoListFragment"
             app:destination="@id/photoListFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_polygonSelectionFragment"
+            app:destination="@id/polygonSelectionFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_polygonListFragment"
+            app:destination="@id/polygonListFragment" />
     </fragment>
     <fragment
         android:id="@+id/regionListFragment"
         android:name="ru.transservice.routemanager.ui.routesettings.RegionListFragment"
-        android:label="fragment_region_list"
-        tools:layout="@layout/fragment_region_list" >
+        android:label="@string/regions"
+        tools:layout="@layout/fragment_region_list">
         <argument
             android:name="region"
             app:argType="ru.transservice.routemanager.data.local.RegionItem"
-            app:nullable="true"/>
+            app:nullable="true" />
         <action
             android:id="@+id/action_regionListFragment_to_routeSettingsFragment"
             app:destination="@id/routeSettingsFragment"
@@ -85,8 +91,8 @@
     <fragment
         android:id="@+id/vehicleListFragment"
         android:name="ru.transservice.routemanager.ui.routesettings.VehicleListFragment"
-        android:label="fragment_vehicle_list"
-        tools:layout="@layout/fragment_vehicle_list" >
+        android:label="@string/vehicles"
+        tools:layout="@layout/fragment_vehicle_list">
         <action
             android:id="@+id/action_vehicleListFragment_to_routeSettingsFragment"
             app:destination="@id/routeSettingsFragment"
@@ -100,8 +106,8 @@
     <fragment
         android:id="@+id/pointFragment"
         android:name="ru.transservice.routemanager.ui.point.PointFragment"
-        android:label="fragment_point"
-        tools:layout="@layout/fragment_point" >
+        android:label="@string/point_completion"
+        tools:layout="@layout/fragment_point">
         <argument
             android:name="point"
             app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
@@ -114,18 +120,22 @@
         <action
             android:id="@+id/action_pointFragment_to_photoListFragment"
             app:destination="@id/photoListFragment" />
+        <action
+            android:id="@+id/action_pointFragment_to_polygonListFragment"
+            app:destination="@id/polygonListFragment" />
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
         android:name="ru.transservice.routemanager.ui.camera.CameraFragment"
-        android:label="CameraFragment" >
+        android:label="Камера">
         <argument
             android:name="point"
             app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
         <action
             android:id="@+id/action_cameraFragment_to_permissionFragment"
             app:destination="@id/permissionFragment" />
-        <argument android:name="photoOrder"
+        <argument
+            android:name="photoOrder"
             app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder" />
         <action
             android:id="@+id/action_cameraFragment_to_photoFragment"
@@ -156,8 +166,8 @@
     <fragment
         android:id="@+id/photoListFragment"
         android:name="ru.transservice.routemanager.ui.gallery.list.PhotoListFragment"
-        android:label="fragment_photo_list"
-        tools:layout="@layout/fragment_photo_list" >
+        android:label="@string/Photo_gallery"
+        tools:layout="@layout/fragment_photo_list">
         <argument
             android:name="point"
             app:argType="ru.transservice.routemanager.data.local.entities.PointItem"
@@ -172,7 +182,7 @@
     <fragment
         android:id="@+id/galleryFragment"
         android:name="ru.transservice.routemanager.ui.gallery.GalleryFragment"
-        android:label="GalleryFragment" >
+        android:label="@string/all_title">
         <argument
             android:name="currentItem"
             app:argType="integer" />
@@ -186,7 +196,7 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="ru.transservice.routemanager.ui.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="Настройки" />
     <fragment
         android:id="@+id/splashScreenFragment"
         android:name="ru.transservice.routemanager.ui.splashscreen.SplashScreenFragment"
@@ -201,7 +211,7 @@
     <fragment
         android:id="@+id/routeListFragment"
         android:name="ru.transservice.routemanager.ui.routesettings.RouteListFragment"
-        android:label="RouteListFragment" >
+        android:label="@string/routes_title">
         <action
             android:id="@+id/action_routeListFragment_to_routeSettingsFragment"
             app:destination="@id/routeSettingsFragment"
@@ -211,5 +221,30 @@
             android:name="route"
             app:argType="ru.transservice.routemanager.data.local.RouteItem"
             app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/polygonListFragment"
+        android:name="ru.transservice.routemanager.ui.polygon.PolygonListFragment"
+        android:label="@string/choose_polygon" >
+        <action
+            android:id="@+id/action_polygonListFragment_to_polygonSelectionFragment"
+            app:destination="@id/polygonSelectionFragment" />
+        <action
+            android:id="@+id/action_polygonListFragment_to_taskListFragment"
+            app:destination="@id/taskListFragment" />
+        <action
+            android:id="@+id/action_polygonListFragment_to_pointFragment"
+            app:destination="@id/pointFragment" />
+        <argument
+            android:name="requestKey"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/polygonSelectionFragment"
+        android:name="ru.transservice.routemanager.ui.polygon.PolygonSelectionFragment"
+        android:label="@string/polygons">
+        <action
+            android:id="@+id/action_polygonSelectionFragment_to_polygonListFragment"
+            app:destination="@id/polygonListFragment" />
     </fragment>
 </navigation>
