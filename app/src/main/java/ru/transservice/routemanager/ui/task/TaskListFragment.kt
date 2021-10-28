@@ -253,8 +253,7 @@ class TaskListFragment : Fragment() {
         with(binding.btsPointList){
             ibtnCanDone.setOnClickListener {
                 if (viewModel.getCurrentPoint().value!!.polygon) {
-                    val resultPoint = viewModel.getCurrentPoint().value!!.copy(done = true)
-                        .also { it.timestamp = Date() }
+                    val resultPoint = viewModel.getCurrentPoint().value!!.copy(done = true, timestamp = Date(), status = PointStatuses.DONE)
                     viewModel.updateCurrentPoint(resultPoint)
                 }else{
                     startNavService()

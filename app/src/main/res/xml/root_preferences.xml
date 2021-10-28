@@ -11,10 +11,10 @@
             android:singleLine="true"
             android:summary="@string/URLName_Description"
             android:title="@string/serverAddress"
-            app:defaultValue="188.234.242.63"
+            app:defaultValue="mobile.eko-ekb.ru"
             app:useSimpleSummaryProvider="true" />
         <androidx.preference.EditTextPreference
-            android:defaultValue="444"
+            android:defaultValue="443"
             android:inputType="number"
             android:key="URL_PORT"
             android:selectAllOnFocus="true"

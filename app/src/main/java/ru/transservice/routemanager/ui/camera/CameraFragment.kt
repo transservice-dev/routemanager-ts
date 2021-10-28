@@ -52,13 +52,6 @@ import kotlin.math.min
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
 
-/**
- * Main fragment for this app. Implements all camera operations including:
- * - Viewfinder
- * - Photo taking
- * - Image analysis
- */
-
 class CameraFragment : Fragment() {
 
     private lateinit var container: ConstraintLayout
@@ -629,25 +622,13 @@ class CameraFragment : Fragment() {
 
     private fun generateFileName(): String {
         val timeCreated = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU")).format(Date())
-        //var addressName = point.getAddressName().replace("/", "")
         var fName = "${point.routeName}__{$timeCreated}__${point.addressName}"
-        fName = fName.replace("/", "")
-        fName = fName.replace("\\", "")
-        fName = fName.replace(":", "")
-        fName = fName.replace(",", "")
-        fName = fName.replace(".", "")
-        fName = fName.replace("(", "")
-        fName = fName.replace(")", "")
-        fName = fName.replace("-", "_")
-        fName = fName.replace("\"", "")
-        fName = fName.replace("*", "")
-        fName = fName.replace("|", "")
-        fName = fName.replace(">", "")
-        fName = fName.replace("<", "")
-        fName = fName.replace("]", "")
-        fName = fName.replace("[", "")
-
-        return if (fName.length > 139) "${fName.substring(0,139)}_${currentFileOrder.string}" else "${fName}_${currentFileOrder.string}"
+            .filter { it.isLetterOrDigit() || it.isWhitespace() || it.toString() == "_" }
+        val filePostfixSize = "_${currentFileOrder.string}$PHOTO_EXTENSION".toByteArray().size
+        while (fName.toByteArray().size + filePostfixSize > 255) {
+            fName = fName.dropLast(1)
+        }
+        return "${fName}_${currentFileOrder.string}"
     }
 
     private fun animateFocus(x: Float, y: Float) {
@@ -668,12 +649,14 @@ class CameraFragment : Fragment() {
             .setListener(object: Animator.AnimatorListener {
                 override fun onAnimationEnd(animator: Animator?) {
                     ivFocus.visibility = View.INVISIBLE
-                    ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_start,null))
+                    ivFocus.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_focus_start))
+                    //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_start,null))
                         //resources.getDrawable(R.drawable.ic_focus_start,requireActivity().theme))
                 }
 
                 override fun onAnimationStart(animation: Animator?) {
-                    ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_stop,null))
+                    ivFocus.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_focus_stop))
+                    //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_stop,null))
                         //resources.getDrawable(R.drawable.ic_focus_stop,requireActivity().theme))
                 }
 

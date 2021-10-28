@@ -153,7 +153,7 @@ class StartScreenFragment : Fragment() {
     private fun <T>errorDescription(loadResult: LoadResult<T>): String {
         val errorDescription = when (loadResult.e) {
             is UnknownHostException -> "Ошибка: неизвестное имя сервера. Проверьте наличие интернета на устройстве."
-            is SocketTimeoutException -> "Ошибка соединения. Проверьте наличие интернета на устройстве."
+            is SocketTimeoutException -> "Ошибка соединения. Сервер не отвечает. Проверьте наличие интернета на устройстве."
             is SecurityException -> "Ошибка авторизации. Проверьте правильность ввода пароля."
             else -> "При выгрузке/загрузке данных произошла ошибка."
         }

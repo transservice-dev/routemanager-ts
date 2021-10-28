@@ -211,9 +211,12 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
 
     private fun updatePointAndDoneStatus(point: PointItem) {
         repository.checkPointForCompletion(point) { canBeDone ->
+            //val statusChanged = point.done != canBeDone
             point.done = canBeDone
             if (point.done) {
-                point.timestamp = Date()
+                //if (statusChanged) {
+                    point.timestamp = Date()
+                //}
                 point.status = PointStatuses.DONE
             }
             updateCurrentPoint(point)

@@ -85,5 +85,6 @@
     <string name="showall_title">Показать все</string>
     <string name="make_picture_after">Сделать фото после</string>
     <string name="fullList">Полный список</string>
+    <string name="permission_title">Разрешения</string>
 
 </resources>

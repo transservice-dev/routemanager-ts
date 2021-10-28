@@ -10,17 +10,14 @@ import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 
 interface PostgrestApi {
 
-    @GET("regions")
+    @POST("rpc/getRegions")
     suspend fun getRegionsList(): Response<List<RegionRes>>
 
-    @GET("vehicle")
-    suspend fun getAllVehicles(): Response<List<VehicleRes>>
+    @POST("rpc/getVehicles")
+    suspend fun getVehicles(@Body params: RegionParam): Response<List<VehicleRes>>
 
-    @GET("vehicle")
-    suspend fun getVehiclesByRegion(@Query("regionUID") regionUID: String): Response<List<VehicleRes>>
-
-    @GET("routes")
-    suspend fun getRoutesByRegion(@Query("region") regionUID: String): Response<List<RouteRes>>
+    @POST("rpc/getRoutes")
+    suspend fun getRoutes(@Body params: RegionParam): Response<List<RouteRes>>
 
     @POST("rpc/getTask")
     suspend fun getTask(@Body taskRequestBody: TaskRequestBody): Response<TaskRes>

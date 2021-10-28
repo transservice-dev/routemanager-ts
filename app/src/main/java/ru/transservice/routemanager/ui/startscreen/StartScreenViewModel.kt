@@ -19,6 +19,12 @@ class StartScreenViewModel : ViewModel() {
 
     private val uploadResult: MutableLiveData<LoadResult<Boolean>> = MutableLiveData()
 
+    /*private val selfObserver = Observer<LoadResult<Boolean>> { _ ->  }
+
+    init {
+        uploadResult.observeForever { selfObserver }
+    }*/
+
     class StartScreenViewModelFactory : ViewModelProvider.Factory{
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if(modelClass.isAssignableFrom(StartScreenViewModel::class.java)){

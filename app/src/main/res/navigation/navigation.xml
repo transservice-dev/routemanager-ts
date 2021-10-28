@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/permissionFragment"
         android:name="ru.transservice.routemanager.ui.permission.PermissionFragment"
-        android:label="fragment_permission" >
+        android:label="@string/permission_title">
         <action
             android:id="@+id/action_permissionFragment_to_startScreenFragment"
             app:destination="@id/startScreenFragment" />

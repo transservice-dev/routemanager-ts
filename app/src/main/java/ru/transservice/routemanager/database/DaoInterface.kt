@@ -166,7 +166,7 @@ interface DaoInterface {
     @Delete
     fun deletePolygonFromPointList(pointItem: PointItem)
 
-    @Query("SELECT MAX(tripNumberFact) from pointList_table WHERE polygon")
+    @Query("SELECT MAX(tripNumberFact) from pointList_table WHERE polygon and tripNumberFact < 1000")
     fun getLastTripNumber():Int
 
     @Query("UPDATE currentRoute_table SET lastTripNumber = :tripNumber")

@@ -102,8 +102,10 @@ object RetrofitClient {
 
     private val okHttpClientApache = OkHttpClient.Builder().apply {
         connectTimeout(60, TimeUnit.SECONDS)
-        val sslSettings = customSSL()
-        sslSocketFactory(sslSettings.first, sslSettings.second)
+        if (!RootRepository.baseUrl.contains("eko-ekb.ru")) {
+            val sslSettings = customSSL()
+            sslSocketFactory(sslSettings.first, sslSettings.second)
+        }
     }.build()
 
     fun getApacheConnection(): PostgrestApi{
@@ -115,6 +117,7 @@ object RetrofitClient {
     }
 
     fun updateConnectionSettings(){
+        okHttpClient.sslSocketFactory()
         retrofit = Retrofit.Builder()
             .baseUrl(RootRepository.baseUrl)
             .addConverterFactory(GsonConverterFactory.create(gson))

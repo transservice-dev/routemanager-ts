@@ -41,11 +41,10 @@ data class PointItem(
     @ColumnInfo(defaultValue = "0")
     val polygonByRow: Boolean,
     @ColumnInfo(defaultValue = "1000")
-    var tripNumberFact: Int
-) : Serializable {
-    var timestamp: Date? = null
+    var tripNumberFact: Int,
+    var timestamp: Date? = null,
     var status : PointStatuses = PointStatuses.NOT_VISITED
-
+) : Serializable {
     @Ignore
     var pointActionsArray: ArrayList<PointActions> = ArrayList()
     @Ignore

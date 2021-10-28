@@ -150,35 +150,31 @@ class RouteSettingsViewModel : ViewModel() {
                    vehicles = list
                 }
             }
-            if (vehicles.isNotEmpty()) {
-                mediatorListVehicleResult.value = if (queryStr.isNotEmpty())
-                    LoadResult.Success(vehicles
-                            .filter { it.number.contains(queryStr, true) })
-                else LoadResult.Success(vehicles)
-            }
+            mediatorListVehicleResult.value = if (queryStr.isNotEmpty())
+                LoadResult.Success(vehicles
+                    .filter { it.number.contains(queryStr, true) })
+            else LoadResult.Success(vehicles)
+
         }
 
         mediatorListVehicleResult.addSource(vehicleList) { filterF.invoke() }
         mediatorListVehicleResult.addSource(query) { filterF.invoke() }
     }
 
-    fun addSourcesRoute(){
+    fun addSourcesRoute() {
         val filterF = {
             val queryStr = query.value!!
             var routes: List<RouteItem> = listOf()
-            routeList.value?.let{
+            routeList.value?.let {
                 it.data?.let { list ->
                     routes = list
                 }
             }
-            if (routes.isNotEmpty()) {
-                mediatorListRouteResult.value = if (queryStr.isNotEmpty())
-                    LoadResult.Success(routes
-                        .filter { it.name.contains(queryStr, true) })
-                else LoadResult.Success(routes)
-            }
+            mediatorListRouteResult.value = if (queryStr.isNotEmpty())
+                LoadResult.Success(routes
+                    .filter { it.name.contains(queryStr, true) })
+            else LoadResult.Success(routes)
         }
-
         mediatorListRouteResult.addSource(routeList) { filterF.invoke() }
         mediatorListRouteResult.addSource(query) { filterF.invoke() }
     }
@@ -192,12 +188,12 @@ class RouteSettingsViewModel : ViewModel() {
                     regions = list
                 }
             }
-            if (regions.isNotEmpty()) {
-                mediatorListRegionResult.value = if (queryStr.isNotEmpty())
-                    LoadResult.Success(regions
-                            .filter { it.name.contains(queryStr, true) })
-                else LoadResult.Success(regions)
-            }
+
+            mediatorListRegionResult.value = if (queryStr.isNotEmpty())
+                LoadResult.Success(regions
+                    .filter { it.name.contains(queryStr, true) })
+            else LoadResult.Success(regions)
+
         }
 
         mediatorListRegionResult.addSource(regionList) { filterF.invoke() }

@@ -1,6 +1,5 @@
 package ru.transservice.routemanager.repositories
 
-import android.nfc.Tag
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -145,7 +144,7 @@ object RootRepository {
 
     fun loadAllVehicles(complete: (vehicles: List<VehicleRes>) -> Unit){
         scope.launch {
-            val response = RetrofitClient.getPostgrestApi().getAllVehicles()
+            val response = RetrofitClient.getPostgrestApi().getVehicles(RegionParam())
             if (responseResult(response) is LoadResult.Success) {
                 if (!response.body().isNullOrEmpty()) {
                     complete.invoke(response.body()!!)
@@ -157,11 +156,13 @@ object RootRepository {
     fun loadVehiclesByRegion(regionItem: RegionItem,complete: (vehicles: List<VehicleRes>) -> Unit){
         Log.d(TAG, "Loading Vehicles START")
         scope.launch {
-            val response = RetrofitClient.getPostgrestApi().getVehiclesByRegion("eq.${regionItem.uid}")
+            val response = RetrofitClient.getPostgrestApi().getVehicles(RegionParam(regionItem.uid))
             if (responseResult(response) is LoadResult.Success) {
                 if (!response.body().isNullOrEmpty()) {
                     Log.d(TAG, "Loading Vehicles FINISHED")
                     complete.invoke(response.body()!!)
+                }else{
+                    complete.invoke(listOf())
                 }
             }
         }
@@ -170,7 +171,7 @@ object RootRepository {
     fun loadRoutesByRegion(regionItem: RegionItem,complete: (vehicles: List<RouteRes>) -> Unit){
         scope.launch {
             Log.d(TAG, "Loading Routes START")
-            val response = RetrofitClient.getPostgrestApi().getRoutesByRegion("eq.${regionItem.uid}")
+            val response = RetrofitClient.getPostgrestApi().getRoutes(RegionParam(regionItem.uid))
             if (responseResult(response) is LoadResult.Success) {
                 if (!response.body().isNullOrEmpty()) {
                     Log.d(TAG, "Loading Routes FINISHED")
@@ -616,6 +617,7 @@ object RootRepository {
                         task.countPoint = pointList.filter { !it.polygon }.size
                         task.countPointDone = dbDao.countPointDone()
                         task.polygonByRow = pointList[0].polygonByRow ?: false
+                        task.lastTripNumber = 0
                             //if (pointList[0].polygonByRow == null) false else pointList[0].polygonByRow
                     }
             dbDao.insertTask(task)
