@@ -1,5 +1,6 @@
 package ru.transservice.routemanager.ui.task
 
+import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
@@ -27,9 +28,11 @@ class TaskListAdapter(val listener: (PointItem) -> Unit) : ListAdapter<PointItem
                 if (item.done) {
                     ivPointStatus.setImageResource(R.drawable.ic_check_24_small)
                     ivPointStatus.visibility = View.VISIBLE
+                    ivPointStatus.setColorFilter(Color.GREEN)
                 }else if (item.reasonComment != "") {
                     ivPointStatus.setImageResource(R.drawable.ic_block_24_small)
                     ivPointStatus.visibility = View.VISIBLE
+                    ivPointStatus.setColorFilter(Color.RED)
                 }else{
                     ivPointStatus.visibility = View.GONE
                 }

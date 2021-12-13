@@ -43,8 +43,8 @@ interface DaoInterface {
     @Update
     fun updatePoint(point: PointItem)
 
-    @Query("UPDATE currentRoute_table SET countPointDone = :countPointDone")
-    fun updateCountPointDone(countPointDone: Int)
+    @Query("UPDATE currentRoute_table SET countPointDone = :countPointDone AND lastTripNumber = :lastTripNumber")
+    fun updateCountPointDoneLastTrip(countPointDone: Int,lastTripNumber: Int)
 
     @Query("SELECT COUNT(1) as countDone from pointList_table where done AND NOT polygon Group By docUID")
     fun countPointDone(): Int
@@ -53,7 +53,8 @@ interface DaoInterface {
     fun updatePointWithRoute(point: PointItem) {
         updatePoint(point)
         val countDone = countPointDone()
-        updateCountPointDone(countDone)
+        val lastTripNumber = getLastTripNumber()
+        updateCountPointDoneLastTrip(countDone,lastTripNumber)
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

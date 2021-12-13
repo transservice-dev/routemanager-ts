@@ -707,7 +707,7 @@ object RootRepository {
         scope.launch {
             val filesBefore = dbDao.getPointFilesByOrder(pointItem.lineUID,PhotoOrder.PHOTO_BEFORE)
             val filesAfter = dbDao.getPointFilesByOrder(pointItem.lineUID,PhotoOrder.PHOTO_AFTER)
-            val photoAndFactDone = pointItem.countFact != -1.0 && filesAfter.isNotEmpty() && filesBefore.isNotEmpty()
+            val photoAndFactDone = pointItem.countFact > 0 && filesAfter.isNotEmpty() && filesBefore.isNotEmpty()
             val canBeDone = if (pointItem.polygonByRow) {
                 !pointItem.polygonNotFilled() && photoAndFactDone
             }else{

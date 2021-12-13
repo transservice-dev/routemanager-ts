@@ -239,7 +239,8 @@ class TaskListFragment : Fragment() {
             btsBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
             with(binding.btsPointList) {
-                ibtnCannotDone.visibility = if (point.polygon) View.GONE else View.VISIBLE
+                //ibtnCannotDone.visibility = if (point.polygon) View.GONE else View.VISIBLE
+                ibtnCannotDone.visibility = View.GONE
                 ibtnPhotos.visibility = if (point.polygon) View.GONE else View.VISIBLE
                 ibtnEdit.visibility = if (point.polygon) View.VISIBLE else View.GONE
                 ibtnDelete.visibility = if (point.polygon && !point.done) View.VISIBLE else View.GONE
@@ -257,7 +258,9 @@ class TaskListFragment : Fragment() {
                     viewModel.updateCurrentPoint(resultPoint)
                 }else{
                     startNavService()
-                    navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.DONE))
+                    viewModel.getCurrentPoint().value?.let{
+                        navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(it,it.status))
+                    }
                 }
                 btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED
             }

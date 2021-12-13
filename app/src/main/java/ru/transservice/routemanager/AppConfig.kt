@@ -4,6 +4,7 @@ import ru.transservice.routemanager.data.local.entities.FailureReasons
 
 object AppConfig {
     val FAILURE_REASONS = arrayOf(
+        FailureReasons.EMPTY_VALUE.reasonTitle,
         FailureReasons.NO_GARBAGE.reasonTitle,
         FailureReasons.CARS_ON_POINT.reasonTitle,
         FailureReasons.ROAD_REPAIR.reasonTitle,

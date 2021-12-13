@@ -6,17 +6,23 @@
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_bottom_sheet.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_darkprimary.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_darkprimary_with_states.xml" value="0.21614583333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_primary_selector.xml" value="0.23958333333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_button_selector.xml" value="0.24583333333333332" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_gradient_list.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_photo_list_white.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_regionlist_white.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_task_list_polygon.xml" value="0.215625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_item_task_list_white.xml" value="0.215625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_rect_primary.xml" value="0.2890625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_rect_white.xml" value="0.24583333333333332" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_darkPrimary.xml" value="0.23854166666666668" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_darkprimary.xml" value="0.23854166666666668" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_gray.xml" value="0.21614583333333334" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_primary.xml" value="0.215625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_primary_light.xml" value="0.215625" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_primary_unable.xml" value="0.23958333333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/bg_round_rect_white.xml" value="0.23958333333333334" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/btn_test.xml" value="0.2859375" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_add_24.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_add_32.xml" value="0.2890625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/drawable/ic_back.xml" value="0.23854166666666668" />
@@ -58,5 +64,12 @@
   </component>
   <component name="SuppressKotlinCodeStyleNotification">
     <option name="disableForAll" value="true" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.2" />
+      </ProjectState>
+    </option>
   </component>
 </project>

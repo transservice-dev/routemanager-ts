@@ -36,16 +36,42 @@ class Converters {
             }
         }
 
+        /*@TypeConverter
+        @JvmStatic
+        fun pointStatusToInt(pointStatus: PointStatuses): Int {
+            return when (pointStatus) {
+                PointStatuses.NOT_VISITED -> -1
+                PointStatuses.CANNOT_DONE -> 0
+                PointStatuses.DONE -> 1
+            }
+        }
+
         @TypeConverter
         @JvmStatic
-        fun pointStatusToString(pointStatuses: PointStatuses): String {
-            return pointStatuses.toString()
+        fun IntToPointStatus(value: Int): PointStatuses {
+            return when (value) {
+                -1 -> PointStatuses.NOT_VISITED
+                0 -> PointStatuses.CANNOT_DONE
+                1 -> PointStatuses.DONE
+                else -> PointStatuses.NOT_VISITED
+            }
+        }*/
+
+        @TypeConverter
+        @JvmStatic
+        fun pointStatusToString(pointStatus: PointStatuses): String {
+            return pointStatus.toString()
         }
 
         @TypeConverter
         @JvmStatic
         fun stringToPointStatus(value: String): PointStatuses {
-            return PointStatuses.NOT_VISITED
+            return when (value) {
+                "NOT_VISITED" -> PointStatuses.NOT_VISITED
+                "CANNOT_DONE" -> PointStatuses.CANNOT_DONE
+                "DONE" -> PointStatuses.DONE
+                else -> PointStatuses.NOT_VISITED
+            }
         }
 
 

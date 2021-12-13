@@ -185,6 +185,7 @@ enum class PointStatuses : Serializable {
 }
 
 enum class FailureReasons(val reasonTitle: String){
+    EMPTY_VALUE("Причина не указана"),
     NO_GARBAGE("нет ТКО"),
     CARS_ON_POINT("нет проезда к КП (заставлено автомашинами)"),
     ROAD_REPAIR("нет проезда (ремонт дороги)"),

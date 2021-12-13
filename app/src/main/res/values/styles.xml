@@ -3,6 +3,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorPrimaryToDark</item>
+        <item name="colorOnPrimary">@color/colorWhite</item>
         <item name="android:windowBackground">@drawable/bg_gradient_list</item>
         <item name="android:textSize">@dimen/text_size_standart</item>
         <item name="android:selectableItemBackgroundBorderless">@color/colorPrimary</item>
@@ -10,4 +11,12 @@
     <style name="PreferenceScreen">
         <item name="android:textColor">@color/colorPrimaryDark</item>
     </style>
+
+    <style name="DefButton" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/AppTheme</item>
+        <item name="android:padding">12dp</item>
+        <item name="colorOnSurface">@color/color_primary_selector</item>
+        <item name="backgroundTint">@color/color_primary_selector</item>
+    </style>
+
 </resources>

@@ -33,9 +33,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="Наименование точки"
+                    android:paddingRight="@dimen/margin_small"
                     android:textSize="@dimen/text_size_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/iv_pointStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_check_24_small"
+                    android:contentDescription="@string/pointStatusDescription" />
 
                 <LinearLayout
                     android:id="@+id/containerInfo"
@@ -78,147 +88,106 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/buttonsToDo"
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/sw_pointStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/pointInfo"
+                app:layout_constraintStart_toStartOf="@id/pointInfo"
+                android:layout_margin="@dimen/margin_small8"
+                android:padding="@dimen/margin_small8"
+                android:textOn="@string/text_point_can_be_done"
+                android:textOff="@string/text_point_cannot_be_done"
+                android:text="@string/text_point_can_be_done"
+                android:textSize="@dimen/text_size_standart"
                 android:background="@drawable/bg_round_rect_white"
-                android:elevation="5dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pointInfo">
+                android:textColor="@android:color/secondary_text_light"
+                android:elevation="5dp"/>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutTakePhotoBefore"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btns_main_action"
+                app:layout_constraintTop_toBottomOf="@+id/sw_pointStatus"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="@dimen/margin_small16"
+                android:layout_marginHorizontal="@dimen/margin_small8"
+
+                android:orientation="vertical"
+                android:background="@drawable/bg_round_rect_white">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/margin_small8">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_photo_before"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/bg_round_rect_primary"
+                        android:layout_weight="4"
                         android:text="@string/photo_before_title"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/guidelineTakePhotoBefore"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="MissingConstraints" />
+                        android:theme="@style/DefButton" />
 
-                    <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guidelineTakePhotoBefore"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        app:layout_constraintGuide_percent="0.75" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_view_photo_before"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_weight="1"
+                        app:icon="@drawable/ic_done_24"/>
+                </LinearLayout>
 
-                    <ImageView
-                        android:id="@+id/iv_done_photo_before"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_done_24"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/guidelineTakePhotoBefore"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutSetCountFact"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layoutTakePhotoBefore">
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/margin_small8">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_set_fact"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/bg_round_rect_primary"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
                         android:text="@string/set_countfact_title"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/guidelineSetCountFact"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="MissingConstraints" />
-
-                    <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guidelineSetCountFact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        app:layout_constraintGuide_percent="0.75" />
+                        android:theme="@style/DefButton"
+                        tools:enabled="false"/>
 
                     <TextView
                         android:id="@+id/tv_count_fact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginEnd="8dp"
-                        android:text="@string/doneTitle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/guidelineSetCountFact"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_weight="1"
+                        tools:text="1.0"/>
+                </LinearLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutTakePhotoAfter"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layoutSetCountFact">
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/margin_small8">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_photo_after"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/bg_round_rect_primary"
-                        android:text="@string/photo_after_title"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/guidelineTakePhotoAfter"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="MissingConstraints" />
+                        android:layout_weight="4"
+                        android:text="@string/photo_before_title"
+                        android:theme="@style/DefButton"
+                        tools:enabled="false"/>
 
-                    <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guidelineTakePhotoAfter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        app:layout_constraintGuide_percent="0.75" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_view_photo_after"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_weight="1"
+                        app:icon="@drawable/ic_done_24"/>
+                </LinearLayout>
 
-                    <ImageView
-                        android:id="@+id/iv_done_photo_after"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_done_24"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/guidelineTakePhotoAfter"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layoutCantDone"
@@ -232,7 +201,7 @@
                 android:elevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonsToDo">
+                app:layout_constraintTop_toBottomOf="@+id/btns_main_action">
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layoutTakePhotoCantDone"
                     android:layout_width="match_parent"
@@ -249,7 +218,7 @@
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="8dp"
                         android:layout_marginBottom="8dp"
-                        android:background="@drawable/bg_round_rect_primary"
+                        android:background="@drawable/bg_button_primary_selector"
                         android:text="@string/photo_title"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/guidelineTakePhotoCantDone"

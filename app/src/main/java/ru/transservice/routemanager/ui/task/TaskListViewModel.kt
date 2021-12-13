@@ -205,21 +205,55 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
         currentPoint.value?.let { pointItem ->
             val resultPoint = pointItem.copy(countFact = fact)
             resultPoint.setCountOverFromPlanAndFact()
-            updateCurrentPoint(resultPoint)
+            updatePointAndDoneStatus(resultPoint)
+            //updateCurrentPoint(resultPoint)
         }
     }
 
     private fun updatePointAndDoneStatus(point: PointItem) {
         repository.checkPointForCompletion(point) { canBeDone ->
-            //val statusChanged = point.done != canBeDone
+            val statusChanged = point.done != canBeDone
             point.done = canBeDone
-            if (point.done) {
-                //if (statusChanged) {
-                    point.timestamp = Date()
-                //}
-                point.status = PointStatuses.DONE
+            if (statusChanged) {
+                point.timestamp = Date()
+
+                when {
+                    point.done -> point.status = PointStatuses.DONE
+                    reasonComment != "" ->  {
+                        point.status = PointStatuses.CANNOT_DONE
+                        point.reasonComment = reasonComment
+                    }
+                }
+
+                if (point.done) {
+                    point.status = PointStatuses.DONE
+                }
             }
+            if (point.done && point.tripNumberFact == 2000)
+                point.tripNumberFact = 1000
+            if (point.done && point.polygonByRow && point.tripNumberFact >= 1000)
+                repository.getTask().value?.let {
+                    point.tripNumberFact = it.lastTripNumber + 1
+                }
             updateCurrentPoint(point)
+        }
+    }
+
+    fun updateUndonePoint(){
+        /*currentPoint.value?.let { pointItem ->
+            val resultPoint = pointItem.copy(reasonComment =  reasonComment, tripNumberFact = 2000)
+            updatePointAndDoneStatus(resultPoint)
+        }*/
+        currentPoint.value?.let{ point ->
+        val resultPoint =  point
+            .copy(reasonComment =  reasonComment, tripNumberFact = 2000)
+            .also {
+                if (it.timestamp == null){
+                    it.timestamp = Date()
+                }
+                it.status = PointStatuses.CANNOT_DONE
+            }
+            updateCurrentPoint(resultPoint)
         }
     }
 

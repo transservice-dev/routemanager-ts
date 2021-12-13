@@ -86,5 +86,8 @@
     <string name="make_picture_after">Сделать фото после</string>
     <string name="fullList">Полный список</string>
     <string name="permission_title">Разрешения</string>
+    <string name="text_point_can_be_done">Вывоз возможен</string>
+    <string name="text_point_cannot_be_done">Вывоз невозможен</string>
+    <string name="yes">Да</string>
 
 </resources>
