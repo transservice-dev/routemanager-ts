@@ -43,7 +43,7 @@ interface DaoInterface {
     @Update
     fun updatePoint(point: PointItem)
 
-    @Query("UPDATE currentRoute_table SET countPointDone = :countPointDone AND lastTripNumber = :lastTripNumber")
+    @Query("UPDATE currentRoute_table SET countPointDone = :countPointDone, lastTripNumber = :lastTripNumber")
     fun updateCountPointDoneLastTrip(countPointDone: Int,lastTripNumber: Int)
 
     @Query("SELECT COUNT(1) as countDone from pointList_table where done AND NOT polygon Group By docUID")
@@ -53,7 +53,7 @@ interface DaoInterface {
     fun updatePointWithRoute(point: PointItem) {
         updatePoint(point)
         val countDone = countPointDone()
-        val lastTripNumber = getLastTripNumber()
+        val lastTripNumber = getLastTripNumberByPoints()
         updateCountPointDoneLastTrip(countDone,lastTripNumber)
     }
 
@@ -169,6 +169,9 @@ interface DaoInterface {
 
     @Query("SELECT MAX(tripNumberFact) from pointList_table WHERE polygon and tripNumberFact < 1000")
     fun getLastTripNumber():Int
+
+    @Query("SELECT MAX(tripNumberFact) from pointList_table WHERE tripNumberFact < 1000")
+    fun getLastTripNumberByPoints():Int
 
     @Query("UPDATE currentRoute_table SET lastTripNumber = :tripNumber")
     fun updateLastTripNumber(tripNumber: Int)

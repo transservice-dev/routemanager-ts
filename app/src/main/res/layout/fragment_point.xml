@@ -14,16 +14,16 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/backLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/pointInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_small8"
-                android:padding="@dimen/margin_small8"
                 android:background="@drawable/bg_round_rect_white"
                 android:elevation="5dp"
+                android:padding="@dimen/margin_small8"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -32,20 +32,20 @@
                     android:id="@+id/tv_point_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="Наименование точки"
                     android:paddingRight="@dimen/margin_small"
                     android:textSize="@dimen/text_size_title"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Наименование точки" />
 
                 <ImageView
                     android:id="@+id/iv_pointStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/pointStatusDescription"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_check_24_small"
-                    android:contentDescription="@string/pointStatusDescription" />
+                    app:srcCompat="@drawable/ic_check_24_small" />
 
                 <LinearLayout
                     android:id="@+id/containerInfo"
@@ -80,11 +80,11 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"
-                    tools:text="Контрагент"
                     android:textSize="@dimen/text_size_title"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/containerInfo" />
+                    app:layout_constraintTop_toBottomOf="@id/containerInfo"
+                    tools:text="Контрагент" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -92,51 +92,57 @@
                 android:id="@+id/sw_pointStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/pointInfo"
-                app:layout_constraintStart_toStartOf="@id/pointInfo"
                 android:layout_margin="@dimen/margin_small8"
-                android:padding="@dimen/margin_small8"
-                android:textOn="@string/text_point_can_be_done"
-                android:textOff="@string/text_point_cannot_be_done"
-                android:text="@string/text_point_can_be_done"
-                android:textSize="@dimen/text_size_standart"
                 android:background="@drawable/bg_round_rect_white"
+                android:elevation="5dp"
+                android:padding="@dimen/margin_small8"
+                android:text="@string/text_point_can_be_done"
                 android:textColor="@android:color/secondary_text_light"
-                android:elevation="5dp"/>
+                android:textOff="@string/text_point_cannot_be_done"
+                android:textOn="@string/text_point_can_be_done"
+                android:textSize="@dimen/text_size_standart"
+                app:layout_constraintStart_toStartOf="@id/pointInfo"
+                app:layout_constraintTop_toBottomOf="@+id/pointInfo" />
 
             <LinearLayout
+                android:id="@+id/btns_main_action"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/btns_main_action"
-                app:layout_constraintTop_toBottomOf="@+id/sw_pointStatus"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="@dimen/margin_small16"
                 android:layout_marginHorizontal="@dimen/margin_small8"
-
+                android:layout_marginTop="@dimen/margin_small16"
+                android:background="@drawable/bg_round_rect_white"
                 android:orientation="vertical"
-                android:background="@drawable/bg_round_rect_white">
+                android:padding="0dp"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/sw_pointStatus">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_small8">
+                    android:padding="@dimen/margin_small8">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_photo_before"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         android:text="@string/photo_before_title"
                         android:theme="@style/DefButton" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_view_photo_before"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_weight="1"
-                        app:icon="@drawable/ic_done_24"/>
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_done_24"
+                        app:iconSize="48dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -150,48 +156,57 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         android:text="@string/set_countfact_title"
                         android:theme="@style/DefButton"
-                        tools:enabled="false"/>
+                        tools:enabled="false" />
 
                     <TextView
                         android:id="@+id/tv_count_fact"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_weight="1"
-                        tools:text="1.0"/>
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        tools:text="1.0" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_small8">
+                    android:padding="@dimen/margin_small8"
+                    android:paddingVertical="0dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_photo_after"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
-                        android:text="@string/photo_before_title"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="@string/photo_after_title"
                         android:theme="@style/DefButton"
-                        tools:enabled="false"/>
+                        tools:enabled="false" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_view_photo_after"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_weight="1"
-                        app:icon="@drawable/ic_done_24"/>
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_done_24"
+                        app:iconSize="48dp" />
                 </LinearLayout>
 
             </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layoutCantDone"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -199,9 +214,11 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_round_rect_white"
                 android:elevation="5dp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btns_main_action">
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layoutTakePhotoCantDone"
                     android:layout_width="match_parent"
@@ -272,9 +289,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
-                        android:inputType="text"
                         android:hint="@string/reasonInputHint"
                         android:imeOptions="actionDone"
+                        android:inputType="text"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -288,14 +305,14 @@
                 android:id="@+id/tv_polygon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_small8"
                 android:background="@drawable/bg_rect_white"
+                android:hint="@string/polygon"
+                android:padding="@dimen/margin_small8"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layoutCantDone"
-                android:layout_margin="@dimen/margin_small8"
-                android:padding="@dimen/margin_small8"
-                tools:text="@string/polygon"
-                android:hint="@string/polygon"/>
+                tools:text="@string/polygon" />
 
             <Button
                 android:id="@+id/btn_pointDone"
@@ -317,9 +334,9 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="16dp"
-                android:padding="@dimen/margin_small8"
                 android:background="@drawable/bg_round_rect_white"
                 android:elevation="5dp"
+                android:padding="@dimen/margin_small8"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -341,10 +358,10 @@
                     android:id="@+id/tv_comment_text"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/btn_call"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

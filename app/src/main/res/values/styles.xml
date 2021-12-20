@@ -15,8 +15,8 @@
     <style name="DefButton" parent="Widget.MaterialComponents.Button">
         <item name="materialThemeOverlay">@style/AppTheme</item>
         <item name="android:padding">12dp</item>
+        <item name="rippleColor">@color/colorPrimaryLight</item>
         <item name="colorOnSurface">@color/color_primary_selector</item>
-        <item name="backgroundTint">@color/color_primary_selector</item>
     </style>
 
 </resources>

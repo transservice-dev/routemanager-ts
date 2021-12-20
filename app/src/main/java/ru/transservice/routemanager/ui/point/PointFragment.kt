@@ -344,6 +344,9 @@ class PointFragment : Fragment() {
                 btnViewPhotoBefore.visibility = if (it == true) View.VISIBLE else View.INVISIBLE
                 ivDonePhotoCantdone.visibility = if (it == true) View.VISIBLE else View.GONE
                 btnSetFact.isEnabled = it
+
+                reasonSpinner.isEnabled = (it || ivDonePhotoCantdone.isVisible)
+                reasonInput.isEnabled = (it || ivDonePhotoCantdone.isVisible)
             }
         })
 
@@ -364,6 +367,7 @@ class PointFragment : Fragment() {
             }
             lastPointDoneStatus = it.done
             binding.btnPhotoAfter.isEnabled = it.countFact > 0.0
+            pointStatus = it.status
             initViews()
         })
 
