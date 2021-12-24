@@ -440,6 +440,7 @@ class PointFragment : Fragment() {
                 }
                 goBack -> navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
                 //else -> navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                //TODO testing
             }
         }
     }
