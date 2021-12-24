@@ -123,6 +123,11 @@
         <action
             android:id="@+id/action_pointFragment_to_polygonListFragment"
             app:destination="@id/polygonListFragment" />
+        <action
+            android:id="@+id/action_pointFragment_to_taskListFragment"
+            app:destination="@id/taskListFragment"
+            app:popUpTo="@id/taskListFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"

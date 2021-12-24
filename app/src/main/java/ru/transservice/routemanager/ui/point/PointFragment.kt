@@ -1,6 +1,8 @@
 package ru.transservice.routemanager.ui.point
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -15,10 +17,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
@@ -43,6 +47,12 @@ class PointFragment : Fragment() {
     private var lastPointDoneStatus: Boolean = false
 
     private val requestKeyPolygon = "polygonForPoint"
+
+    private val callbackExit = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            checkForCompletion(true)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +85,12 @@ class PointFragment : Fragment() {
     override fun onResume() {
         Log.d(TAG, "onResume")
         super.onResume()
+        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,6 +111,8 @@ class PointFragment : Fragment() {
             }
     }
 
+
+
     private fun initViewModel() {
         viewModel = ViewModelProvider(requireActivity(), TaskListViewModel.TaskListViewModelFactory(requireActivity().application)).get(TaskListViewModel::class.java)
         viewModel.initPointData()
@@ -112,9 +130,15 @@ class PointFragment : Fragment() {
                 tvCountFact.text = if (it.countFact == -1.0) "" else it.countFact.toString()
                 tvPolygon.text = if (it.isPolygonEmpty()) "" else it.polygonName
 
+                swPointStatus.isEnabled = !pointItem.done
+
                 swPointStatus.isChecked = pointStatus != PointStatuses.CANNOT_DONE
                 swPointStatus.setOnCheckedChangeListener { _, isChecked ->
-                    pointStatus = if (isChecked) PointStatuses.NOT_VISITED else PointStatuses.CANNOT_DONE
+                    pointStatus = when {
+                        isChecked && it.done -> PointStatuses.DONE
+                        isChecked && !it.done -> PointStatuses.NOT_VISITED
+                        else -> PointStatuses.CANNOT_DONE
+                    }
                     setViewsVisibility(it)
                 }
 
@@ -244,38 +268,7 @@ class PointFragment : Fragment() {
             }
 
             btnPointDone.setOnClickListener {
-                viewModel.getCurrentPoint().value?.let { pointItem ->
-                    when {
-                        pointItem.done -> {
-                            //viewModel.uploadPointFiles()
-                            requireActivity().onBackPressed()
-                        }
-                        viewModel.reasonComment == FailureReasons.EMPTY_VALUE.reasonTitle -> {
-                            val snackMsg = Snackbar.make(
-                                binding.root,
-                                "Вы не указали причину невывоза, продолжить?",
-                                Snackbar.LENGTH_LONG
-                            )
-
-                            val snackTextView =
-                                snackMsg.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
-                            snackTextView.maxLines = 10
-                            snackMsg.setAction(
-                                resources.getString(R.string.yes)
-                            ) {
-                                viewModel.updateUndonePoint()
-                                requireActivity().onBackPressed()
-                            }
-                            snackMsg.show()
-
-                        }
-                        viewModel.reasonComment != "" -> {
-                            viewModel.updateUndonePoint()
-                            requireActivity().onBackPressed()
-                        }
-                        else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
-                    }
-                }
+                checkForCompletion()
             }
 
 
@@ -367,7 +360,8 @@ class PointFragment : Fragment() {
             }
             lastPointDoneStatus = it.done
             binding.btnPhotoAfter.isEnabled = it.countFact > 0.0
-            pointStatus = it.status
+            if (it.status != PointStatuses.NOT_VISITED)
+                pointStatus = it.status
             initViews()
         })
 
@@ -414,4 +408,39 @@ class PointFragment : Fragment() {
     }
 
 
+
+    fun checkForCompletion(goBack: Boolean = false) {
+        viewModel.getCurrentPoint().value?.let { pointItem ->
+            when {
+                pointStatus == PointStatuses.DONE || pointStatus == PointStatuses.NOT_VISITED-> {
+                    when {
+                        pointItem.done ->  navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                        else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
+                    }
+                }
+                pointStatus == PointStatuses.CANNOT_DONE -> {
+                    when {
+                        viewModel.reasonComment == FailureReasons.EMPTY_VALUE.reasonTitle
+                                && viewModel.getFileBeforeIsDone().value ?: false -> {
+                            val snackMsg = Snackbar.make(
+                                binding.root,
+                                "Вы не указали причину невывоза!",
+                                Snackbar.LENGTH_LONG
+                            )
+                            val snackTextView = snackMsg.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                            snackTextView.maxLines = 10
+                            snackMsg.show()
+                        }
+                        viewModel.reasonComment != "" -> {
+                            viewModel.updateUndonePoint()
+                            navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                        }
+                    }
+
+                }
+                goBack -> navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                //else -> navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+            }
+        }
+    }
 }

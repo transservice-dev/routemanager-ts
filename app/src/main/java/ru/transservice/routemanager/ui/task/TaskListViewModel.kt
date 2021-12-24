@@ -216,19 +216,21 @@ class TaskListViewModel(application: Application) : AndroidViewModel(application
             point.done = canBeDone
             if (statusChanged) {
                 point.timestamp = Date()
-
-                when {
-                    point.done -> point.status = PointStatuses.DONE
-                    reasonComment != "" ->  {
-                        point.status = PointStatuses.CANNOT_DONE
-                        point.reasonComment = reasonComment
-                    }
-                }
-
-                if (point.done) {
-                    point.status = PointStatuses.DONE
+                if (reasonComment != "") {
+                    point.reasonComment = reasonComment
                 }
             }
+            when {
+                point.done ->
+                    point.status = PointStatuses.DONE
+                !point.done && point.countFact != 0.0 && point.countFact != -1.0 ->
+                    point.status = PointStatuses.NOT_VISITED
+                !point.done && point.countFact == 0.0 ->
+                    point.status = PointStatuses.CANNOT_DONE
+                !point.done && point.reasonComment != "" ->
+                    point.status = PointStatuses.CANNOT_DONE
+            }
+
             if (point.done && point.tripNumberFact == 2000)
                 point.tripNumberFact = 1000
             if (point.done && point.polygonByRow && point.tripNumberFact >= 1000)

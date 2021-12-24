@@ -1,6 +1,7 @@
 package ru.transservice.routemanager
 
 import android.util.Log
+import kotlinx.coroutines.*
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -18,11 +19,26 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun loadRegions(){
-        RootRepository.getRegions {
-            it.forEach{
-                Log.i("TEST", "Region $it")
-            }
+    fun coroutinesTest() {
+
+        val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        scope.launch {
+            test1()
+            test2()
         }
+
     }
+
+    suspend fun test1(){
+        delay(1000)
+        Log.d("test1", "test1 is done")
+    }
+
+    suspend fun test2(){
+        delay(200)
+        Log.d("test2", "test2 is done")
+    }
+
+
 }
