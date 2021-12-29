@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.graphics.PointF
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Bundle
@@ -33,6 +34,7 @@ import ru.transservice.routemanager.*
 import ru.transservice.routemanager.AppClass.Companion.getOutputDirectory
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
+import ru.transservice.routemanager.data.local.entities.PointFileParams
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.extensions.simulateClick
@@ -71,16 +73,12 @@ class CameraFragment : Fragment() {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     }
 
-    private lateinit var point: PointItem
-    private lateinit var currentFileOrder: PhotoOrder
-    private lateinit var pointAction: PointStatuses
-    private lateinit var fileName: String
-    private lateinit var ivFocus: ImageView
-    //private var gps: GPSTracker? = null
-
-
     lateinit var navController: NavController
     private val args:CameraFragmentArgs by navArgs()
+
+    private lateinit var fileName: String
+    private lateinit var ivFocus: ImageView
+
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -116,12 +114,6 @@ class CameraFragment : Fragment() {
         } ?: Unit
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        point = args.point
-        currentFileOrder = args.photoOrder
-        pointAction = args.pointAction
-    }
 
     override fun onResume() {
         super.onResume()
@@ -229,9 +221,7 @@ class CameraFragment : Fragment() {
         })
 
         (requireActivity() as MainActivity).supportActionBar?.hide()
-        //TODO swipe camera
-    // (requireActivity() as MainActivity).mSwipeRefreshLayout?.isEnabled = false
-    }
+      }
 
     /**
      * Inflate camera controls and update the UI manually upon config changes to avoid removing
@@ -432,7 +422,7 @@ class CameraFragment : Fragment() {
                                 navController.navigate(
                                     CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
                                         photoFile.absolutePath,
-                                        point, pointAction
+                                        args.params
                                     )
                                 )
                             }
@@ -622,13 +612,13 @@ class CameraFragment : Fragment() {
 
     private fun generateFileName(): String {
         val timeCreated = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU")).format(Date())
-        var fName = "${point.routeName}__{$timeCreated}__${point.addressName}"
+        var fName = "${args.params.routeName}__{$timeCreated}__${args.params.addressName}"
             .filter { it.isLetterOrDigit() || it.isWhitespace() || it.toString() == "_" }
-        val filePostfixSize = "_${currentFileOrder.string}$PHOTO_EXTENSION".toByteArray().size
+        val filePostfixSize = "_${args.params.fileOrder.string}$PHOTO_EXTENSION".toByteArray().size
         while (fName.toByteArray().size + filePostfixSize > 255) {
             fName = fName.dropLast(1)
         }
-        return "${fName}_${currentFileOrder.string}"
+        return "${fName}_${args.params.fileOrder.string}"
     }
 
     private fun animateFocus(x: Float, y: Float) {

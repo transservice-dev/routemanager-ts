@@ -7,7 +7,9 @@ import android.location.Geocoder
 import android.location.Location
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
+import kotlinx.coroutines.CoroutineScope
 import ru.transservice.routemanager.R
+import ru.transservice.routemanager.data.local.entities.PointFileParams
 import ru.transservice.routemanager.data.local.entities.PointItem
 import java.io.File
 import java.io.FileOutputStream
@@ -16,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
+//TODO change to class and use DI, use coroutines with default context to proccess image
 object ImageFileProcessing {
 
     private val ExifAttributes = arrayOf(
@@ -47,7 +50,7 @@ object ImageFileProcessing {
         )
 
     @SuppressLint("InflateParams")
-    fun createResultImageFile(filePath: String, lat: Double, lon: Double, point: PointItem, context: Context) {
+    fun createResultImageFile(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
 
         // Основное изображение
         val currentFile = File(filePath)
@@ -102,11 +105,11 @@ object ImageFileProcessing {
         var lonText = ""
 
         if (lat == 0.0 || lon == 0.0) {
-            addressText = point.addressName
+            addressText = params.addressName
         } else {
             addressText = getAddressNameFromLocation(lat, lon, context)
             if (addressText=="") {
-                addressText = point.addressName
+                addressText = params.addressName
             }
 
             latText = String.format("%.6f",lat) // 6 decimal digits

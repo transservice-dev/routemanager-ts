@@ -2,9 +2,15 @@ package ru.transservice.routemanager.ui.polygon
 
 import androidx.lifecycle.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PolygonItem
+import ru.transservice.routemanager.data.local.entities.Task
+import ru.transservice.routemanager.data.local.entities.TaskWithData
 import ru.transservice.routemanager.repositories.RootRepository
 import java.util.*
 
@@ -25,6 +31,7 @@ class PolygonViewModel : ViewModel()  {
                 throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
         }
     }
+
 
     fun loadAvailablePolygons(): MutableLiveData<List<PolygonItem>> {
         repository.getPolygonList {pList->
@@ -57,18 +64,20 @@ class PolygonViewModel : ViewModel()  {
     }
 
     fun addNewPolygonToPointList() {
-        val currentTask = repository.getTask()
-        if (currentTask.value != null && currentItem.value != null) {
-            currentTask.value!!.lastTripNumber += 1
-            val newPoint = PointItem(
-                docUID = currentTask.value!!.docUid,
-                lineUID = UUID.randomUUID().toString(),
-                addressName = currentItem.value!!.name,
-                polygonUID = currentItem.value!!.uid,
-                polygon = true,
-                tripNumber = currentTask.value!!.lastTripNumber
-            )
-            repository.addPolygon(newPoint, currentTask.value!!)
+        viewModelScope.launch {
+            val currentTask = repository.getTaskValue()
+            if (!currentTask.isEmpty() && currentItem.value != null) {
+                currentTask.lastTripNumber += 1
+                val newPoint = PointItem(
+                    docUID = currentTask.docUid,
+                    lineUID = UUID.randomUUID().toString(),
+                    addressName = currentItem.value!!.name,
+                    polygonUID = currentItem.value!!.uid,
+                    polygon = true,
+                    tripNumber = currentTask.lastTripNumber
+                )
+                repository.addPolygon(newPoint, currentTask)
+            }
         }
     }
 

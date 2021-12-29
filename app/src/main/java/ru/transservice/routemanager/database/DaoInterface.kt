@@ -1,6 +1,7 @@
 package ru.transservice.routemanager.database
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import ru.transservice.routemanager.data.local.entities.*
 
 @Dao
@@ -183,4 +184,27 @@ interface DaoInterface {
         updateLastTripNumber(getLastTripNumber())
     }
 
+
+    @Query("""
+        SELECT *
+        FROM PointWithData
+        WHERE lineUID=:pointId
+    """)
+    fun observePointItemStateById(pointId: String): Flow<PointWithData>
+
+    @Query("""
+        SELECT *
+        FROM pointList_table
+        WHERE lineUID=:pointId
+    """)
+    fun getPointById(pointId: String): PointItem
+
+    @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")
+    fun observePointList() : Flow<List<PointItem>>
+
+    @Query("""
+        SELECT *
+        FROM TaskWithData
+    """)
+    fun observeTaskWithData(): Flow<TaskWithData>
 }

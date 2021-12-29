@@ -1,10 +1,7 @@
 package ru.transservice.routemanager.data.local.entities
 
 import androidx.core.text.isDigitsOnly
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.Index
+import androidx.room.*
 import org.jetbrains.annotations.NotNull
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadBody
 import ru.transservice.routemanager.extensions.longFormat
@@ -153,29 +150,71 @@ data class PointItem(
     }
 }
 
-/*@DatabaseView("SELECT lineUID, rowNumber, addressName, containerName, containerSize, agentName, " +
-                            "countPlan, countFact, countOver, done, tripNumber, polygon, " +
-                            "comment, reasonComment, timestamp " +
-                    "FROM pointList_table as points ")
-data class PointItem(
+@DatabaseView("""
+            SELECT  points.lineUID as lineUID, addressName, containerName, containerSize, agentName, 
+               countPlan, countFact,  done, comment, status, reasonComment, timestamp, polygonByRow, polygonName,
+               IFNULL(files_before.count_files,0) as count_files_before, IFNULL(files_after.count_files,0) as count_files_after
+            FROM pointList_table as points 
+            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder IN (0,2)  group by lineUID ) as files_before 
+            ON points.lineUID = files_before.lineUID
+            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=1 group by lineUID ) as files_after 
+            ON points.lineUID = files_after.lineUID
+""")
+data class PointItemState(
         val lineUID: String,
-        val rowNumber: Int,
         val addressName: String,
         val containerName: String,
         val containerSize: Double,
         val agentName: String,
         val countPlan: Double,
         var countFact: Double,
-        var countOver: Double,
         var done: Boolean,
-        val tripNumber: Int,
-        val polygon: Boolean,
-        val comment: String
+        val comment: String,
+        val status: PointStatuses,
+        var timestamp: Date?,
+        var reasonComment: String,
+        val polygonName: String,
+        val polygonByRow: Boolean,
+        @ColumnInfo(name = "count_files_before")
+        val countFilesBefore: Int,
+        @ColumnInfo(name = "count_files_after")
+        val countFilesAfter: Int
 ): Serializable {
-    var timestamp: Date? = null
-    var reasonComment: String = ""
+
+
 }
-*/
+
+@DatabaseView("""
+            SELECT points.*,
+               IFNULL(files_before.count_files,0) as count_files_before, IFNULL(files_after.count_files,0) as count_files_after
+            FROM pointList_table as points 
+            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder IN (0,2)  group by lineUID ) as files_before 
+            ON points.lineUID = files_before.lineUID
+            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=1 group by lineUID ) as files_after 
+            ON points.lineUID = files_after.lineUID
+""")
+data class PointWithData(
+    @Embedded
+    val point: PointItem,
+    @ColumnInfo(name = "count_files_before")
+    val countFilesBefore: Int,
+    @ColumnInfo(name = "count_files_after")
+    val countFilesAfter: Int
+) : Serializable {
+
+    fun toPointFileParams(fileOrder: PhotoOrder): PointFileParams {
+        return PointFileParams(point.addressName, point.routeName, fileOrder, point.lineUID)
+    }
+}
+
+data class PointFileParams(
+    val addressName: String,
+    val routeName: String,
+    val fileOrder: PhotoOrder,
+    val lineUID: String
+): Serializable
+
+
 enum class PointActions : Serializable {
     TAKE_PHOTO_BEFORE, TAKE_PHOTO_AFTER, SET_VOLUME, SET_REASON
 }

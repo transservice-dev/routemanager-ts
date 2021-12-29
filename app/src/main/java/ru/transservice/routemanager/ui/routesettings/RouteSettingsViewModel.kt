@@ -112,29 +112,21 @@ class RouteSettingsViewModel : ViewModel() {
     fun setRegion(regionItem: RegionItem){
         currentRegion.value = regionItem
         prefRepository.saveRegion(regionItem)
-        updateCurrentTask()
     }
 
     fun setVehicle(vehicleItem: VehicleItem){
         currentVehicle.value = vehicleItem
         prefRepository.saveVehicle(vehicleItem)
-        updateCurrentTask()
     }
 
     fun setRoute(routeItem: RouteItem){
         currentRoute.value = routeItem
         prefRepository.saveRoute(routeItem)
-        updateCurrentTask()
     }
 
     fun setDate(date: Date){
         currentDate.value = date
         prefRepository.saveDate(date)
-        updateCurrentTask()
-    }
-
-    private fun updateCurrentTask(){
-        repository.updatePointListData()
     }
 
     fun handleSearchQuery(text: String) {

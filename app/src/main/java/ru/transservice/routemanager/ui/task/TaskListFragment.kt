@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -42,7 +43,7 @@ class TaskListFragment : Fragment() {
     private val binding get() = _binding!!
 
     lateinit var navController: NavController
-    private lateinit var viewModel: TaskListViewModel
+    private val viewModel: TaskListViewModel by viewModels()
     private lateinit var taskListAdapter: TaskListAdapter
     private lateinit var btsBehavior: BottomSheetBehavior<View>
 
@@ -111,12 +112,11 @@ class TaskListFragment : Fragment() {
             }
         }
 
-
         return super.onOptionsItemSelected(item)
     }
 
     private fun initViewModel() {
-        viewModel = ViewModelProvider(requireActivity(),TaskListViewModel.TaskListViewModelFactory(requireActivity().application)).get(TaskListViewModel::class.java)
+        //viewModel = ViewModelProvider(requireActivity(),TaskListViewModel.TaskListViewModelFactory(requireActivity().application)).get(TaskListViewModel::class.java)
         viewModel.removeSources()
         viewModel.addSources()
     }
@@ -259,16 +259,12 @@ class TaskListFragment : Fragment() {
                 }else{
                     startNavService()
                     viewModel.getCurrentPoint().value?.let{
-                        navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(it,it.status))
+                        navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(it))
                     }
                 }
                 btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED
             }
 
-            ibtnCannotDone.setOnClickListener {
-                startNavService()
-                navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(viewModel.getCurrentPoint().value!!,PointStatuses.CANNOT_DONE))
-            }
 
             ibtnHome.setOnClickListener {
                 navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToStartScreenFragment())
@@ -285,10 +281,7 @@ class TaskListFragment : Fragment() {
             }
 
             ibtnDelete.setOnClickListener {
-                //Delete polygon from the list and clear points with this polygon
-                viewModel.getCurrentPoint().value?.let {
-                    viewModel.deletePolygonFromList(it)
-                }
+                viewModel.deletePolygonFromList()
             }
 
             ibtnEdit.setOnClickListener {
@@ -332,7 +325,6 @@ class TaskListFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startNavService(){
         (requireActivity() as MainActivity).startForegroundService((requireActivity() as MainActivity).locationServiceIntent)
-        //NavigationServiceConnection.startTracking()
     }
 
     private fun stopNavService(){

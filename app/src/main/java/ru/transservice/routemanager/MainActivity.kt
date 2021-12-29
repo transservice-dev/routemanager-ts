@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (key == "SEARCH_BY_ROUTE") {
-                    RootRepository.updatePointListData()
+                    //TODO Check if working correctly
                 }
 
                 if (key == "USE_GOOGLE_NAV") {

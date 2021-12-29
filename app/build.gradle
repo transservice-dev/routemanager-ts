@@ -7,16 +7,15 @@ apply plugin: "androidx.navigation.safeargs"
 apply plugin: "kotlin-kapt"
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "ru.transservice.routemanager"
         minSdkVersion 26
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 24
         versionName "1.0.21"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,6 +31,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas".toString())
+        }
     }
 
     buildFeatures{
@@ -74,16 +79,17 @@ dependencies {
 
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     // Room components
-    def roomVersion = "2.3.0"
+    def roomVersion = "2.4.0"
     implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "androidx.room:room-testing:$roomVersion"
 
     // Coroutines
-    def coroutinesVersion = '1.3.9'
+    def coroutinesVersion = '1.6.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:coroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-debug:$coroutinesVersion"

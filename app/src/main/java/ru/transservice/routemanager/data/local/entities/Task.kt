@@ -1,10 +1,7 @@
 package ru.transservice.routemanager.data.local.entities
 
 import androidx.annotation.NonNull
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.*
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
 import ru.transservice.routemanager.extensions.shortFormat
@@ -31,7 +28,28 @@ data class Task(
     var lastTripNumber: Int = 0
     @ColumnInfo(defaultValue = "0")
     var polygonByRow = false
+
+    fun isEmpty(): Boolean {
+        return docUid.isNullOrEmpty()
+    }
 }
+
+@DatabaseView("""
+    SELECT task.*, points_all.count_points as taskCountPoint, points_done.count_points as taskCountPointDone, 1 as isLoaded    
+    FROM currentRoute_table as task
+    LEFT JOIN (SELECT COUNT(1) as count_points, docUID FROM pointList_table WHERE NOT polygon GROUP BY docUID) as points_all
+    ON task.docUid = points_all.docUID
+    LEFT JOIN (SELECT COUNT(1) as count_points, docUID FROM pointList_table WHERE NOT polygon AND done GROUP BY docUID) as points_done
+    ON task.docUid = points_done.docUID
+    
+""")
+data class TaskWithData(
+    @Embedded()
+    val task: Task,
+    val taskCountPoint: Int,
+    val taskCountPointDone: Int,
+    val isLoaded: Boolean
+)
 
 enum class SearchType(val id: Int){
     BY_ROUTE(1),

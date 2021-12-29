@@ -1,21 +1,19 @@
 package ru.transservice.routemanager.database
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room.*
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import ru.transservice.routemanager.data.local.entities.PointFile
-import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.data.local.entities.PolygonItem
-import ru.transservice.routemanager.data.local.entities.Task
+import ru.transservice.routemanager.data.local.entities.*
 
 @Database(
     entities = [PointItem::class, Task::class, PointFile::class, PolygonItem::class],
-    version = 2,
-    exportSchema = false
+    views = [PointWithData::class, TaskWithData::class],
+    version = 3,
+    autoMigrations = [
+        AutoMigration (from = 2, to = 3)
+    ],
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -44,6 +42,13 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE pointList_table ADD COLUMN polygonName TEXT NOT NULL DEFAULT ''")
                 database.execSQL("ALTER TABLE pointList_table ADD COLUMN polygonByRow INTEGER NOT NULL DEFAULT 0")
             }
+        }
+
+        private val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+
+            }
+
         }
 
 

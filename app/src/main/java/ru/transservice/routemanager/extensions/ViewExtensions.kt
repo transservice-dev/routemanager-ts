@@ -21,8 +21,15 @@ import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageButton
+import androidx.annotation.NavigationRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.navigation.navGraphViewModels
 
 /** Combination of all flags required to put activity into immersive mode */
 const val FLAGS_FULLSCREEN =
@@ -87,4 +94,24 @@ fun AlertDialog.showImmersive() {
 
     // Set the dialog to focusable again
     window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+}
+
+inline fun <reified T : ViewModel> Fragment.viewModelsFactory(noinline ownerProducer: () -> ViewModelStoreOwner = { this }, crossinline viewModelInitialization: () -> T): Lazy<T> {
+    return viewModels(ownerProducer) {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return viewModelInitialization.invoke() as T
+            }
+        }
+    }
+}
+
+inline fun <reified T : ViewModel> Fragment.navViewModelsFactory(@NavigationRes navGraphId: Int, crossinline viewModelInitialization: () -> T): Lazy<T> {
+    return navGraphViewModels(navGraphId) {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return viewModelInitialization.invoke() as T
+            }
+        }
+    }
 }

@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import ru.transservice.routemanager.AppClass
+import ru.transservice.routemanager.BaseFragment
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.animation.AnimateView
@@ -33,7 +34,7 @@ import ru.transservice.routemanager.service.LoadResult
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-class StartScreenFragment : Fragment() {
+class StartScreenFragment : BaseFragment() {
 
     private var _binding: FragmentStartScreenBinding? = null
     private val binding get() = _binding!!
@@ -44,22 +45,6 @@ class StartScreenFragment : Fragment() {
     private val notificationId: Int = 100
     private var backPressedTime:Long = 0
 
-    private val callbackExit = object : OnBackPressedCallback(true) {
-        lateinit var backToast:Toast
-        @SuppressLint("ShowToast")
-        override fun handleOnBackPressed() {
-            backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
-            if (backPressedTime + 2000 > System.currentTimeMillis()) {
-                backToast.cancel()
-                requireActivity().moveTaskToBack(true)
-                requireActivity().finish()
-            } else {
-                backToast.show()
-            }
-            backPressedTime = System.currentTimeMillis()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -68,17 +53,17 @@ class StartScreenFragment : Fragment() {
         initViewModel()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        //Log.d(TAG, "onAttach ${this::class.java}")
-        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //Log.d(TAG, "onResume ${this::class.java}")
-        //viewModel.updateTaskParams()
-        requireActivity().onBackPressedDispatcher.addCallback(this, callbackExit)
+    override fun handleExit() {
+        // FIXME dont ask for exit in PointListFragment
+        val backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
+        if (backPressedTime + 2000 > System.currentTimeMillis()) {
+            backToast.cancel()
+            root.moveTaskToBack(true)
+            root.finish()
+        } else {
+            backToast.show()
+        }
+        backPressedTime = System.currentTimeMillis()
     }
 
     override fun onCreateView(
@@ -109,14 +94,8 @@ class StartScreenFragment : Fragment() {
         initViews()
         initActionButtons()
         initNotificationManager()
-        Log.d(TAG, "OnViewCreated")
-
-        viewModel.getTaskParams().observe(viewLifecycleOwner, {
-            with(binding) {
-                dateOfRoute.text = it.routeDate.shortFormat()
-                vehicleNumber.text = if (it.search_type == SearchType.BY_VEHICLE) it.vehicle?.number ?: "" else it.route?.name ?: ""
-                updateRouteInfo(true)
-            }
+        viewModel.getTaskParams().observe(viewLifecycleOwner, { state ->
+            updateRouteInfo(true)
         })
 
         viewModel.getUploadResult().observe(requireActivity(), {
@@ -167,11 +146,11 @@ class StartScreenFragment : Fragment() {
 
     private fun initViews(){
         updateRouteInfo(false)
-        binding.closeLayout.visibility = View.GONE
-        binding.tvVersion.text = "Версия ${viewModel.version}"
-       //isBtnCloseHidden = false
-        //showHideButtonClose()
-    }
+        with(binding){
+            closeLayout.visibility = View.GONE
+            tvVersion.text = "Версия ${viewModel.version}"
+        }
+     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun initActionButtons(){
@@ -198,9 +177,10 @@ class StartScreenFragment : Fragment() {
                         (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
                         Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
                         //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
-                        viewModel.getTaskParams().value?.let { task->
-                            binding.atAllCount.text = task.countPoint.toString()
-                        }
+                        //TODO Test how in working with a flow
+                        /*viewModel.getTaskParams().value?.let { task->
+                            binding.atAllCount.text = task.taskCountPoint.toString()
+                        }*/
                     }
                     is LoadResult.Error -> {
                         (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
@@ -263,8 +243,24 @@ class StartScreenFragment : Fragment() {
     }
 
     private fun updateRouteInfo(animate: Boolean){
-        val task = viewModel.getTaskParams().value
-        val routeIsLoaded = task?.docUid != ""
+        viewModel.getTaskParams().value?.let { state ->
+            with(binding) {
+                routeGroup.visibility = if (state.isLoaded) View.VISIBLE else View.GONE
+                if (state.isLoaded) {
+                    btnLoad.setImageResource(R.drawable.ic_replay_24)
+                }else{
+                    btnLoad.setImageResource(R.drawable.ic_add_24)
+                }
+                atAllCount.text = state.taskCountPoint.toString()
+                doneCount.text = state.taskCountPointDone.toString()
+
+                dateOfRoute.text = state.task.routeDate.shortFormat()
+                vehicleNumber.text = if (state.task.search_type == SearchType.BY_VEHICLE) state.task.vehicle?.number ?: "" else state.task.route?.name ?: ""
+
+            }
+        }
+        //TODO Animation
+        /*val routeIsLoaded = taskState?.task?.docUid != ""
         if (routeIsLoaded) {
             /*if (animate){
                 val animation = AnimateView(binding.routeGroup, requireContext(), animate)
@@ -283,11 +279,7 @@ class StartScreenFragment : Fragment() {
             }*/
             binding.routeGroup.visibility = View.GONE
             binding.btnLoad.setImageResource(R.drawable.ic_add_24)
-        }
-        with(binding){
-            atAllCount.text = task?.countPoint.toString()
-            doneCount.text = task?.countPointDone.toString()
-        }
+        }*/
     }
 
     private fun showHideButtonClose(){
