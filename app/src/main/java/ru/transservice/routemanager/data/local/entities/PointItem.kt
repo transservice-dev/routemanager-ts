@@ -186,12 +186,16 @@ data class PointItemState(
 
 @DatabaseView("""
             SELECT points.*,
-               IFNULL(files_before.count_files,0) as count_files_before, IFNULL(files_after.count_files,0) as count_files_after
+                IFNULL(files_before.count_files,0) as count_files_before, 
+                IFNULL(files_after.count_files,0) as count_files_after,
+                IFNULL(files_cantdone.count_files,0) as count_files_cantdone
             FROM pointList_table as points 
-            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder IN (0,2)  group by lineUID ) as files_before 
+            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=0 group by lineUID ) as files_before 
             ON points.lineUID = files_before.lineUID
             LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=1 group by lineUID ) as files_after 
             ON points.lineUID = files_after.lineUID
+            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=2 group by lineUID ) as files_cantdone 
+            ON points.lineUID = files_cantdone.lineUID
 """)
 data class PointWithData(
     @Embedded
@@ -199,7 +203,9 @@ data class PointWithData(
     @ColumnInfo(name = "count_files_before")
     val countFilesBefore: Int,
     @ColumnInfo(name = "count_files_after")
-    val countFilesAfter: Int
+    val countFilesAfter: Int,
+    @ColumnInfo(name = "count_files_cantdone")
+    val countFilesCantDone: Int
 ) : Serializable {
 
     fun toPointFileParams(fileOrder: PhotoOrder): PointFileParams {
@@ -220,7 +226,7 @@ enum class PointActions : Serializable {
 }
 
 enum class PointStatuses : Serializable {
-    NOT_VISITED,CANNOT_DONE,DONE
+    NOT_VISITED,CANNOT_DONE,DONE, CANDONE
 }
 
 enum class FailureReasons(val reasonTitle: String){

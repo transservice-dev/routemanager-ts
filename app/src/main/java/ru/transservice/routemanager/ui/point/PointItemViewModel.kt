@@ -1,14 +1,13 @@
 package ru.transservice.routemanager.ui.point
 
-import android.app.Application
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.repositories.RootRepository
-import ru.transservice.routemanager.ui.task.TaskListViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -18,6 +17,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
 
     private val repository = RootRepository
     val state: LiveData<PointWithData> = repository.observePointItemState(pointId).asLiveData()
+    var pointStatus: PointStatuses = PointStatuses.NOT_VISITED
     private val currentTask = repository.observeTask().asLiveData()
     val currentPoint: PointItem? get() = state.value?.let { it.point }
     var reasonComment: String = ""
@@ -73,7 +73,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         }
     }
 
-    fun updateCurrentPoint(pointItem: PointItem){
+    private fun updateCurrentPoint(pointItem: PointItem){
         //TODO check online updating
         //currentPoint.postValue(pointItem)
         repository.updatePoint(pointItem)
@@ -154,33 +154,36 @@ class PointItemViewModel(pointId: String) : ViewModel() {
     }
 
     private fun updatePointAndDoneStatus(point: PointItem) {
-        repository.checkPointForCompletion(point) { canBeDone ->
-            val statusChanged = point.done != canBeDone
-            point.done = canBeDone
-            if (statusChanged) {
-                point.timestamp = Date()
-                if (reasonComment != "") {
-                    point.reasonComment = reasonComment
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.checkPointForCompletion(point) { canBeDone ->
+                val statusChanged = point.done != canBeDone
+                point.done = canBeDone
+                if (statusChanged) {
+                    point.timestamp = Date()
+                    if (reasonComment != "") {
+                        point.reasonComment = reasonComment
+                    }
+                    pointStatus = if (canBeDone) PointStatuses.DONE else PointStatuses.CANNOT_DONE
                 }
-            }
-            when {
-                point.done ->
-                    point.status = PointStatuses.DONE
-                !point.done && point.countFact != 0.0 && point.countFact != -1.0 ->
-                    point.status = PointStatuses.NOT_VISITED
-                !point.done && point.countFact == 0.0 ->
-                    point.status = PointStatuses.CANNOT_DONE
-                !point.done && point.reasonComment != "" ->
-                    point.status = PointStatuses.CANNOT_DONE
-            }
+                when {
+                    point.done ->
+                        point.status = PointStatuses.DONE
+                    !point.done && point.countFact != 0.0 && point.countFact != -1.0 ->
+                        point.status = PointStatuses.NOT_VISITED
+                    !point.done && point.countFact == 0.0 ->
+                        point.status = PointStatuses.CANNOT_DONE
+                    !point.done && point.reasonComment != "" ->
+                        point.status = PointStatuses.CANNOT_DONE
+                }
 
-            if (point.done && point.tripNumberFact == 2000)
-                point.tripNumberFact = 1000
-            if (point.done && point.polygonByRow && point.tripNumberFact >= 1000)
-                currentTask.value?.let {
-                    point.tripNumberFact = it.task.lastTripNumber + 1
-                }
-            updateCurrentPoint(point)
+                if (point.done && point.tripNumberFact == 2000)
+                    point.tripNumberFact = 1000
+                if (point.done && point.polygonByRow && point.tripNumberFact >= 1000)
+                    currentTask.value?.let {
+                        point.tripNumberFact = it.task.lastTripNumber + 1
+                    }
+                updateCurrentPoint(point)
+            }
         }
     }
 

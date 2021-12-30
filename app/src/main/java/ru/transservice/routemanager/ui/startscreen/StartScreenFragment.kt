@@ -206,7 +206,7 @@ class StartScreenFragment : BaseFragment() {
             val alertBuilder = AlertDialog.Builder(context).apply {
                 setTitle("Подтвердите действие")
                 setMessage("Вы уверены, что хотите завершить маршрут?")
-                setPositiveButton("Да, заврешить") { _,_ ->
+                setPositiveButton("Да, завершить") { _,_ ->
                     with(NotificationManagerCompat.from(requireActivity())) {
                         notificationBuilder.setProgress(100, 0, true)
                         notify(notificationId, notificationBuilder.build())

@@ -8,7 +8,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.os.HandlerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.asLiveData
+import androidx.room.Transaction
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.*
@@ -45,19 +47,6 @@ object RootRepository {
 
     private val dbDao: DaoInterface = AppClass.getDatabase()!!.dbDao()
     private val prefRepository = PreferencesRepository
-
-    val deviceName: String get() {
-        var value = ""
-            val vehicleRouteName = if (currentTask.value.search_type == SearchType.BY_VEHICLE) {
-                Utils.vehicleNumToLatin(currentTask.value.vehicle?.number ?: "")
-            }else{
-                Utils.transliteration(currentTask.value.route?.name ?: "")
-            }
-            value = "$vehicleRouteName ${Utils.transliteration(prefRepository.getRegion()?.name ?: "")}"
-
-        return value
-    }
-
     private val errHandler = CoroutineExceptionHandler{ _, exception ->
         println("Caught $exception")
         Log.e(TAG, "Caught $exception")
@@ -67,22 +56,43 @@ object RootRepository {
     private val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errHandler)
 
-    //TODO delete current Task, used only in device name, change device name differently
+    //TODO auto update currentTask, callback?
     private var currentTask: MutableStateFlow<Task> = MutableStateFlow(prefRepository.getTask())
+    //private var currentTask = Transformations.map(observeTask().asLiveData()) { it }
+    //private var currentTask = prefRepository.getTask()
+
+    val deviceName: String get() {
+        var value = ""
+        val task = getTaskValue()
+        val vehicleRouteName = if (task.search_type == SearchType.BY_VEHICLE) {
+            Utils.vehicleNumToLatin(task.vehicle?.number ?: "")
+        } else {
+            Utils.transliteration(task.route?.name ?: "")
+        }
+        value = "$vehicleRouteName ${Utils.transliteration(prefRepository.getRegion()?.name ?: "")}"
+        return value
+    }
 
     private val unloadingAvailable: MutableLiveData<Boolean> = MutableLiveData()
 
     init {
         setPreferences()
         scope.launch {
-            observeTask().collectLatest {
+            observeTask()
+            .shareIn(scope, replay = 1, started = SharingStarted.Lazily)
+            .collectLatest {
                 currentTask.value = it.task
             }
         }
+            /*{
+                currentTask.value = it.task
+            }*/
         updateUiState()
     }
 
-    fun getTaskValue(): Task = currentTask.value
+    fun getTaskValue(): Task =
+        currentTask.value
+        //currentTask.value?.task ?: prefRepository.getTask()
 
     fun setPreferences() {
         urlName = prefRepository.getUrlName()
@@ -612,6 +622,8 @@ object RootRepository {
             .map {
                 if (it==null)
                     TaskWithData(prefRepository.getTask(),0,0, false) else  it
+            }.onEach {
+                //currentTask = it.task
             }
 
     }
