@@ -33,18 +33,14 @@ class PointFragment : BaseFragment() {
 
     private var _binding: FragmentPointBinding? = null
     private val binding get() = _binding!!
-    lateinit var navController: NavController
     private val args: PointFragmentArgs by navArgs()
     private val viewModel: PointItemViewModel by navViewModelsFactory(R.id.navPoint) { PointItemViewModel(args.point.lineUID) }
-    //private lateinit var pointStatus: PointStatuses
     private var lastPointDoneStatus: Boolean = false
 
     private val requestKeyPolygon = "polygonForPoint"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "OnCreate")
-        //pointStatus = PointStatuses.NOT_VISITED
         initFragmentFactDialogListener()
         initPolygonSelectionListener()
     }
@@ -65,7 +61,6 @@ class PointFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         initButtonsActions()
         initLiveDataObservers()
     }
@@ -108,7 +103,6 @@ class PointFragment : BaseFragment() {
             arrayAdapter.setNotifyOnChange(true)
             reasonSpinner.adapter = arrayAdapter
 
-            //TODO viewModel comment
             if (viewModel.reasonComment != "") {
                 if (reasonArray.contains(viewModel.reasonComment)) {
                     val spinnerPosition: Int =
@@ -240,12 +234,7 @@ class PointFragment : BaseFragment() {
 
     private fun navigateToPictures(){
         viewModel.state.value?.let {
-            navController.navigate(
-                PointFragmentDirections.actionPointFragmentToPhotoListFragment(
-                    it.point,
-                    PhotoOrder.DONT_SET
-                )
-            )
+            navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(it.point,PhotoOrder.DONT_SET))
         }
     }
 
@@ -319,7 +308,7 @@ class PointFragment : BaseFragment() {
                 viewModel.pointStatus == PointStatuses.CANNOT_DONE -> {
                     when {
                         viewModel.reasonComment == FailureReasons.EMPTY_VALUE.reasonTitle
-                                && pointState.countFilesBefore > 0 -> {
+                                && (pointState.countFilesBefore > 0 || pointState.countFilesCantDone > 0) -> {
                             val snackMsg = Snackbar.make(
                                 binding.root,
                                 "Вы не указали причину невывоза!",

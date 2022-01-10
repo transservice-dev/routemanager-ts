@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +23,7 @@ class RegionListFragment : Fragment() {
     private var _binding: FragmentRegionListBinding? = null
     private val binding get() = _binding!!
     private lateinit var regionAdapter: RegionListAdapter
-    private lateinit var viewModel: RouteSettingsViewModel
+    private val viewModel: RouteSettingsViewModel by navGraphViewModels(R.id.navRouteSettings)
     lateinit var navController: NavController
     private val args: RegionListFragmentArgs by navArgs()
 
@@ -115,9 +116,7 @@ class RegionListFragment : Fragment() {
             }
     }
 
-    fun initViewModel(){
-        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
-        RouteSettingsViewModel::class.java)
+    private fun initViewModel(){
         viewModel.loadRegions()
         viewModel.removeSources()
         viewModel.addSourcesRegion()

@@ -121,7 +121,7 @@ class CameraFragment : Fragment() {
         // user could have removed them while the app was in paused state.
         if (!PermissionFragment.hasPermissions(requireContext())) {
             navController.navigate(
-                CameraFragmentDirections.actionCameraFragmentToPermissionFragment()
+                MainNavigationDirections.actionGlobalPermissionFragment()
             )
         }
     }

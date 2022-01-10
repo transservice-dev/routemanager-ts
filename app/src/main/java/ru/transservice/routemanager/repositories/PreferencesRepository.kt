@@ -3,12 +3,18 @@ package ru.transservice.routemanager.repositories
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem
 import ru.transservice.routemanager.data.local.VehicleItem
 import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.data.local.entities.Task
+import ru.transservice.routemanager.data.local.entities.TaskWithData
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,6 +34,8 @@ object PreferencesRepository {
         val ctx = AppClass.appliactionContext()
         PreferenceManager.getDefaultSharedPreferences(ctx)
     }
+
+    private val taskWithDataFlow = MutableStateFlow(getTaskWithData())
 
     fun getUrlName(): String {
         return prefs.getString(URL_NAME,"") as String
@@ -94,7 +102,7 @@ object PreferencesRepository {
         }
     }
 
-    fun getTask(): Task {
+    private fun getTask(): Task {
         return Task(
             "",
             getVehicle(),
@@ -102,6 +110,16 @@ object PreferencesRepository {
             getDate() ?: Date(),
             if (getSearchBYRoute()) SearchType.BY_ROUTE else SearchType.BY_VEHICLE
         )
+    }
+
+    fun getTaskWithData(): TaskWithData {
+        return TaskWithData(
+            getTask(),0,0,false
+        )
+    }
+
+    fun getTaskDataFlow() : Flow<TaskWithData> {
+        return taskWithDataFlow
     }
 
     private fun putValue(pair: Pair<String,Any>) = with(prefs.edit()) {
@@ -116,6 +134,7 @@ object PreferencesRepository {
             else -> error("Only primitive types can be stored in Shared Preferences")
         }
         apply()
+        taskWithDataFlow.value = getTaskWithData()
     }
 
     fun saveVehicle(vehicleItem: VehicleItem){

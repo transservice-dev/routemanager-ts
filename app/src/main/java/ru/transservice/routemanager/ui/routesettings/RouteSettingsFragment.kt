@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentRouteSettingsBinding
@@ -21,17 +22,9 @@ class RouteSettingsFragment : Fragment() {
 
     private var _binding: FragmentRouteSettingsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: RouteSettingsViewModel
+    private val viewModel: RouteSettingsViewModel by navGraphViewModels(R.id.navRouteSettings)
     lateinit var navController: NavController
     private var snackbarMessage: Snackbar? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-
-        }
-        initViewModel()
-    }
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -146,11 +139,6 @@ class RouteSettingsFragment : Fragment() {
         snackbarMessage?.dismiss()
     }
 
-    fun initViewModel(){
-        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
-                RouteSettingsViewModel::class.java)
-        viewModel.forbidEdititng()
-    }
 
     companion object {
 

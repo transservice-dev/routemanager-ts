@@ -20,10 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.BaseFragment
-import ru.transservice.routemanager.MainActivity
-import ru.transservice.routemanager.R
+import ru.transservice.routemanager.*
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.SearchType
@@ -38,7 +35,6 @@ class StartScreenFragment : BaseFragment() {
 
     private var _binding: FragmentStartScreenBinding? = null
     private val binding get() = _binding!!
-    lateinit var navController: NavController
     private lateinit var viewModel: StartScreenViewModel
     private var isBtnCloseHidden = true
     private lateinit var notificationBuilder: NotificationCompat.Builder
@@ -54,7 +50,6 @@ class StartScreenFragment : BaseFragment() {
     }
 
     override fun handleExit() {
-        // FIXME dont ask for exit in PointListFragment
         val backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
         if (backPressedTime + 2000 > System.currentTimeMillis()) {
             backToast.cancel()
@@ -87,7 +82,6 @@ class StartScreenFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         (requireActivity() as MainActivity).navMenu.visibility = View.VISIBLE
         (requireActivity() as MainActivity).supportActionBar?.show()
 
@@ -155,8 +149,7 @@ class StartScreenFragment : BaseFragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun initActionButtons(){
         binding.photoLayout.setOnClickListener {
-            //throw IllegalArgumentException()
-            navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToPhotoListFragment(null,PhotoOrder.DONT_SET))
+            navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(null,PhotoOrder.DONT_SET))
         }
 
         binding.vehicleLayout.setOnClickListener {

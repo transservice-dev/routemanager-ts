@@ -47,6 +47,8 @@ object RootRepository {
 
     private val dbDao: DaoInterface = AppClass.getDatabase()!!.dbDao()
     private val prefRepository = PreferencesRepository
+
+    //Coroutines params
     private val errHandler = CoroutineExceptionHandler{ _, exception ->
         println("Caught $exception")
         Log.e(TAG, "Caught $exception")
@@ -56,12 +58,32 @@ object RootRepository {
     private val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errHandler)
 
-    //TODO auto update currentTask, callback?
-    private var currentTask: MutableStateFlow<Task> = MutableStateFlow(prefRepository.getTask())
-    //private var currentTask = Transformations.map(observeTask().asLiveData()) { it }
-    //private var currentTask = prefRepository.getTask()
+    // Task flow
+    private var currentTaskValue = prefRepository.getTaskWithData()
+    private var taskFlow = dbDao.observeTaskWithData()
+        .combine(prefRepository.getTaskDataFlow()) { taskDb, taskPref ->
+            if (taskDb == null) taskPref else taskDb
+        }
 
+    // device name depends on current task value
     val deviceName: String get() {
+        return generateDeviceName()
+    }
+
+    private val unloadingAvailable: MutableLiveData<Boolean> = MutableLiveData()
+
+    init {
+        setPreferences()
+        scope.launch {
+            taskFlow.collect {
+                currentTaskValue = it
+                unloadingAvailable.postValue(dbDao.unloadingAvailable())
+                Log.d(TAG, "collect task value $it")
+            }
+        }
+    }
+
+    fun generateDeviceName(): String {
         var value = ""
         val task = getTaskValue()
         val vehicleRouteName = if (task.search_type == SearchType.BY_VEHICLE) {
@@ -70,29 +92,16 @@ object RootRepository {
             Utils.transliteration(task.route?.name ?: "")
         }
         value = "$vehicleRouteName ${Utils.transliteration(prefRepository.getRegion()?.name ?: "")}"
-        return value
+        return  value
     }
 
-    private val unloadingAvailable: MutableLiveData<Boolean> = MutableLiveData()
-
-    init {
-        setPreferences()
-        scope.launch {
-            observeTask()
-            .shareIn(scope, replay = 1, started = SharingStarted.Lazily)
-            .collectLatest {
-                currentTask.value = it.task
-            }
-        }
-            /*{
-                currentTask.value = it.task
-            }*/
-        updateUiState()
+    fun getUnloadingAvailable(): MutableLiveData<Boolean>{
+        return unloadingAvailable
     }
 
-    fun getTaskValue(): Task =
-        currentTask.value
-        //currentTask.value?.task ?: prefRepository.getTask()
+    fun getTaskValue(): Task = currentTaskValue.task
+
+    fun getTaskData(): TaskWithData = currentTaskValue
 
     fun setPreferences() {
         urlName = prefRepository.getUrlName()
@@ -100,6 +109,7 @@ object RootRepository {
         baseUrl = "https://$urlName:$urlPort/mobileapp/"
         generateAuthPass(prefRepository.getUrlPass())
     }
+
 
     private fun generateAuthPass(password: String) {
         val token = encodeToken(password)
@@ -196,12 +206,6 @@ object RootRepository {
                     complete.invoke(response.body()!!)
                 }
             }
-        }
-    }
-
-    fun isTaskLoaded(complete: (isLoaded: Boolean) -> Unit){
-        scope.launch {
-            complete(dbDao.getAllPointList().isNotEmpty())
         }
     }
 
@@ -305,44 +309,44 @@ object RootRepository {
     suspend fun uploadResult(complete: (loadResult: LoadResult<Boolean>) -> Unit) = withContext(Dispatchers.IO){
         scope.launch {
             Log.d(TAG, "uploading result START")
-            delay(2000)
             try {
                 //1. upload files first
                 val resultFiles = uploadFiles()
-                if (resultFiles is LoadResult.Success) {
-                    // Files uploaded successfully
-                    //2. upload task
-                    val resultTask = uploadTask()
-                    if (resultTask is LoadResult.Success) {
-                        // Task uploaded successfully
-                        //3. set status
-                        resultTask.data?.get(0)?.let {
-                            val resultStatus = setStatus(getTaskFromDB(), 2)
-                            if (resultStatus is LoadResult.Success) {
-                                Log.d(TAG, "uploading result FINISHED")
-                                deleteDataFromDB()
-                                complete(resultStatus)
-                            } else {
-                                Log.e(
-                                    TAG,
-                                    "uploading result CANCELED with error: ${resultStatus.errorMessage}"
-                                )
-                                complete(resultStatus)
-                            }
-                        }
-                    } else {
-                        Log.e(
-                            TAG,
-                            "uploading result CANCELED with error: ${resultTask.errorMessage}"
-                        )
-                        complete(LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
-                    }
-                } else {
+                if (resultFiles !is LoadResult.Success){
                     Log.e(
                         TAG,
                         "uploading result CANCELED with error: Error while uploading files: : ${resultFiles.errorMessage}"
                     )
                     complete(LoadResult.Error("Ошибка при выгрузке файлов"))
+                    return@launch
+                }
+                // Files uploaded successfully
+                //2. upload task
+                val resultTask = uploadTask()
+                if (resultTask !is LoadResult.Success) {
+                    Log.e(
+                        TAG,
+                        "uploading result CANCELED with error: ${resultTask.errorMessage}"
+                    )
+                    complete(LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
+                    return@launch
+                }
+                // Task uploaded successfully
+                //3. set status
+                resultTask.data?.get(0)?.let {
+                    val resultStatus = setStatus(currentTaskValue.task, 2)
+                    if (resultStatus !is LoadResult.Success) {
+                        Log.e(
+                            TAG,
+                            "uploading result CANCELED with error: ${resultStatus.errorMessage}"
+                        )
+                        complete(resultStatus)
+                        return@launch
+                    }
+
+                    Log.d(TAG, "uploading result FINISHED")
+                    deleteDataFromDB()
+                    complete(resultStatus)
                 }
             } catch (e: java.lang.Exception) {
                 Log.e(TAG, "Error while uploading task: $e ${e.stackTraceToString()}")
@@ -543,35 +547,35 @@ object RootRepository {
             LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
     }
 
-    private suspend fun setStatus(task: Task, status: Int): LoadResult<Boolean>{
-
-            Log.d(TAG, "set status START")
-            val dList: ArrayList<StatusUploadBody> = arrayListOf(
-                    StatusUploadBody(
-                            task.docUid,status,
-                            task.deviceId,
-                            task.vehicle?.uid ?: "",
-                            "",
-                            task.dateStart?.longFormat() ?: "",
-                            task.dateEnd?.longFormat() ?: "",
-                            AppClass.appVersion
-                     ))
-            val response = RetrofitClient
-                .getPostgrestApi()
-                .setStatus(StatusUploadRequest(dList))
-            val result = responseResult(response)
-            return if (result is LoadResult.Success) {
-                if (response.body() != null) {
-                    Log.d(TAG, "set status FINISHED")
-                    LoadResult.Success(true)
-                }else{
-                    Log.d(TAG, "Error setting status: network result is empty ${result.errorMessage}")
-                    LoadResult.Error("Ошибка установки статуса: Вернулся пустой ответ")
-                }
-            }else{
-                Log.d(TAG, "Error setting status: network result is incorrect ${result.errorMessage}")
-                LoadResult.Error("Ошибка установки статуса: ${result.errorMessage}")
+    private suspend fun setStatus(task: Task, status: Int): LoadResult<Boolean> {
+        Log.d(TAG, "set status START")
+        val dList: ArrayList<StatusUploadBody> = arrayListOf(
+            StatusUploadBody(
+                task.docUid, status,
+                task.deviceId,
+                task.vehicle?.uid ?: "",
+                "",
+                task.dateStart?.longFormat() ?: "",
+                task.dateEnd?.longFormat() ?: "",
+                AppClass.appVersion
+            )
+        )
+        val response = RetrofitClient
+            .getPostgrestApi()
+            .setStatus(StatusUploadRequest(dList))
+        val result = responseResult(response)
+        return if (result is LoadResult.Success) {
+            if (response.body() != null) {
+                Log.d(TAG, "set status FINISHED")
+                LoadResult.Success(true)
+            } else {
+                Log.d(TAG, "Error setting status: network result is empty ${result.errorMessage}")
+                LoadResult.Error("Ошибка установки статуса: Вернулся пустой ответ")
             }
+        } else {
+            Log.d(TAG, "Error setting status: network result is incorrect ${result.errorMessage}")
+            LoadResult.Error("Ошибка установки статуса: ${result.errorMessage}")
+        }
 
     }
 
@@ -590,20 +594,6 @@ object RootRepository {
         }
     }
 
-    fun loadSSLCert(complete: (cert: InputStream) -> Unit){
-        scope.launch {
-            val response = RetrofitClient
-                .getApacheConnection()
-                .getApk("/cert/apache-selfsigned.crt")
-            if (responseResult(response) is LoadResult.Success) {
-                response.body()?.let {
-                    Log.d(TAG, "Loading cert FINISHED")
-                    complete.invoke(it.byteStream())
-
-                }
-            }
-        }
-    }
 
     //endregion
 
@@ -618,14 +608,7 @@ object RootRepository {
     }
 
     fun observeTask() : Flow<TaskWithData>{
-        return dbDao.observeTaskWithData()
-            .map {
-                if (it==null)
-                    TaskWithData(prefRepository.getTask(),0,0, false) else  it
-            }.onEach {
-                //currentTask = it.task
-            }
-
+       return taskFlow
     }
 
     fun getPointById(pointId: String, complete: (pointItem: PointItem) -> Unit) {
@@ -664,37 +647,16 @@ object RootRepository {
         }
     }
 
-    //TODO Check if getTaskFromDB really needed, used in syncData
-    private fun getTaskFromDB(): Task {
-        return dbDao.selectTask()
-    }
-
-    fun getUnloadingAvailable(): MutableLiveData<Boolean>{
-        return unloadingAvailable
-    }
-
-    private fun updateUnloadingAvailable(){
-        scope.launch {
-            unloadingAvailable.postValue(dbDao.unloadingAvailable())
-        }
-    }
-
-    //TODO Something with updateUnloadingAvailable
-    private fun updateUiState(){
-        updateUnloadingAvailable()
-    }
 
     fun updatePoint(pointItem: PointItem){
         scope.launch {
             dbDao.updatePointWithRoute(pointItem)
-            updateUiState()
         }
     }
 
     fun addPolygon(pointItem: PointItem, task: Task){
         scope.launch {
             dbDao.addPolygon(pointItem)
-            updateUiState()
         }
 
     }
@@ -702,7 +664,6 @@ object RootRepository {
     fun deletePolygon(pointItem: PointItem){
         scope.launch {
             dbDao.deletePolygon(pointItem)
-            updateUiState()
         }
     }
 
@@ -805,7 +766,6 @@ object RootRepository {
     fun updatePolygon(polygon: PolygonItem, complete: () -> Unit){
         scope.launch {
             dbDao.updatePolygon(polygon)
-            updateUiState()
             complete()
         }
     }

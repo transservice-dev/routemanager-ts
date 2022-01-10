@@ -17,6 +17,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialElevationScale
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
+import ru.transservice.routemanager.MainNavigationDirections
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
@@ -136,11 +138,7 @@ class TaskListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        /*if (AppClass.gps!!.trackingIsOn) {
-            AppClass.gps!!.stopUsingGPS()
-        }*/
         stopNavService()
-        //viewModel.loadPointList()
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -267,7 +265,7 @@ class TaskListFragment : Fragment() {
 
 
             ibtnHome.setOnClickListener {
-                navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToStartScreenFragment())
+                navController.navigate(MainNavigationDirections.actionGlobalStartScreenFragment())
             }
 
             ibtnNavigation.setOnClickListener {
@@ -277,7 +275,7 @@ class TaskListFragment : Fragment() {
             }
 
             ibtnPhotos.setOnClickListener {
-                navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.DONT_SET))
+                navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(viewModel.getCurrentPoint().value!!,PhotoOrder.DONT_SET))
             }
 
             ibtnDelete.setOnClickListener {

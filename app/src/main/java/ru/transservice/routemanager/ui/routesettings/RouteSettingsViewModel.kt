@@ -28,7 +28,7 @@ class RouteSettingsViewModel : ViewModel() {
     private var regionList: MutableLiveData<LoadResult<List<RegionItem>>> = MutableLiveData()
     private var routeList: MutableLiveData<LoadResult<List<RouteItem>>> = MutableLiveData()
 
-    private var editingIsAvailable = MutableLiveData(true)
+    private var editingIsAvailable = MutableLiveData(false)
     val searchByRoute get() = prefRepository.getSearchBYRoute()
 
 
@@ -58,18 +58,8 @@ class RouteSettingsViewModel : ViewModel() {
     }
 
     fun getEditingIsAvailable(): MutableLiveData<Boolean>{
-        repository.isTaskLoaded {
-            editingIsAvailable.postValue(!it)
-        }
+        editingIsAvailable.value = !repository.getTaskData().isLoaded
         return editingIsAvailable
-    }
-
-    fun openEdititng(){
-        editingIsAvailable.value = true
-    }
-
-    fun forbidEdititng(){
-        editingIsAvailable.value = false
     }
 
     fun loadRegions(): MutableLiveData<LoadResult<List<RegionItem>>> {

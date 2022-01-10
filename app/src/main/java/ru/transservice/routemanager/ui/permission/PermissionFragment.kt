@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.navigation.Navigation
+import ru.transservice.routemanager.MainNavigationDirections
 import ru.transservice.routemanager.R
 
 private const val PERMISSIONS_REQUEST_CODE = 10
@@ -34,7 +35,7 @@ class PermissionFragment : Fragment() {
                     .show()
                 Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
                     .navigate(
-                        PermissionFragmentDirections.actionPermissionFragmentToStartScreenFragment()
+                        MainNavigationDirections.actionGlobalStartScreenFragment()
                     )
             } else {
                 Toast.makeText(context, "Разрешения НЕ предоставлены", Toast.LENGTH_LONG)
@@ -58,7 +59,7 @@ class PermissionFragment : Fragment() {
         } else {
             // If permissions have already been granted, proceed
             Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(
-                PermissionFragmentDirections.actionPermissionFragmentToStartScreenFragment()
+                MainNavigationDirections.actionGlobalStartScreenFragment()
             )
         }
     }

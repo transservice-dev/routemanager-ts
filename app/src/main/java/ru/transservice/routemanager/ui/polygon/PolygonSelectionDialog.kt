@@ -12,11 +12,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.entities.PolygonItem
 import ru.transservice.routemanager.databinding.DialogPolygonSelectionBinding
 import ru.transservice.routemanager.ui.task.TaskListFragmentDirections
 
@@ -26,7 +22,6 @@ class PolygonSelectionDialog: DialogFragment() {
     private val binding get() = _binding!!
     lateinit var navController: NavController
     private lateinit var viewModel: PolygonViewModel
-    private var polygon: PolygonItem? = null
     private val requestKeyPolygon = "polygonResult"
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -42,8 +37,6 @@ class PolygonSelectionDialog: DialogFragment() {
 
         val dialog = builder.create()
         dialog.window?.setLayout(50, 100)
-
-        //initViewModel()
 
         return dialog
     }
@@ -70,11 +63,6 @@ class PolygonSelectionDialog: DialogFragment() {
         binding.tvPolygon.setOnClickListener {
             navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPolygonListFragment(requestKeyPolygon))
         }
-        /*viewModel.addedPointItem.observe(viewLifecycleOwner,{
-            it?.let {
-               setFragmentResult("polygonResult", bundleOf("polygon" to it))
-            }
-        })*/
     }
 
     fun initViewModel(){

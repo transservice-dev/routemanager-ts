@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (key == "SEARCH_BY_ROUTE") {
-                    //TODO Check if working correctly
+                    //RootRepository.setTaskByPref()
                 }
 
                 if (key == "USE_GOOGLE_NAV") {

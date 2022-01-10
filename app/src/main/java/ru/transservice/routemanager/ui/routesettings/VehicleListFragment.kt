@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +22,7 @@ class VehicleListFragment : Fragment() {
     private var _binding: FragmentVehicleListBinding? = null
     private val binding get() = _binding!!
     private lateinit var vehicleAdapter: VehicleListAdapter
-    private lateinit var viewModel: RouteSettingsViewModel
+    private val viewModel: RouteSettingsViewModel by navGraphViewModels(R.id.navRouteSettings)
     lateinit var navController: NavController
     private val args: VehicleListFragmentArgs by navArgs()
 
@@ -106,9 +107,7 @@ class VehicleListFragment : Fragment() {
     }
 
 
-    fun initViewModel(){
-        viewModel  = ViewModelProvider(requireActivity(), RouteSettingsViewModel.RouteSettingsViewModelFactory()).get(
-            RouteSettingsViewModel::class.java)
+    private fun initViewModel(){
         viewModel.loadVehicle()
         viewModel.removeSources()
         viewModel.addSourcesRegion()

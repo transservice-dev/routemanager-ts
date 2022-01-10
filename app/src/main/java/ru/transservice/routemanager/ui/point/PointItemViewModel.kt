@@ -18,8 +18,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
     private val repository = RootRepository
     val state: LiveData<PointWithData> = repository.observePointItemState(pointId).asLiveData()
     var pointStatus: PointStatuses = PointStatuses.NOT_VISITED
-    private val currentTask = repository.observeTask().asLiveData()
-    val currentPoint: PointItem? get() = state.value?.let { it.point }
     var reasonComment: String = ""
 
     //TODO redo the algorithm with geoless files
@@ -179,8 +177,8 @@ class PointItemViewModel(pointId: String) : ViewModel() {
                 if (point.done && point.tripNumberFact == 2000)
                     point.tripNumberFact = 1000
                 if (point.done && point.polygonByRow && point.tripNumberFact >= 1000)
-                    currentTask.value?.let {
-                        point.tripNumberFact = it.task.lastTripNumber + 1
+                    repository.getTaskValue().let {
+                        point.tripNumberFact = it.lastTripNumber + 1
                     }
                 updateCurrentPoint(point)
             }
