@@ -305,7 +305,8 @@ class PointFragment : BaseFragment() {
                         else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
                     }
                 }
-                viewModel.pointStatus == PointStatuses.CANNOT_DONE -> {
+                //TODO Change viewModel status point CANDONE and countFact = 0.0
+                viewModel.pointStatus == PointStatuses.CANNOT_DONE || (viewModel.pointStatus == PointStatuses.CANDONE && pointState.point.countFact == 0.0) -> {
                     when {
                         viewModel.reasonComment == FailureReasons.EMPTY_VALUE.reasonTitle
                                 && (pointState.countFilesBefore > 0 || pointState.countFilesCantDone > 0) -> {

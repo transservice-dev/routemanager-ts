@@ -137,6 +137,11 @@ object PreferencesRepository {
         taskWithDataFlow.value = getTaskWithData()
     }
 
+    fun updatePrefTask() {
+        taskWithDataFlow.value = getTaskWithData()
+    }
+
+
     fun saveVehicle(vehicleItem: VehicleItem){
         val gson = Gson()
         putValue(VEHICLE to gson.toJson(vehicleItem) )

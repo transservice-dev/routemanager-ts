@@ -29,6 +29,7 @@ import ru.transservice.routemanager.databinding.ActivityMainBinding
 import ru.transservice.routemanager.location.NavigationService
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.network.RetrofitClient
+import ru.transservice.routemanager.repositories.PreferencesRepository
 import ru.transservice.routemanager.repositories.RootRepository
 import java.util.*
 
@@ -39,13 +40,12 @@ const val KEY_EVENT_EXTRA = "key_event_extra"
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var navController: NavController
+    private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     lateinit var swipeLayout: SwipeRefreshLayout
     lateinit var navMenu: BottomNavigationView
     var backPressedBlock = false
-    private var doubleBackClick = false
     private lateinit var channel: NotificationChannel
     var locationServiceIntent: Intent? = null
 
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (key == "SEARCH_BY_ROUTE") {
-                    //RootRepository.setTaskByPref()
+                    PreferencesRepository.updatePrefTask()
                 }
 
                 if (key == "USE_GOOGLE_NAV") {

@@ -25,6 +25,8 @@ import ru.transservice.routemanager.ui.gallery.list.PhotoListViewModel
 
 val EXTENSION_WHITELIST = arrayOf("JPG")
 
+//FIXME share icon visibility, use viewModel selected item, use by viewModel()
+
 class GalleryFragment internal constructor() : Fragment() {
 
     private val args: GalleryFragmentArgs by navArgs()

@@ -35,6 +35,9 @@ import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.navArgs
 import ru.transservice.routemanager.R
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.data.local.entities.PointItem
@@ -91,10 +94,12 @@ class PhotoFragment : Fragment() {
         // location = null
         //viewPointModel.geoIsRequired.value = true
         if (currentFile!=null && location!=null){
-            ImageFileProcessing.createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
+            CoroutineScope(Dispatchers.Main).launch {
+                ImageFileProcessing().createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
+                Glide.with(requireContext()).load(resource).into(imageView as ImageView)
+            }
         }
 
-        Glide.with(requireContext()).load(resource).into(imageView as ImageView)
         view.findViewById<TextView>(R.id.tv_confirm).setOnClickListener {
             currentFile?.let {
                 viewPointModel.savePointFile(it,location, args.params.fileOrder)

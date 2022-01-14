@@ -37,7 +37,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
     fun savePointFile(file: File, location: Location?, fileOrder: PhotoOrder){
 
         location?.let {
-            ImageFileProcessing.setGeoTag(location, file.absolutePath)
+            ImageFileProcessing().setGeoTag(location, file.absolutePath)
         }
 
         val exifInterface = androidx.exifinterface.media.ExifInterface(file.absoluteFile)
@@ -104,11 +104,17 @@ class PointItemViewModel(pointId: String) : ViewModel() {
                         if (it.filePath.isNotEmpty()) {
                             val lon = location.longitude
                             val lat = location.latitude
-                            ImageFileProcessing.createResultImageFile(
-                                it.filePath, lat, lon, currentState.toPointFileParams(it.photoOrder),
-                                AppClass.appliactionContext()
-                            )
-                            ImageFileProcessing.setGeoTag(location, it.filePath)
+                            val imageProcessing = ImageFileProcessing()
+                            viewModelScope.launch {
+                                imageProcessing.createResultImageFile(
+                                    it.filePath,
+                                    lat,
+                                    lon,
+                                    currentState.toPointFileParams(it.photoOrder),
+                                    AppClass.appliactionContext()
+                                )
+                            }
+                            imageProcessing.setGeoTag(location, it.filePath)
                             repository.updatePointFileLocation(it, lat, lon) {
                                 Log.d(
                                     TAG,
