@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
-//TODO change to class and use DI, use coroutines with default context to process image
 class ImageFileProcessing {
 
     private val ExifAttributes = arrayOf(

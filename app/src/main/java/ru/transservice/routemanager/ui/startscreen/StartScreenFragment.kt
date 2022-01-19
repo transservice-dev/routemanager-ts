@@ -1,53 +1,41 @@
 package ru.transservice.routemanager.ui.startscreen
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.work.*
 import ru.transservice.routemanager.*
+import ru.transservice.routemanager.R
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.SearchType
 import ru.transservice.routemanager.databinding.FragmentStartScreenBinding
+import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.extensions.shortFormat
+import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
+import ru.transservice.routemanager.service.errorDescription
+import ru.transservice.routemanager.workmanager.UploadResultWorker
 
 class StartScreenFragment : BaseFragment() {
 
     private var _binding: FragmentStartScreenBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: StartScreenViewModel
+    private val viewModel: StartScreenViewModel by viewModels()
     private var isBtnCloseHidden = true
-    private lateinit var notificationBuilder: NotificationCompat.Builder
-    private val notificationId: Int = 100
     private var backPressedTime:Long = 0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-
-        }
-        initViewModel()
-    }
+    private var progressDialog: AlertDialog? = null
 
     override fun handleExit() {
         val backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
@@ -61,21 +49,21 @@ class StartScreenFragment : BaseFragment() {
         backPressedTime = System.currentTimeMillis()
     }
 
+    //TODO On App Start Check for current UploadResultWorker Status and show dialog if necessary
+    //TODO Splash Screen
+    //TODO progress animation on the dialog
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        //Log.d(TAG, "onCreateView ${this::class.java}")
         _binding = FragmentStartScreenBinding.inflate(inflater,container,false)
         return binding.root
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
-        //Log.d(TAG, "onDestroyView ${this::class.java}")
         _binding = null
-        Log.d(TAG, "onDestroyView")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -87,55 +75,10 @@ class StartScreenFragment : BaseFragment() {
 
         initViews()
         initActionButtons()
-        initNotificationManager()
         viewModel.getTaskParams().observe(viewLifecycleOwner, { state ->
             updateRouteInfo(true)
         })
 
-        viewModel.getUploadResult().observe(requireActivity(), {
-            Log.d(TAG, "start observing getUploadResult ${this::class.java}")
-            when (it) {
-                    is LoadResult.Loading -> {
-                        navController.navigate(R.id.splashScreenFragment)
-                    }
-                    is LoadResult.Success -> {
-                        navController.navigate(R.id.startScreenFragment)
-                        with(NotificationManagerCompat.from(requireActivity())) {
-                            notificationBuilder.setProgress(0, 0, false)
-                            notificationBuilder.setContentTitle("Выгрузка завершена")
-                            notify(notificationId, notificationBuilder.build())
-                        }
-                        Toast.makeText(context, "Данные выгружены успешно!",Toast.LENGTH_LONG).show()
-                        //viewModel.updateCurrentTask()
-                    }
-                    is LoadResult.Error -> {
-                        navController.navigate(R.id.startScreenFragment)
-                        with(NotificationManagerCompat.from(requireActivity())) {
-                            notificationBuilder.setProgress(0, 0, false)
-                            notificationBuilder.setContentTitle("Данные НЕ выгружены")
-                            notify(notificationId, notificationBuilder.build())
-                        }
-                        val errorDescription = errorDescription(it)
-                        ErrorAlert.showAlert("$errorDescription Отправить отчет об ошибке?", requireContext())
-                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
-                    }
-                }
-        })
-    }
-
-    private fun <T>errorDescription(loadResult: LoadResult<T>): String {
-        val errorDescription = when (loadResult.e) {
-            is UnknownHostException -> "Ошибка: неизвестное имя сервера. Проверьте наличие интернета на устройстве."
-            is SocketTimeoutException -> "Ошибка соединения. Сервер не отвечает. Проверьте наличие интернета на устройстве."
-            is SecurityException -> "Ошибка авторизации. Проверьте правильность ввода пароля."
-            else -> "При выгрузке/загрузке данных произошла ошибка."
-        }
-        return errorDescription
-    }
-
-    private fun initViewModel(){
-        viewModel  = ViewModelProvider(this, StartScreenViewModel.StartScreenViewModelFactory()).get(
-            StartScreenViewModel::class.java)
     }
 
     private fun initViews(){
@@ -145,95 +88,6 @@ class StartScreenFragment : BaseFragment() {
             tvVersion.text = "Версия ${viewModel.version}"
         }
      }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun initActionButtons(){
-        binding.photoLayout.setOnClickListener {
-            navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(null,PhotoOrder.DONT_SET))
-        }
-
-        binding.vehicleLayout.setOnClickListener {
-            navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToRouteSettingsFragment())
-        }
-
-        binding.routeGroup.setOnClickListener {
-            navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToTaskListFragment())
-        }
-
-        binding.btnLoad.setOnClickListener{
-            viewModel.syncTaskData().observe(viewLifecycleOwner, {
-                when (it) {
-                    is LoadResult.Loading -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
-                    }
-                    is LoadResult.Success -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
-                        Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
-                        //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
-                        //TODO Test how in working with a flow
-                        /*viewModel.getTaskParams().value?.let { task->
-                            binding.atAllCount.text = task.taskCountPoint.toString()
-                        }*/
-                    }
-                    is LoadResult.Error -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
-                        if (it.e != null) {
-                            val errorDescription = errorDescription(it)
-                            ErrorAlert.showAlert(
-                                "$errorDescription Отправить отчет об ошибке?",
-                                requireContext()
-                            )
-                        }
-                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
-                        //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
-                    }
-                }
-            })
-        }
-
-        binding.imageOpenCloseRoute.setOnClickListener {
-            showHideButtonClose()
-        }
-
-        binding.btnFinishRoute.setOnClickListener {
-            val alertBuilder = AlertDialog.Builder(context).apply {
-                setTitle("Подтвердите действие")
-                setMessage("Вы уверены, что хотите завершить маршрут?")
-                setPositiveButton("Да, завершить") { _,_ ->
-                    with(NotificationManagerCompat.from(requireActivity())) {
-                        notificationBuilder.setProgress(100, 0, true)
-                        notify(notificationId, notificationBuilder.build())
-                    }
-                    viewModel.finishRoute()
-                }
-                setNegativeButton("Нет, отменить") { _,_ ->
-                    showHideButtonClose()
-                    Toast.makeText(context, "Действие отменено пользователем",Toast.LENGTH_SHORT).show()
-                }
-            }
-            val alert = alertBuilder.create()
-            alert.show()
-        }
-
-    }
-
-    private fun initNotificationManager(){
-        val intent = Intent(requireActivity(), MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            requireActivity(),
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        //создание builder'а (что будет отображаться)
-        notificationBuilder = NotificationCompat.Builder(requireActivity(), (requireActivity() as MainActivity).getNotificationChannel().id)
-            .setContentTitle("Выгрузка данных")
-            .setContentText("Выгрузка данных маршрута и фотографий")
-            .setSmallIcon(R.drawable.ic_logo_mini)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-    }
 
     private fun updateRouteInfo(animate: Boolean){
         viewModel.getTaskParams().value?.let { state ->
@@ -278,7 +132,7 @@ class StartScreenFragment : BaseFragment() {
     private fun showHideButtonClose(){
         with(binding.closeLayout){
             val animateView = this.context?.let {
-                context -> AnimateView(this, context, true)
+                    context -> AnimateView(this, context, true)
             }
             if (!isBtnCloseHidden) {
                 animateView!!.hideHeight()
@@ -290,7 +144,7 @@ class StartScreenFragment : BaseFragment() {
 
         with(binding.imageOpenCloseRoute) {
             val animateView = this.context?.let {
-                context -> AnimateView(this, context, true)
+                    context -> AnimateView(this, context, true)
             }
 
             if (!isBtnCloseHidden) {
@@ -303,10 +157,154 @@ class StartScreenFragment : BaseFragment() {
         isBtnCloseHidden = !isBtnCloseHidden
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initActionButtons(){
+        binding.photoLayout.setOnClickListener {
+            navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(null,PhotoOrder.DONT_SET))
+        }
+
+        binding.vehicleLayout.setOnClickListener {
+            navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToRouteSettingsFragment())
+        }
+
+        binding.routeGroup.setOnClickListener {
+            navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToTaskListFragment())
+        }
+
+        binding.btnLoad.setOnClickListener{
+            viewModel.syncTaskData().observe(viewLifecycleOwner, {
+                when (it) {
+                    is LoadResult.Loading -> {
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
+                    }
+                    is LoadResult.Success -> {
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                        Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
+                        //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
+                        //TODO Test how in working with a flow
+                        /*viewModel.getTaskParams().value?.let { task->
+                            binding.atAllCount.text = task.taskCountPoint.toString()
+                        }*/
+                    }
+                    is LoadResult.Error -> {
+                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                        if (it.e != null) {
+                            ErrorAlert.showAlert(
+                                "${it.errorDescription()} Отправить отчет об ошибке?",
+                                requireContext()
+                            )
+                        }
+                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
+                        //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            })
+        }
+
+        binding.imageOpenCloseRoute.setOnClickListener {
+            showHideButtonClose()
+        }
+
+        binding.btnFinishRoute.setOnClickListener {
+           handleFinishRoute()
+        }
+
+    }
+
+    private fun handleFinishRoute() {
+        val alertBuilder = AlertDialog.Builder(context).apply {
+            setTitle("Подтвердите действие")
+            setMessage("Вы уверены, что хотите завершить маршрут?")
+            setPositiveButton("Да, завершить") { _,_ ->
+                progressDialog = createProgressDialog()
+                progressDialog?.show()
+                val request = UploadResultWorker.requestOneTimeWorkExpedited()
+                observeUpload(request)
+                viewModel.startUploadWorker(request)
+            }
+            setNegativeButton("Нет, отменить") { _,_ ->
+                showHideButtonClose()
+                Toast.makeText(context, "Действие отменено пользователем",Toast.LENGTH_SHORT).show()
+            }
+        }
+        val alert = alertBuilder.create()
+        alert.show()
+    }
+
+    private fun createProgressDialog(): AlertDialog {
+        val builder = AlertDialog.Builder(context)
+        val inflater = requireActivity().layoutInflater
+        builder
+            .setView(inflater.inflate(R.layout.dialog_upload_progress,null))
+            .setNegativeButton(R.string.cancel) {_,_ ->
+
+            }
+            .setCancelable(false)
+        return builder.create()
+    }
+
+    private fun observeUpload(request: WorkRequest) {
+        WorkManager.getInstance(requireContext())
+            .getWorkInfoByIdLiveData(request.id)
+            .observe(requireActivity(), Observer { workInfo: WorkInfo? ->
+                workInfo?.let { info ->
+                    updateProgressDialog(info)
+                }
+            })
+    }
+
+    private fun updateProgressDialog(info: WorkInfo) {
+        progressDialog?.window?.let { dialogWindow ->
+            val progressDescription =
+                dialogWindow.findViewById<TextView>(R.id.tv_progressDescription)
+            val progressBar = dialogWindow.findViewById<ProgressBar>(R.id.progressBar)
+            when (info.state) {
+                WorkInfo.State.ENQUEUED -> {
+                    val countAttempts = info.progress.getInt(WorkInfoKeys.CountAttempts,0)
+                    if (countAttempts == 0) {
+                        progressDescription.text = getString(R.string.UploadAwaiting)
+                        progressBar.isIndeterminate = true
+                    }else{
+                        progressDescription.text = "Ожидание выгрузки. Попытка №$countAttempts"
+                        progressBar.isIndeterminate = true
+                    }
+                }
+                WorkInfo.State.RUNNING -> {
+                    info.progress.getString(WorkInfoKeys.Description)?.let {
+                        progressDescription.text = it
+                    }
+                    val currentProgress = info.progress.getInt(WorkInfoKeys.Progress, 0)
+                    Log.d(tag(), "Uploading result current progress $currentProgress ")
+                    if (currentProgress != 0) {
+                        progressBar.isIndeterminate = false
+                        progressBar.progress = info.progress.getInt(WorkInfoKeys.Progress, 0)
+                    }else {
+
+                    }
+                }
+                WorkInfo.State.SUCCEEDED -> {
+                    info.progress.getString(WorkInfoKeys.Description)?.let {
+                        progressDescription.text = it
+                    }
+                    progressBar.progress = info.progress.getInt(WorkInfoKeys.Progress, 100)
+                    progressDialog?.dismiss()
+                    progressDialog = null
+                    Toast.makeText(context, "Данные выгружены успешно!", Toast.LENGTH_LONG).show()
+                }
+                else -> {
+                    progressDialog?.dismiss()
+                    progressDialog = null
+                    info.outputData.keyValueMap[WorkInfoKeys.Error]?.let {
+                        ErrorAlert.showAlert("$it Отправить отчет об ошибке?", requireContext())
+                    }
+
+                }
+            }
+        }
+    }
+
     companion object {
-
-        private const val TAG = "${AppClass.TAG}: StartScreenFragment"
-
         @JvmStatic
         fun newInstance() =
             StartScreenFragment().apply {

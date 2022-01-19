@@ -1,28 +1,24 @@
 package ru.transservice.routemanager.ui.startscreen
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.data.local.entities.Task
+
 import ru.transservice.routemanager.data.local.entities.TaskWithData
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
+import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.lang.IllegalArgumentException
 
 class StartScreenViewModel : ViewModel() {
 
     private val repository = RootRepository
     private val currentTask = repository.observeTask().asLiveData()
-
     val version get() = AppClass.appVersion
 
-    private val uploadResult: MutableLiveData<LoadResult<Boolean>> = MutableLiveData()
-
-
-    class StartScreenViewModelFactory : ViewModelProvider.Factory{
+     class StartScreenViewModelFactory : ViewModelProvider.Factory{
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if(modelClass.isAssignableFrom(StartScreenViewModel::class.java)){
                 return StartScreenViewModel() as T
@@ -44,24 +40,15 @@ class StartScreenViewModel : ViewModel() {
         return result
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun finishRoute(): MutableLiveData<LoadResult<Boolean>> {
-        uploadResult.value = LoadResult.Loading()
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.uploadResult { loadResult ->
-                uploadResult.postValue(loadResult)
-            }
-        }
-        return uploadResult
+    fun startUploadWorker(request: WorkRequest){
+        // cancel all previous work for uploading files
+        WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadFilesWorker.workerTag)
+        WorkManager.getInstance(AppClass.appliactionContext())
+            .enqueue(request)
     }
 
     fun getTaskParams(): LiveData<TaskWithData> {
         return currentTask
-    }
-
-
-    fun getUploadResult(): MutableLiveData<LoadResult<Boolean>> {
-        return uploadResult
     }
 
 }

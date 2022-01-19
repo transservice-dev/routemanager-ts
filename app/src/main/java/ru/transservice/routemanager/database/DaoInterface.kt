@@ -207,4 +207,12 @@ interface DaoInterface {
         FROM TaskWithData
     """)
     fun observeTaskWithData(): Flow<TaskWithData>
+
+    @Query("""
+        SELECT COUNT(1) from pointFiles_table
+    """)
+    fun countFiles() : Int
+
+    @Query("SELECT * FROM pointFiles_table where id=:id")
+    fun getFileById(id: Long): PointFile?
 }

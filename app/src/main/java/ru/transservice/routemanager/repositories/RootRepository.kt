@@ -6,11 +6,9 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.os.HandlerCompat
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.asLiveData
-import androidx.room.Transaction
+import androidx.work.CoroutineWorker
+import androidx.work.Data
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.*
@@ -26,15 +24,18 @@ import ru.transservice.routemanager.data.remote.res.task.TaskRes
 import ru.transservice.routemanager.data.remote.res.task.TaskRowRes
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 import ru.transservice.routemanager.database.DaoInterface
+import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.extensions.longFormat
+import ru.transservice.routemanager.extensions.updateProgressValue
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.utils.Utils
+import ru.transservice.routemanager.workmanager.UploadResultWorker
 import java.io.File
-import java.io.InputStream
 import java.security.Key
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 object RootRepository {
 
@@ -83,7 +84,7 @@ object RootRepository {
         }
     }
 
-    fun generateDeviceName(): String {
+    private fun generateDeviceName(): String {
         var value = ""
         val task = getTaskValue()
         val vehicleRouteName = if (task.search_type == SearchType.BY_VEHICLE) {
@@ -153,6 +154,10 @@ object RootRepository {
             Log.e("RootRepository", "$methodName Unknown exception ${e.message} ${e.stackTraceToString()}")
             LoadResult.Error("Неизвестная ошибка ${e.message}")
         }
+    }
+
+    private suspend fun <T: CoroutineWorker> updateWorkerProgress(worker: T, data: Data){
+        worker.setProgress(data)
     }
 
     //region RemoteConnections
@@ -305,117 +310,72 @@ object RootRepository {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun uploadResult(complete: (loadResult: LoadResult<Boolean>) -> Unit) = withContext(Dispatchers.IO){
-        scope.launch {
-            Log.d(TAG, "uploading result START")
-            try {
-                //1. upload files first
-                val resultFiles = uploadFiles()
-                if (resultFiles !is LoadResult.Success){
-                    Log.e(
-                        TAG,
-                        "uploading result CANCELED with error: Error while uploading files: : ${resultFiles.errorMessage}"
-                    )
-                    complete(LoadResult.Error("Ошибка при выгрузке файлов"))
-                    return@launch
-                }
-                // Files uploaded successfully
-                //2. upload task
-                val resultTask = uploadTask()
-                if (resultTask !is LoadResult.Success) {
-                    Log.e(
-                        TAG,
-                        "uploading result CANCELED with error: ${resultTask.errorMessage}"
-                    )
-                    complete(LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
-                    return@launch
-                }
-                // Task uploaded successfully
-                //3. set status
-                resultTask.data?.get(0)?.let {
-                    val resultStatus = setStatus(currentTaskValue.task, 2)
-                    if (resultStatus !is LoadResult.Success) {
-                        Log.e(
-                            TAG,
-                            "uploading result CANCELED with error: ${resultStatus.errorMessage}"
-                        )
-                        complete(resultStatus)
-                        return@launch
-                    }
-
-                    Log.d(TAG, "uploading result FINISHED")
-                    deleteDataFromDB()
-                    complete(resultStatus)
-                }
-            } catch (e: java.lang.Exception) {
-                Log.e(TAG, "Error while uploading task: $e ${e.stackTraceToString()}")
-               complete(LoadResult.Error("Ошибка при выгрузке данных", e))
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun uploadFilesOnSchedule(){
-        scope.launch {
-            uploadFiles(false)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun uploadFile(pointFile: PointFile){
-        scope.launch {
-            Log.d(TAG, "uploading file ${pointFile.filePath} START")
-            if (!pointFile.exists()) {
-                Log.i(
+    suspend fun uploadResult(worker: UploadResultWorker): LoadResult<Boolean>{
+        Log.d(TAG, "uploading result START")
+        //return LoadResult.Success(true)
+        //return LoadResult.Error("Ошибка!", SocketTimeoutException())
+        try {
+            //1. upload files first
+            val resultFiles = uploadFiles(worker)
+            if (resultFiles !is LoadResult.Success){
+                Log.e(
                     TAG,
-                    " uploading file : " + pointFile.filePath + "FILE NOT FOUND"
+                    "uploading result CANCELED with error: Error while uploading files: : ${resultFiles.errorMessage}"
                 )
-                return@launch
+                return (LoadResult.Error("Ошибка при выгрузке файлов"))
             }
-            val filesArray: ArrayList<FilesRequestBody> = arrayListOf()
-            val photoOrder = if (pointFile.photoOrder == PhotoOrder.PHOTO_BEFORE) {
-                0
-            } else {
-                1
-            }
-            filesArray.add(
-                FilesRequestBody(
-                    pointFile.docUID,
-                    pointFile.lineUID,
-                    pointFile.lat,
-                    pointFile.lon,
-                    pointFile.fileName,
-                    pointFile.fileExtension,
-                    pointFile.timeDate.longFormat(),
-                    photoOrder,
-                    pointFile.getCompresedBase64()
+            // Files uploaded successfully
+            //2. upload task
+            val resultTask = uploadTask()
+            if (resultTask !is LoadResult.Success) {
+                Log.e(
+                    TAG,
+                    "uploading result CANCELED with error: ${resultTask.errorMessage}"
                 )
-            )
-            val response = RetrofitClient
-                .getPostgrestApi()
-                .uploadFiles(FilesUploadRequest(filesArray))
-            if (responseResult(response) is LoadResult.Success) {
-                if (response.body() != null) {
-                    Log.d(TAG, "uploading file ${pointFile.filePath} FINISHED")
-                    dbDao.updatePointFileUploadStatus(arrayListOf(pointFile.id), true)
+                return (LoadResult.Error("Ошибка при выгрузке задания: ${resultTask.errorMessage}"))
+            }
+            // Task uploaded successfully
+            //3. set status
+            resultTask.data?.get(0)?.let {
+                val resultStatus = setStatus(currentTaskValue.task, 2)
+                if (resultStatus !is LoadResult.Success) {
+                    Log.e(
+                        TAG,
+                        "uploading result CANCELED with error: ${resultStatus.errorMessage}"
+                    )
+                    return (resultStatus)
                 }
+
+                Log.d(TAG, "uploading result FINISHED")
+                deleteDataFromDB()
+                return (resultStatus)
             }
+            return (LoadResult.Error("Ошибка при выгрузке данных"))
+
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "Error while uploading task: $e ${e.stackTraceToString()}")
+            return (LoadResult.Error("Ошибка при выгрузке данных", e))
         }
     }
 
-    fun updatePointOnServer(pointItem: PointItem){
-        scope.launch {
-            uploadTaskRow(pointItem)
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun uploadFiles(deleteUploaded: Boolean = true): LoadResult<Boolean> {
+    suspend fun uploadFiles(worker: CoroutineWorker,deleteUploaded: Boolean = true, pointFile: PointFile? = null): LoadResult<Boolean> {
 
-        val data = dbDao.getRouteNotUploadedPointFiles()
+        val data = if (pointFile != null) {
+            listOf(pointFile)
+        }else{
+            dbDao.getRouteNotUploadedPointFiles()
+        }
+
+        //calculating worker progress
+        val countFiles = dbDao.countFiles()
+        var countUploadedFiles = countFiles - data.size
+        worker.updateProgressValue(WorkInfoKeys.Progress,(countUploadedFiles.toFloat()/countFiles*100).toInt())
+
         if (data.isNotEmpty()) {
-            val portionSize = 20
+            // uploading in portion
+            val portionSize = 1
             val iterationCount = (data.size.toFloat() / portionSize)
             var startPos = 0
             var endPos = if (portionSize - 1 > (data.size - 1)) {
@@ -423,6 +383,7 @@ object RootRepository {
             } else {
                 portionSize - 1
             }
+
             var i = 0
             var result: Boolean
             do {
@@ -435,6 +396,8 @@ object RootRepository {
                     } else {
                         dbDao.updatePointFileUploadStatus(uploadedFiles, true)
                     }
+                    countUploadedFiles += portionSize
+                    worker.updateProgressValue(WorkInfoKeys.Progress,(countUploadedFiles.toFloat()/countFiles*100).toInt())
                 }
                 result = resultPortion.data ?: false
                 startPos = endPos + 1
@@ -458,6 +421,8 @@ object RootRepository {
         deletedFiles: ArrayList<Long>
     ): LoadResult<Boolean> {
         Log.d(TAG, "uploading files portion START")
+        //TODO remove delay
+        delay(5000)
         val warningMessage = arrayListOf<String>()
         val filesArray: ArrayList<FilesRequestBody> = arrayListOf()
         for (j in startPos..endPos) {
@@ -529,6 +494,11 @@ object RootRepository {
                 LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
     }
 
+    fun updatePointOnServer(pointItem: PointItem){
+        scope.launch {
+            uploadTaskRow(pointItem)
+        }
+    }
     private suspend fun uploadTaskRow(pointItem: PointItem):LoadResult<List<PointItem>>{
         Log.d(TAG, "update task row ${pointItem.addressName} START")
         val taskList = listOf(pointItem)
@@ -593,7 +563,6 @@ object RootRepository {
             }
         }
     }
-
 
     //endregion
 
@@ -768,6 +737,10 @@ object RootRepository {
             dbDao.updatePolygon(polygon)
             complete()
         }
+    }
+
+    suspend fun getPointFileById(id: Long): PointFile? {
+        return dbDao.getFileById(id)
     }
 
     //endregion

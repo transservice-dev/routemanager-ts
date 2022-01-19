@@ -3,12 +3,15 @@ package ru.transservice.routemanager.ui.point
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.utils.ImageFileProcessing
+import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.util.*
@@ -60,7 +63,8 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         )
 
         repository.insertPointFile(pointFile) {
-            repository.uploadFile(pointFile)
+            WorkManager.getInstance(AppClass.appliactionContext())
+                .enqueue(UploadFilesWorker.requestOneTimeWork(workDataOf(UploadFilesWorker.fileId to pointFile.id)))
 
             if (fileOrder == PhotoOrder.PHOTO_AFTER || fileOrder == PhotoOrder.PHOTO_CANTDONE) {
                 state.value?.let { it ->

@@ -13,6 +13,13 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical">
 
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/ltMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:constraint_referenced_ids="routeInfo,constraintLayout2,tv_version"/>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/routeInfo"
             android:layout_width="0dp"
@@ -190,7 +197,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/constraintLayoutDown">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_finishRoute"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -202,7 +209,8 @@
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
                         tools:layout_editor_absoluteY="0dp"
-                        tools:ignore="MissingConstraints" />
+                        tools:ignore="MissingConstraints"
+                        android:theme="@style/DefButton"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -350,6 +358,7 @@
             android:padding="@dimen/margin_small8"
             android:layout_marginBottom="?attr/actionBarSize"
             tools:text="Версия приложения" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

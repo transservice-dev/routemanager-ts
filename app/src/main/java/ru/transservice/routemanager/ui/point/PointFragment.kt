@@ -22,12 +22,14 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.work.WorkManager
 import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.databinding.FragmentPointBinding
 import ru.transservice.routemanager.extensions.navViewModelsFactory
 import ru.transservice.routemanager.location.NavigationServiceConnection
+import ru.transservice.routemanager.workmanager.UploadFilesWorker
 
 class PointFragment : BaseFragment() {
 

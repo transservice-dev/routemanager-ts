@@ -115,3 +115,5 @@ inline fun <reified T : ViewModel> Fragment.navViewModelsFactory(@NavigationRes 
         }
     }
 }
+
+inline fun <reified T> T.tag() : String = T::class.java.simpleName
