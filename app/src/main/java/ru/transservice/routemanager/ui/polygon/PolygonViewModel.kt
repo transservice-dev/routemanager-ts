@@ -23,15 +23,14 @@ class PolygonViewModel : ViewModel()  {
     private var polygonList: MutableLiveData<List<PolygonItem>> = MutableLiveData()
     private var docPolygonList: MutableLiveData<List<PolygonItem>> = MutableLiveData()
 
-    class PolygonViewModelFactory: ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    class Factory: ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(PolygonViewModel::class.java)){
                 return PolygonViewModel() as T
             }else
                 throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
         }
     }
-
 
     fun loadAvailablePolygons(): MutableLiveData<List<PolygonItem>> {
         repository.getPolygonList {pList->

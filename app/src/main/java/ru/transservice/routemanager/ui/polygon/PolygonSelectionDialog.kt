@@ -66,7 +66,7 @@ class PolygonSelectionDialog: DialogFragment() {
     }
 
     fun initViewModel(){
-        viewModel  = ViewModelProvider(requireActivity(), PolygonViewModel.PolygonViewModelFactory()).get(
+        viewModel  = ViewModelProvider(requireActivity(), PolygonViewModel.Factory()).get(
             PolygonViewModel::class.java)
         viewModel.setPolygonByDefault()
     }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,39 +8,52 @@
 
     <LinearLayout
         android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_small16"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shimmer_direction="left_to_right"
+            app:shimmer_repeat_delay="1000"
+            app:shimmer_auto_start="true"
+            tools:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_progressDescription_shimmer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingEnd="@dimen/margin_small16"
+                android:text="@string/UploadAwaiting" />
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
 
         <TextView
             android:id="@+id/tv_progressDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/UploadAwaiting"
-            android:paddingEnd="@dimen/margin_small16"/>
+            android:paddingEnd="@dimen/margin_small16"
+            android:text="@string/UploadAwaiting" />
 
         <ProgressBar
-            android:id="@+id/spinnerRing"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_weight="0"
-            android:visibility="gone"
-            android:indeterminate="true" />
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/margin_small16"
+            android:layout_marginTop="@dimen/margin_small16"
+            android:indeterminate="true"
+            app:layout_constraintTop_toBottomOf="@id/title" />
+
     </LinearLayout>
 
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:layout_marginTop="@dimen/margin_small16"
-        android:layout_marginHorizontal="@dimen/margin_small16"
-        app:layout_constraintTop_toBottomOf="@id/title"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

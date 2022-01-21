@@ -13,9 +13,25 @@
         android:id="@+id/photoPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:src="@drawable/bg_round_rect_gray"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:srcCompat="@drawable/ic_logo" />
+        tools:layout_editor_absoluteX="0dp" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/tv_shimmer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:shimmer_auto_start="true">
+        <TextView
+            android:id="@+id/tv_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Идет обработка фото..." />
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"

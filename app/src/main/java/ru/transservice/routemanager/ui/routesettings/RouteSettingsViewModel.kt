@@ -32,15 +32,6 @@ class RouteSettingsViewModel : ViewModel() {
     val searchByRoute get() = prefRepository.getSearchBYRoute()
 
 
-    class RouteSettingsViewModelFactory: ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(RouteSettingsViewModel::class.java)){
-                return RouteSettingsViewModel() as T
-            }else
-                throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
-        }
-    }
-
     fun getRegion(): MutableLiveData<RegionItem?> {
         return currentRegion
     }

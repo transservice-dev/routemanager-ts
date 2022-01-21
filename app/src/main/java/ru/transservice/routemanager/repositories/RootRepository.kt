@@ -26,12 +26,14 @@ import ru.transservice.routemanager.data.remote.res.task.TaskUploadRequest
 import ru.transservice.routemanager.database.DaoInterface
 import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.extensions.longFormat
+import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.extensions.updateProgressValue
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.utils.Utils
 import ru.transservice.routemanager.workmanager.UploadResultWorker
 import java.io.File
+import java.net.SocketTimeoutException
 import java.security.Key
 import java.util.*
 import kotlin.collections.ArrayList
@@ -211,6 +213,23 @@ object RootRepository {
                     complete.invoke(response.body()!!)
                 }
             }
+        }
+    }
+
+    fun testCoroutines() {
+        val scope1 = CoroutineScope(Dispatchers.Default + errHandler)
+        val scope2 = CoroutineScope(Dispatchers.Default + errHandler)
+        val job = scope1.launch {
+            scope1.launch {
+                delay(100)
+                Log.d(tag(),"task 1")
+                throw SocketTimeoutException()
+            }
+            scope2.launch {
+                delay(200)
+                Log.d(tag(),"task 2")
+            }
+            //delay(1000)
         }
     }
 
@@ -421,8 +440,6 @@ object RootRepository {
         deletedFiles: ArrayList<Long>
     ): LoadResult<Boolean> {
         Log.d(TAG, "uploading files portion START")
-        //TODO remove delay
-        delay(5000)
         val warningMessage = arrayListOf<String>()
         val filesArray: ArrayList<FilesRequestBody> = arrayListOf()
         for (j in startPos..endPos) {

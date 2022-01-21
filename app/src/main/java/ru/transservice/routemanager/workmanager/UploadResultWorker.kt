@@ -28,7 +28,7 @@ class UploadResultWorker(context: Context, workerParams: WorkerParameters): Coro
         const val NOTIFICATION_ID = "UPLOAD_RESULT_DATA"
         const val workerTag = "UploadResult"
 
-        fun requestOneTimeWorkExpedited(): WorkRequest {
+        fun requestOneTimeWorkExpedited(): OneTimeWorkRequest {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
@@ -71,7 +71,6 @@ class UploadResultWorker(context: Context, workerParams: WorkerParameters): Coro
 
     @SuppressLint("RestrictedApi")
     override suspend fun doWork(): Result  {
-        delay(2000)
         val result = withContext(Dispatchers.IO){
             val startUpload = workDataOf(
                 WorkInfoKeys.Progress to 0,

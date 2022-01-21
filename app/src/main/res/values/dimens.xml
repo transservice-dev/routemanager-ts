@@ -40,6 +40,7 @@
     <dimen name="shutter_button_margin">80dp</dimen>
 
     <dimen name="text_size_standart">18sp</dimen>
+    <dimen name="text_shimmer_standart">22sp</dimen>
     <dimen name="text_size_title">24sp</dimen>
     <dimen name="text_size_small">14sp</dimen>
     <dimen name="padding_tiny4">4dp</dimen>

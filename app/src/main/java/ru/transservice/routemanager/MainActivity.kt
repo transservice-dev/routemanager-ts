@@ -22,6 +22,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.WorkManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import ru.transservice.routemanager.animation.AnimateView
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
@@ -91,6 +92,11 @@ class MainActivity : AppCompatActivity() {
 
         //binding.toolbar.setupWithNavController(navController, AppBarConfiguration(navController.graph))
 
+    }
+
+    override fun onDestroy() {
+        WorkManager.getInstance(applicationContext).pruneWork()
+        super.onDestroy()
     }
 
     override fun onSupportNavigateUp(): Boolean {

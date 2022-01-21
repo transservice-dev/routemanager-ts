@@ -53,7 +53,7 @@ class GalleryFragment internal constructor() : Fragment() {
 
         // Get root directory of media from navigation arguments
         val point = args.point
-        val viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.PhotoListViewModelFactory(point)).get(
+        val viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.Factory(point)).get(
                 PhotoListViewModel::class.java)
         mediaList = viewModel.getPointFilesList().value!!
         // Walk through all files in the root directory

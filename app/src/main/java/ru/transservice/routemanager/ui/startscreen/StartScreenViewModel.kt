@@ -1,8 +1,12 @@
 package ru.transservice.routemanager.ui.startscreen
 
 import androidx.lifecycle.*
+import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 
@@ -10,24 +14,28 @@ import ru.transservice.routemanager.data.local.entities.TaskWithData
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
+import ru.transservice.routemanager.workmanager.UploadResultWorker
 import java.lang.IllegalArgumentException
+import java.util.*
 
 class StartScreenViewModel : ViewModel() {
 
     private val repository = RootRepository
     private val currentTask = repository.observeTask().asLiveData()
+
+    private var uploadWorkerId: UUID? = null
+
     val version get() = AppClass.appVersion
 
-     class StartScreenViewModelFactory : ViewModelProvider.Factory{
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if(modelClass.isAssignableFrom(StartScreenViewModel::class.java)){
-                return StartScreenViewModel() as T
-            }else{
-                throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
-            }
-        }
+    private val uploadingIsNotFinished = MutableLiveData(false)
 
+    init {
+        checkForIncompleteWork()
     }
+
+    fun getUploadingIsNotFinished() = uploadingIsNotFinished
+
+    fun getUploadWorkerId() = uploadWorkerId
 
     fun syncTaskData(): MutableLiveData<LoadResult<Int>>{
         val result: MutableLiveData<LoadResult<Int>> =
@@ -40,11 +48,46 @@ class StartScreenViewModel : ViewModel() {
         return result
     }
 
-    fun startUploadWorker(request: WorkRequest){
+    fun startUploadWorker(){
         // cancel all previous work for uploading files
         WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadFilesWorker.workerTag)
+        val request = UploadResultWorker.requestOneTimeWorkExpedited()
+        uploadWorkerId = request.id
         WorkManager.getInstance(AppClass.appliactionContext())
-            .enqueue(request)
+            .enqueueUniqueWork(
+                UploadResultWorker.workerTag,
+                ExistingWorkPolicy.KEEP,
+                request)
+    }
+
+    fun cancelUploadWorker() {
+        WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadResultWorker.workerTag)
+        uploadWorkerId = null
+        checkForIncompleteWork()
+    }
+
+    //Check if there is any incomplete work
+    fun checkForIncompleteWork()  {
+        viewModelScope.launch {
+            val workInfo =
+                WorkManager.getInstance(AppClass.appliactionContext())
+                    .getWorkInfosByTag(UploadResultWorker.workerTag)
+                    .get()
+
+            workInfo?.let {
+                uploadingIsNotFinished.postValue(
+                    workInfo.any {
+                        !it.state.isFinished
+                    }
+                )
+                uploadWorkerId = workInfo.lastOrNull { !it.state.isFinished }?.id
+            }
+
+        }
+    }
+
+    fun testCoroutines(){
+        repository.testCoroutines()
     }
 
     fun getTaskParams(): LiveData<TaskWithData> {

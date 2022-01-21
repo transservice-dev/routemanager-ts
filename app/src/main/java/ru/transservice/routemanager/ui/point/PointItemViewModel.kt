@@ -30,6 +30,12 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         private const val TAG = "${AppClass.TAG}: TaskList_View_Model"
     }
 
+    class Factory(val pointId: String) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return PointItemViewModel(pointId) as T
+        }
+    }
+
     fun initPointData() {
         updateGeoIsRequired()
         if (reasonComment.isEmpty()) {
@@ -76,8 +82,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
     }
 
     private fun updateCurrentPoint(pointItem: PointItem){
-        //TODO check online updating
-        //currentPoint.postValue(pointItem)
         repository.updatePoint(pointItem)
         repository.updatePointOnServer(pointItem)
     }
@@ -161,6 +165,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         }
     }
 
+    //TODO move to data layer
     private fun updatePointAndDoneStatus(point: PointItem) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.checkPointForCompletion(point) { canBeDone ->
@@ -192,17 +197,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
                     }
                 updateCurrentPoint(point)
             }
-        }
-    }
-
-}
-
-class PointItemViewModelFactory(val pointId: String): ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return if (modelClass.isAssignableFrom(PointItemViewModel::class.java)) {
-            PointItemViewModel(pointId) as T
-        }else{
-            throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
         }
     }
 

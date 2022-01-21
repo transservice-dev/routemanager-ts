@@ -1,13 +1,11 @@
 package ru.transservice.routemanager.ui.point
 
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,27 +14,21 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResultListener
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import androidx.work.WorkManager
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.databinding.FragmentPointBinding
-import ru.transservice.routemanager.extensions.navViewModelsFactory
 import ru.transservice.routemanager.location.NavigationServiceConnection
-import ru.transservice.routemanager.workmanager.UploadFilesWorker
 
 class PointFragment : BaseFragment() {
 
     private var _binding: FragmentPointBinding? = null
     private val binding get() = _binding!!
     private val args: PointFragmentArgs by navArgs()
-    private val viewModel: PointItemViewModel by navViewModelsFactory(R.id.navPoint) { PointItemViewModel(args.point.lineUID) }
+    private val viewModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.point.lineUID) }
     private var lastPointDoneStatus: Boolean = false
 
     private val requestKeyPolygon = "polygonForPoint"

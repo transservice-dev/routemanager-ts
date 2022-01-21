@@ -7,10 +7,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.work.*
@@ -49,9 +52,7 @@ class StartScreenFragment : BaseFragment() {
         backPressedTime = System.currentTimeMillis()
     }
 
-    //TODO On App Start Check for current UploadResultWorker Status and show dialog if necessary
     //TODO Splash Screen
-    //TODO progress animation on the dialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,6 +79,12 @@ class StartScreenFragment : BaseFragment() {
         viewModel.getTaskParams().observe(viewLifecycleOwner, { state ->
             updateRouteInfo(true)
         })
+
+        viewModel.getUploadingIsNotFinished().observe(viewLifecycleOwner) { result ->
+            if (result) {
+                showAndObserveUploadProgress()
+            }
+        }
 
     }
 
@@ -173,33 +180,7 @@ class StartScreenFragment : BaseFragment() {
         }
 
         binding.btnLoad.setOnClickListener{
-            viewModel.syncTaskData().observe(viewLifecycleOwner, {
-                when (it) {
-                    is LoadResult.Loading -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
-                    }
-                    is LoadResult.Success -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
-                        Toast.makeText(context, "Добавлено новых строк: ${it.data} ",Toast.LENGTH_LONG).show()
-                        //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
-                        //TODO Test how in working with a flow
-                        /*viewModel.getTaskParams().value?.let { task->
-                            binding.atAllCount.text = task.taskCountPoint.toString()
-                        }*/
-                    }
-                    is LoadResult.Error -> {
-                        (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
-                        if (it.e != null) {
-                            ErrorAlert.showAlert(
-                                "${it.errorDescription()} Отправить отчет об ошибке?",
-                                requireContext()
-                            )
-                        }
-                        Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}",Toast.LENGTH_LONG).show()
-                        //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
-                    }
-                }
-            })
+            syncTask()
         }
 
         binding.imageOpenCloseRoute.setOnClickListener {
@@ -212,16 +193,45 @@ class StartScreenFragment : BaseFragment() {
 
     }
 
+    private fun syncTask() {
+        viewModel.syncTaskData().observe(viewLifecycleOwner, {
+            when (it) {
+                is LoadResult.Loading -> {
+                    (requireActivity() as MainActivity).swipeLayout.isRefreshing = true
+                }
+                is LoadResult.Success -> {
+                    (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                    Toast.makeText(context, "Добавлено новых строк: ${it.data} ", Toast.LENGTH_LONG)
+                        .show()
+                    //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
+                    //TODO Test how in working with a flow
+                    /*viewModel.getTaskParams().value?.let { task->
+                            binding.atAllCount.text = task.taskCountPoint.toString()
+                        }*/
+                }
+                is LoadResult.Error -> {
+                    (requireActivity() as MainActivity).swipeLayout.isRefreshing = false
+                    if (it.e != null) {
+                        ErrorAlert.showAlert(
+                            "${it.errorDescription()} Отправить отчет об ошибке?",
+                            requireContext()
+                        )
+                    }
+                    Toast.makeText(context, "Ошибка загрузки ${it.errorMessage}", Toast.LENGTH_LONG)
+                        .show()
+                    //Snackbar.make(binding.root,"Ошибка загрузки ${it.errorMessage}",Snackbar.LENGTH_LONG).show()
+                }
+            }
+        })
+    }
+
     private fun handleFinishRoute() {
         val alertBuilder = AlertDialog.Builder(context).apply {
             setTitle("Подтвердите действие")
             setMessage("Вы уверены, что хотите завершить маршрут?")
             setPositiveButton("Да, завершить") { _,_ ->
-                progressDialog = createProgressDialog()
-                progressDialog?.show()
-                val request = UploadResultWorker.requestOneTimeWorkExpedited()
-                observeUpload(request)
-                viewModel.startUploadWorker(request)
+                viewModel.startUploadWorker()
+                showAndObserveUploadProgress()
             }
             setNegativeButton("Нет, отменить") { _,_ ->
                 showHideButtonClose()
@@ -232,26 +242,34 @@ class StartScreenFragment : BaseFragment() {
         alert.show()
     }
 
+    private fun showAndObserveUploadProgress() {
+        progressDialog = createProgressDialog()
+        progressDialog?.show()
+        observeUpload()
+    }
+
     private fun createProgressDialog(): AlertDialog {
         val builder = AlertDialog.Builder(context)
         val inflater = requireActivity().layoutInflater
         builder
             .setView(inflater.inflate(R.layout.dialog_upload_progress,null))
             .setNegativeButton(R.string.cancel) {_,_ ->
-
+                handleCancelUploadWork()
             }
             .setCancelable(false)
         return builder.create()
     }
 
-    private fun observeUpload(request: WorkRequest) {
-        WorkManager.getInstance(requireContext())
-            .getWorkInfoByIdLiveData(request.id)
-            .observe(requireActivity(), Observer { workInfo: WorkInfo? ->
-                workInfo?.let { info ->
-                    updateProgressDialog(info)
-                }
-            })
+    private fun observeUpload() {
+        viewModel.getUploadWorkerId()?.let { requestId ->
+            WorkManager.getInstance(AppClass.appliactionContext())
+                .getWorkInfoByIdLiveData(requestId)
+                .observe(requireActivity(), Observer { workInfo ->
+                    workInfo?.let {
+                        updateProgressDialog(it)
+                    }
+                })
+        }
     }
 
     private fun updateProgressDialog(info: WorkInfo) {
@@ -262,18 +280,15 @@ class StartScreenFragment : BaseFragment() {
             when (info.state) {
                 WorkInfo.State.ENQUEUED -> {
                     val countAttempts = info.progress.getInt(WorkInfoKeys.CountAttempts,0)
-                    if (countAttempts == 0) {
-                        progressDescription.text = getString(R.string.UploadAwaiting)
-                        progressBar.isIndeterminate = true
-                    }else{
-                        progressDescription.text = "Ожидание выгрузки. Попытка №$countAttempts"
-                        progressBar.isIndeterminate = true
-                    }
+                    progressBar.isIndeterminate = true
+                    progressDescription.text = if (countAttempts == 0) getString(R.string.UploadAwaiting) else "Ожидание выгрузки. Попытка №$countAttempts"
+                    setShimmerEffect(dialogWindow, false)
                 }
                 WorkInfo.State.RUNNING -> {
                     info.progress.getString(WorkInfoKeys.Description)?.let {
                         progressDescription.text = it
                     }
+                    setShimmerEffect(dialogWindow, true)
                     val currentProgress = info.progress.getInt(WorkInfoKeys.Progress, 0)
                     Log.d(tag(), "Uploading result current progress $currentProgress ")
                     if (currentProgress != 0) {
@@ -286,6 +301,7 @@ class StartScreenFragment : BaseFragment() {
                 WorkInfo.State.SUCCEEDED -> {
                     info.progress.getString(WorkInfoKeys.Description)?.let {
                         progressDescription.text = it
+                        setShimmerEffect(dialogWindow, false)
                     }
                     progressBar.progress = info.progress.getInt(WorkInfoKeys.Progress, 100)
                     progressDialog?.dismiss()
@@ -298,10 +314,41 @@ class StartScreenFragment : BaseFragment() {
                     info.outputData.keyValueMap[WorkInfoKeys.Error]?.let {
                         ErrorAlert.showAlert("$it Отправить отчет об ошибке?", requireContext())
                     }
-
                 }
             }
+
         }
+    }
+
+    private fun setShimmerEffect(dialog: Window, turnOn: Boolean){
+        val progressDescription =
+            dialog.findViewById<TextView>(R.id.tv_progressDescription)
+        val progressDescriptionShimmer =
+            dialog.findViewById<TextView>(R.id.tv_progressDescription_shimmer)
+
+        progressDescription.isVisible = !turnOn
+        progressDescriptionShimmer.isVisible = turnOn
+        progressDescriptionShimmer.text = progressDescription.text
+    }
+
+    private fun handleCancelUploadWork() {
+        val alertBuilder = AlertDialog.Builder(context).apply {
+            setTitle("Подтвердите действие")
+            setMessage("Вы уверены, что хотите отменить выгрузку? Может произойти потеря данных.")
+            setPositiveButton("Да") { _,_ ->
+                cancelUploadWork()
+                showHideButtonClose()
+            }
+            setNegativeButton("Нет") { _,_ ->
+                viewModel.checkForIncompleteWork()
+            }
+        }
+        val alert = alertBuilder.create()
+        alert.show()
+    }
+
+    private fun cancelUploadWork() {
+        viewModel.cancelUploadWorker()
     }
 
     companion object {

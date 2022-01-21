@@ -15,11 +15,11 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
     var selectionMode: MutableLiveData<Boolean> =  MutableLiveData(false)
     var selectedItems: MutableList<PointFile> = mutableListOf()
 
-    class PhotoListViewModelFactory(val pointItem: PointItem?) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    class Factory(val pointItem: PointItem?) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(PhotoListViewModel::class.java)) {
                 return PhotoListViewModel(pointItem) as T
-            }else{
+            } else {
                 throw IllegalArgumentException("Unknown class: Expected ${this::class.java} found $modelClass")
             }
         }

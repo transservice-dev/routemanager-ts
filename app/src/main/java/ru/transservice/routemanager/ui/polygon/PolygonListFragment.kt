@@ -119,7 +119,7 @@ class PolygonListFragment : Fragment()  {
 
     private fun initViewModel() {
         viewModel = ViewModelProvider(requireActivity(),
-            PolygonViewModel.PolygonViewModelFactory()).get(
+            PolygonViewModel.Factory()).get(
             PolygonViewModel::class.java)
         viewModel.removeSources()
         viewModel.addSources()

@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.repositories.RootRepository
@@ -20,6 +21,7 @@ class UploadFilesWorker(appContext: Context, workerParams: WorkerParameters):
 
     companion object {
         const val workerTag = "uploadFiles"
+        const val workerPeriodicTag = "uploadFilesPeriodic"
         const val fileId = "fileId"
 
         fun requestOneTimeWork(inputData: Data? = null): WorkRequest {
@@ -42,6 +44,23 @@ class UploadFilesWorker(appContext: Context, workerParams: WorkerParameters):
             return builder.build()
         }
 
+        fun requestPeriodicTimeWork(minutes_interval: Long,inputData: Data? = null): PeriodicWorkRequest {
+            // Work manager: configure schedule and rules for periodic files upload
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+
+            val builder = PeriodicWorkRequestBuilder<UploadFilesWorker>(minutes_interval, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .addTag(workerPeriodicTag)
+
+            inputData?.let {
+                builder.setInputData(it)
+            }
+
+            return builder.build()
+
+        }
 
     }
 

@@ -25,30 +25,22 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import ru.transservice.routemanager.R
 import com.bumptech.glide.Glide
+import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
-import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.data.local.entities.PointStatuses
-import ru.transservice.routemanager.extensions.navViewModelsFactory
-import ru.transservice.routemanager.extensions.viewModelsFactory
 import ru.transservice.routemanager.location.NavigationServiceConnection
-import ru.transservice.routemanager.ui.point.PointFragment
 import ru.transservice.routemanager.ui.point.PointItemViewModel
-import ru.transservice.routemanager.ui.point.PointItemViewModelFactory
-import ru.transservice.routemanager.ui.task.TaskListViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
 
@@ -58,7 +50,7 @@ class PhotoFragment : Fragment() {
 
     lateinit var navController: NavController
     private val args: PhotoFragmentArgs by navArgs()
-    private val viewPointModel: PointItemViewModel by navViewModelsFactory(R.id.navPoint) { PointItemViewModel(args.params.lineUID) }
+    private val viewPointModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.params.lineUID) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,10 +85,12 @@ class PhotoFragment : Fragment() {
         //For testing null location
         // location = null
         //viewPointModel.geoIsRequired.value = true
+
         if (currentFile!=null && location!=null){
             CoroutineScope(Dispatchers.Main).launch {
                 ImageFileProcessing().createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
                 Glide.with(requireContext()).load(resource).into(imageView as ImageView)
+                view.findViewById<ShimmerFrameLayout>(R.id.tv_shimmer).isGone = true
             }
         }
 

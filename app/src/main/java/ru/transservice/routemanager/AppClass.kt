@@ -42,18 +42,12 @@ class AppClass: Application(), Configuration.Provider {
         }
 
         fun setupWorkManager(){
-            // Work manager: configure schedule and rules for periodic files upload
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-            val uploadWorkRequest: PeriodicWorkRequest =
-                PeriodicWorkRequestBuilder<UploadFilesWorker>(45, TimeUnit.MINUTES)
-                    .addTag("uploadFiles")
-                    .setConstraints(constraints)
-                    .build()
-            val workManager = WorkManager.getInstance(appliactionContext())
-            workManager.enqueueUniquePeriodicWork("uploadFiles",
-                ExistingPeriodicWorkPolicy.KEEP,uploadWorkRequest)
+            WorkManager.getInstance(appliactionContext())
+                .enqueueUniquePeriodicWork(
+                    UploadFilesWorker.workerPeriodicTag,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    UploadFilesWorker.requestPeriodicTimeWork(45L)
+                )
         }
     }
 
@@ -65,8 +59,6 @@ class AppClass: Application(), Configuration.Provider {
         super.onCreate()
         appVersion = BuildConfig.VERSION_NAME
         db= AppDatabase.getDatabase(applicationContext)
-        /*gps = GPSTracker(applicationContext)
-        gpsGoogle = GoogleLocationClient(applicationContext)*/
 
         CaocConfig.Builder.create()
             .enabled(true)
@@ -78,19 +70,8 @@ class AppClass: Application(), Configuration.Provider {
         //region WorkManager
         // Work manager: configure schedule and rules for periodic files upload
         setupWorkManager()
-        /*val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        val uploadWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequestBuilder<UploadFilesWorker>(45, TimeUnit.MINUTES)
-                .addTag("uploadFiles")
-                .setConstraints(constraints)
-                .build()
-        val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueueUniquePeriodicWork("uploadFiles",
-            ExistingPeriodicWorkPolicy.KEEP,uploadWorkRequest)*/
-
     }
+
 
     override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
         .setMinimumLoggingLevel(android.util.Log.INFO)

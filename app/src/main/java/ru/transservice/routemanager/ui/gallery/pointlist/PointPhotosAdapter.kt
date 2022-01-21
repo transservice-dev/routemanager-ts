@@ -21,7 +21,7 @@ import ru.transservice.routemanager.ui.gallery.list.PhotoListViewModel
 class PointPhotosAdapter(val pointItem: PointItem, val activity: MainActivity) : RecyclerView.Adapter<PointPhotosAdapter.PointPhotoViewHolder>() {
 
     var items: List<PointFile> = listOf()
-    val viewModel = ViewModelProvider(activity, PhotoListViewModel.PhotoListViewModelFactory(pointItem)).get(
+    val viewModel = ViewModelProvider(activity, PhotoListViewModel.Factory(pointItem)).get(
             PhotoListViewModel::class.java)
 
     class PointPhotoViewHolder(val binding: ItemPointPhotoBinding, val context: Context) : RecyclerView.ViewHolder(binding.root) {

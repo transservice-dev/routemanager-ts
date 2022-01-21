@@ -97,7 +97,7 @@ class PhotoListFragment : Fragment() {
     }
 
     private fun initViewModel() {
-        viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.PhotoListViewModelFactory(point)).get(
+        viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.Factory(point)).get(
             PhotoListViewModel::class.java)
         viewModel.pointItem = point
     }

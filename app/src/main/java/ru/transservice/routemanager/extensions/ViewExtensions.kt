@@ -96,24 +96,4 @@ fun AlertDialog.showImmersive() {
     window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
 }
 
-inline fun <reified T : ViewModel> Fragment.viewModelsFactory(noinline ownerProducer: () -> ViewModelStoreOwner = { this }, crossinline viewModelInitialization: () -> T): Lazy<T> {
-    return viewModels(ownerProducer) {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return viewModelInitialization.invoke() as T
-            }
-        }
-    }
-}
-
-inline fun <reified T : ViewModel> Fragment.navViewModelsFactory(@NavigationRes navGraphId: Int, crossinline viewModelInitialization: () -> T): Lazy<T> {
-    return navGraphViewModels(navGraphId) {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return viewModelInitialization.invoke() as T
-            }
-        }
-    }
-}
-
 inline fun <reified T> T.tag() : String = T::class.java.simpleName
