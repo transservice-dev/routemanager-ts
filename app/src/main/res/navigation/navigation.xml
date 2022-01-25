@@ -46,36 +46,6 @@
             app:destination="@id/navPoint" />
     </fragment>
     <fragment
-        android:id="@+id/photoListFragment"
-        android:name="ru.transservice.routemanager.ui.gallery.list.PhotoListFragment"
-        android:label="@string/Photo_gallery"
-        tools:layout="@layout/fragment_photo_list">
-        <argument
-            android:name="point"
-            app:argType="ru.transservice.routemanager.data.local.entities.PointItem"
-            app:nullable="true" />
-        <argument
-            android:name="photoOrder"
-            app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder" />
-        <action
-            android:id="@+id/action_photoListFragment_to_galleryFragment"
-            app:destination="@id/galleryFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/galleryFragment"
-        android:name="ru.transservice.routemanager.ui.gallery.GalleryFragment"
-        android:label="@string/all_title">
-        <argument
-            android:name="currentItem"
-            app:argType="integer" />
-        <action
-            android:id="@+id/action_galleryFragment_to_photoListFragment"
-            app:destination="@id/photoListFragment" />
-        <argument
-            android:name="point"
-            app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
-    </fragment>
-    <fragment
         android:id="@+id/settingsFragment"
         android:name="ru.transservice.routemanager.ui.settings.SettingsFragment"
         android:label="Настройки" />
@@ -153,7 +123,7 @@
                 app:argType="ru.transservice.routemanager.data.local.entities.PointFileParams" />
         </fragment>
     </navigation>
-    <action android:id="@+id/action_global_photoListFragment" app:destination="@id/photoListFragment" />
+    <action android:id="@+id/action_global_photoListFragment" app:destination="@id/navGallery" />
     <navigation android:id="@+id/navRouteSettings"
         app:startDestination="@id/routeSettingsFragment">
         <fragment
@@ -222,4 +192,44 @@
         app:destination="@id/startScreenFragment"
         app:popUpTo="@id/startScreenFragment"
         app:popUpToInclusive="true" />
+    <navigation android:id="@+id/navGallery"
+        app:startDestination="@id/photoListFragment">
+        <argument
+            android:name="point"
+            app:argType="ru.transservice.routemanager.data.local.entities.PointItem"
+            app:nullable="true" />
+        <argument
+            android:name="photoOrder"
+            app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder" />
+        <fragment
+            android:id="@+id/photoListFragment"
+            android:name="ru.transservice.routemanager.ui.gallery.list.PhotoListFragment"
+            android:label="@string/Photo_gallery"
+            tools:layout="@layout/fragment_photo_list">
+            <argument
+                android:name="point"
+                app:argType="ru.transservice.routemanager.data.local.entities.PointItem"
+                app:nullable="true" />
+            <argument
+                android:name="photoOrder"
+                app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder" />
+            <action
+                android:id="@+id/action_photoListFragment_to_galleryFragment"
+                app:destination="@id/galleryFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/galleryFragment"
+            android:name="ru.transservice.routemanager.ui.gallery.GalleryFragment"
+            android:label="@string/all_title">
+            <argument
+                android:name="currentItem"
+                app:argType="integer" />
+            <action
+                android:id="@+id/action_galleryFragment_to_photoListFragment"
+                app:destination="@id/photoListFragment" />
+            <argument
+                android:name="point"
+                app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
+        </fragment>
+    </navigation>
 </navigation>

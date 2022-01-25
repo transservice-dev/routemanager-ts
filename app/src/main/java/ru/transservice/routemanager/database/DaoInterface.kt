@@ -215,4 +215,10 @@ interface DaoInterface {
 
     @Query("SELECT * FROM pointFiles_table where id=:id")
     fun getFileById(id: Long): PointFile?
+
+    @Query("SELECT *FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID ")
+    fun getPointAndFiles(): Map<PointItem, List<PointFile>>
+
+    @Query("SELECT *FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID where points.lineUID=:pointId")
+    fun getPointAndFilesByPoint(pointId: String): Map<PointItem, List<PointFile>>
 }

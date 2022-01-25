@@ -43,6 +43,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         }
     }
 
+    //TODO move to data layer
     fun savePointFile(file: File, location: Location?, fileOrder: PhotoOrder){
 
         location?.let {

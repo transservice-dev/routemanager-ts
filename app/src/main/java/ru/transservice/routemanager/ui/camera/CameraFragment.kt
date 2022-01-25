@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.graphics.PointF
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Bundle
@@ -33,10 +32,6 @@ import androidx.navigation.fragment.navArgs
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.AppClass.Companion.getOutputDirectory
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
-import ru.transservice.routemanager.data.local.entities.PointFileParams
-import ru.transservice.routemanager.data.local.entities.PointItem
-import ru.transservice.routemanager.data.local.entities.PointStatuses
 import ru.transservice.routemanager.extensions.simulateClick
 import ru.transservice.routemanager.ui.permission.PermissionFragment
 import java.io.File
@@ -54,6 +49,7 @@ import kotlin.math.min
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
 
+//TODO move to using camerax with binding
 class CameraFragment : Fragment() {
 
     private lateinit var container: ConstraintLayout

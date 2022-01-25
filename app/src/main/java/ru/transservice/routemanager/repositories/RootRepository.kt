@@ -691,6 +691,17 @@ object RootRepository {
         }
     }
 
+    fun getPointFilesData(pointItem: PointItem?, order: PhotoOrder, complete: (pointFiles: Map<PointItem,List<PointFile>>) -> Unit) {
+        scope.launch {
+            if (pointItem == null) {
+                complete(dbDao.getPointAndFiles())
+            }else{
+                complete(dbDao.getPointAndFilesByPoint(pointItem.lineUID))
+            }
+        }
+    }
+
+
     fun getPointFilesByOrder(pointItem: PointItem, order: PhotoOrder, complete: (pointFilesList: List<PointFile>) -> Unit){
         scope.launch {
             complete(dbDao.getPointFilesByOrder(pointItem.lineUID,order))

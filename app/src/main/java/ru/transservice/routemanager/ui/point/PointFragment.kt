@@ -165,8 +165,11 @@ class PointFragment : BaseFragment() {
             btnPhotoCantdone.setOnClickListener { takePicture(PhotoOrder.PHOTO_CANTDONE) }
             btnPhotoAfter.setOnClickListener { takePicture(PhotoOrder.PHOTO_AFTER) }
             btnSetFact.setOnClickListener {
-                val dialog = FactDialog.newInstance(args.point)
-                dialog.show(childFragmentManager, "factDialog")
+                viewModel.state.value?.let {
+                    val dialog = FactDialog.newInstance(it.point)
+                    dialog.show(childFragmentManager, "factDialog")
+                }
+
             }
             tvPolygon.setOnClickListener {
                 navController.navigate(PointFragmentDirections.actionPointFragmentToPolygonListFragment(requestKeyPolygon))

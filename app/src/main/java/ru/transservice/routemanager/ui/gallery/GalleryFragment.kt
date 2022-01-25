@@ -6,26 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import ru.transservice.routemanager.extensions.padWithDisplayCutout
-import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.databinding.FragmentGalleryBinding
 import ru.transservice.routemanager.ui.gallery.list.PhotoListViewModel
 
-
-val EXTENSION_WHITELIST = arrayOf("JPG")
-
-//FIXME share icon visibility, use viewModel selected item, use by viewModel()
 
 class GalleryFragment internal constructor() : Fragment() {
 
@@ -35,27 +30,24 @@ class GalleryFragment internal constructor() : Fragment() {
     lateinit var navController: NavController
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: PhotoListViewModel by navGraphViewModels(R.id.navGallery) {PhotoListViewModel.Factory(args.point)}
 
     /** Adapter class used to present a fragment containing one photo or video as a page */
-    inner class MediaPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        override fun getCount(): Int = mediaList.size
-        override fun getItem(position: Int): Fragment = PhotoShowFragment.create(mediaList[position])
-        override fun getItemPosition(obj: Any): Int = POSITION_NONE
+    private inner class MediaPagerAdapter(fm: Fragment) : FragmentStateAdapter(fm) {
+        override fun getItemCount(): Int = mediaList.size
+        override fun createFragment(position: Int): Fragment = PhotoShowFragment.create(mediaList[position])
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Mark this as a retain fragment, so the lifecycle does not get restarted on config change
-        retainInstance = true
+        //retainInstance = true
         (requireActivity() as MainActivity).supportActionBar?.hide()
         (requireActivity() as MainActivity).navMenu.visibility = View.GONE
 
         // Get root directory of media from navigation arguments
-        val point = args.point
-        val viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.Factory(point)).get(
-                PhotoListViewModel::class.java)
-        mediaList = viewModel.getPointFilesList().value!!
+        mediaList = viewModel.getPointFilesList().value?: listOf()
         // Walk through all files in the root directory
         // We reverse the order of the list to present the last photos first
     }
@@ -78,7 +70,7 @@ class GalleryFragment internal constructor() : Fragment() {
             // Populate the ViewPager and implement a cache of two media items
             photoViewPager.apply {
                 offscreenPageLimit = 2
-                adapter = MediaPagerAdapter(childFragmentManager)
+                adapter = MediaPagerAdapter(this@GalleryFragment)
                 currentItem = args.currentItem
             }
 
@@ -90,6 +82,7 @@ class GalleryFragment internal constructor() : Fragment() {
             backButton.setOnClickListener {
                 requireActivity().onBackPressed()
             }
+
 
             shareButton.setOnClickListener {
                 mediaList.getOrNull(photoViewPager.currentItem)?.let { pointFile ->

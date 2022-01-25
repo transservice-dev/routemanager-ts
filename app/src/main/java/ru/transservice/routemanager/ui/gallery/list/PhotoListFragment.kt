@@ -5,9 +5,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.*
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
@@ -19,20 +25,31 @@ class PhotoListFragment : Fragment() {
 
     private var _binding: FragmentPhotoListBinding? = null
     private val binding get() = _binding!!
-    private lateinit var photoListAdapter: PhotoListAdapter
-    private lateinit var viewModel: PhotoListViewModel
+    private lateinit var photoListAdapter: PointListAdapter
+    lateinit var navController: NavController
+
     private var point: PointItem? = null
     private lateinit var photoOrder: PhotoOrder
 
     private val args: PhotoListFragmentArgs by navArgs()
+    private val viewModel: PhotoListViewModel by navGraphViewModels(R.id.navGallery)  { PhotoListViewModel.Factory(args.point) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         point = args.point
         photoOrder = args.photoOrder
-        initViewModel()
-        photoListAdapter = PhotoListAdapter(photoOrder, (requireActivity() as MainActivity))
+        photoListAdapter = PointListAdapter(photoOrder, (requireActivity() as MainActivity).getDisplayWidth(),viewModel.state)
         setHasOptionsMenu(true)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.navParams.collectLatest{
+                    if (it.isRequired && it.pointItem != null) {
+                        navController.navigate(PhotoListFragmentDirections.actionPhotoListFragmentToGalleryFragment(it.position,it.pointItem))
+                        viewModel.navRequestComplete()
+                    }
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -43,20 +60,28 @@ class PhotoListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_share -> {
-                val imageUris: ArrayList<Uri> = arrayListOf()
-                for (pointFile in viewModel.selectedItems) {
-                    imageUris.add(Uri.parse(pointFile.filePath))
-                }
+                if (viewModel.selectedItems.value != null) {
+                    val imageUris: ArrayList<Uri> = arrayListOf()
+                    for (pointFile in viewModel.selectedItems.value!!) {
+                        imageUris.add(Uri.parse(pointFile.filePath))
+                    }
 
-                val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND_MULTIPLE
-                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
-                    type = "image/*"
-                }
+                    val shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND_MULTIPLE
+                        putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+                        type = "image/*"
+                    }
 
-                requireActivity().startActivity(Intent.createChooser(shareIntent, "Отправка фото"))
-                viewModel.selectedItems.clear()
-                true
+                    requireActivity().startActivity(
+                        Intent.createChooser(
+                            shareIntent,
+                            "Отправка фото"
+                        )
+                    )
+                    true
+                } else {
+                    false
+                }
             }
             else -> super.onOptionsItemSelected(item)
         }
@@ -77,7 +102,7 @@ class PhotoListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         (requireActivity() as MainActivity).navMenu.visibility = View.GONE
         (requireActivity() as MainActivity).supportActionBar?.show()
 
@@ -87,19 +112,13 @@ class PhotoListFragment : Fragment() {
         }
 
         viewModel.loadPointList().observe(viewLifecycleOwner, {
-            photoListAdapter.updateItems(it)
+            photoListAdapter.submitList(it)
         })
 
-        viewModel.selectionMode.observe(viewLifecycleOwner,{
-            //binding.floatingActionButton.visibility = if (it) View.VISIBLE else View.GONE
-            setMenuVisibility(it)
+        viewModel.selectedItems.observe(viewLifecycleOwner,{
+            setMenuVisibility(it.isNotEmpty())
         })
-    }
 
-    private fun initViewModel() {
-        viewModel = ViewModelProvider(requireActivity(), PhotoListViewModel.Factory(point)).get(
-            PhotoListViewModel::class.java)
-        viewModel.pointItem = point
     }
 
     companion object {
