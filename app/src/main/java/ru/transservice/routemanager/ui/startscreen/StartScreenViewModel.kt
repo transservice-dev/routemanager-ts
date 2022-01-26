@@ -5,7 +5,10 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
@@ -28,6 +31,9 @@ class StartScreenViewModel : ViewModel() {
     val version get() = AppClass.appVersion
 
     private val uploadingIsNotFinished = MutableLiveData(false)
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
 
     init {
         checkForIncompleteWork()
@@ -69,6 +75,7 @@ class StartScreenViewModel : ViewModel() {
     //Check if there is any incomplete work
     fun checkForIncompleteWork()  {
         viewModelScope.launch {
+            delay(1000)
             val workInfo =
                 WorkManager.getInstance(AppClass.appliactionContext())
                     .getWorkInfosByTag(UploadResultWorker.workerTag)
@@ -82,6 +89,7 @@ class StartScreenViewModel : ViewModel() {
                 )
                 uploadWorkerId = workInfo.lastOrNull { !it.state.isFinished }?.id
             }
+            _isLoading.value = false
 
         }
     }

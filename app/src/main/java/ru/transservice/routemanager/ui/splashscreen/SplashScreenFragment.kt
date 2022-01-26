@@ -19,9 +19,6 @@ import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentSplashScreenBinding
 
-
-//TODO remove splashscreen fragment - use splash screen api
-
 class SplashScreenFragment : BaseFragment() {
 
     private var _binding: FragmentSplashScreenBinding? = null

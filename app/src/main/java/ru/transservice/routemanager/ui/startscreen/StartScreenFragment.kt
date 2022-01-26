@@ -11,7 +11,9 @@ import android.view.Window
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.window.SplashScreen
 import androidx.annotation.RequiresApi
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -52,7 +54,15 @@ class StartScreenFragment : BaseFragment() {
         backPressedTime = System.currentTimeMillis()
     }
 
-    //TODO Splash Screen
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                viewModel.isLoading.value
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -204,7 +214,6 @@ class StartScreenFragment : BaseFragment() {
                     Toast.makeText(context, "Добавлено новых строк: ${it.data} ", Toast.LENGTH_LONG)
                         .show()
                     //Snackbar.make(binding.root,"Добавлено новых строк: ${it.data} ",Snackbar.LENGTH_LONG).show()
-                    //TODO Test how in working with a flow
                     /*viewModel.getTaskParams().value?.let { task->
                             binding.atAllCount.text = task.taskCountPoint.toString()
                         }*/

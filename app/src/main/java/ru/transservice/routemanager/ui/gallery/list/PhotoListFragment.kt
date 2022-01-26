@@ -45,7 +45,7 @@ class PhotoListFragment : Fragment() {
                 viewModel.navParams.collectLatest{
                     if (it.isRequired && it.pointItem != null) {
                         navController.navigate(PhotoListFragmentDirections.actionPhotoListFragmentToGalleryFragment(it.position,it.pointItem))
-                        viewModel.navRequestComplete()
+                        //viewModel.navRequestComplete()
                     }
                 }
             }

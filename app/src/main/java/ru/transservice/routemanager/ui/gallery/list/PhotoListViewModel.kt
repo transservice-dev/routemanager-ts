@@ -3,10 +3,9 @@ package ru.transservice.routemanager.ui.gallery.list
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.repositories.RootRepository
@@ -19,8 +18,12 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
     var selectedItems: MutableLiveData<MutableList<PointFile>> = MutableLiveData(mutableListOf())
     val state: PhotoListState = PhotoListState(pointItem, mutableListOf(), ::handleSelection, ::navRequest)
 
-    private val _navParams = MutableStateFlow(NavParams())
-    val navParams: StateFlow<NavParams> = _navParams.asStateFlow()
+    //private val _navParams = MutableStateFlow(NavParams())
+    //val navParams: StateFlow<NavParams> = _navParams.asStateFlow()
+
+    private val _navParams = MutableSharedFlow<NavParams>()
+    val navParams: SharedFlow<NavParams> = _navParams.asSharedFlow()
+
 
     class Factory(val pointItem: PointItem?) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -84,14 +87,17 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
 
     private fun navRequest(pointItem: PointItem?, position: Int, list: List<PointFile>) {
         pointFilesList.value = list
-        _navParams.update {
-            NavParams(pointItem,position,true)
+        viewModelScope.launch {
+            _navParams.emit(NavParams(pointItem,position,true))
         }
+        /*_navParams.update {
+            NavParams(pointItem,position,true)
+        }*/
     }
 
     fun navRequestComplete() {
-        _navParams.update {
+        /*_navParams.update {
             _navParams.value.copy(isRequired = false)
-        }
+        }*/
     }
 }
