@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_item_photo_list_white"
-    android:id="@+id/listElement"
-    android:padding="5dp"
-    android:layout_margin="5dp"
-    android:elevation="5dp">
-
-    <TextView
-        android:id="@+id/fileStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/beforeTitle"
-        android:textSize="@dimen/text_size_small"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:id="@+id/listElement">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_pointPhoto"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
-        android:layout_margin="8dp"
-        android:src="@drawable/ic_check_24_small"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/ic_check_24_small" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iv_pointPhotoSelected"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:src="@drawable/ic_check_24_small" />
+
+    <TextView
+        android:id="@+id/fileStatus"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorPrimaryDarkFade"
+        android:textAlignment="center"
+        android:textSize="@dimen/text_size_small"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fileStatus" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/beforeTitle" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

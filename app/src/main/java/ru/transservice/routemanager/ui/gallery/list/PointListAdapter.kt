@@ -1,15 +1,20 @@
 package ru.transservice.routemanager.ui.gallery.list
 
+import android.graphics.Rect
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.transservice.routemanager.AppClass
+import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.FragmentPointPhotosBinding
+import ru.transservice.routemanager.delegates.AttrValue
 import ru.transservice.routemanager.repositories.RootRepository
 
 class PointListAdapter(
@@ -29,18 +34,17 @@ class PointListAdapter(
             val repository = RootRepository
             with(binding) {
                 pointNameText.text = pointData.addressName
-                // set size for screen elements (-2 - wrap content)
-                photoFilesFragment.layoutParams.height = -2
-                pointFilesParent.layoutParams.height = -2
-                rvPointsPhotos.layoutParams.height = -2
-                listOfPointFiles.layoutParams.height = -2
                 //settings for recycle view
-                val countOfImages = (displayWidth / 300) // grid size
+                val countOfImages = (displayWidth / 200) // grid size
                 rvPointsPhotos.layoutManager =
                     GridLayoutManager(AppClass.appliactionContext(), countOfImages)
                 rvPointsPhotos.isVerticalScrollBarEnabled = false
                 rvPointsPhotos.isNestedScrollingEnabled = false
                 rvPointsPhotos.adapter = PointFilesAdapter(pointData,state)
+
+                rvPointsPhotos.addItemDecoration(
+                    SpaceItemDecoration(AppClass.appliactionContext().resources.getDimensionPixelSize(R.dimen.margin_small8)))
+
                 //(rvPointsPhotos.adapter as PointPhotosAdapter).submitList(pointData.second)
                 repository.getPointFilesForGallery(pointData,photoOrder) {
                     (rvPointsPhotos.adapter as PointFilesAdapter).submitList(it)
@@ -70,4 +74,26 @@ class PointListAdapter(
 
 }
 
+class SpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
+
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        outRect.left = space;
+        outRect.right = space;
+        outRect.bottom = space;
+        outRect.top = space
+
+        // Add top margin only for the first item to avoid double space between items
+       /* if (parent.getChildLayoutPosition(view) == 0) {
+            outRect.top = space;
+        } else {
+            outRect.top = 0;
+        }*/
+    }
+
+}
 

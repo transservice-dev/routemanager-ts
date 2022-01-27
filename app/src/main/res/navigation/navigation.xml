@@ -18,7 +18,11 @@
             app:destination="@id/navRouteSettings" />
         <action
             android:id="@+id/action_startScreenFragment_to_taskListFragment"
-            app:destination="@id/taskListFragment" />
+            app:destination="@id/taskListFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
         <action
             android:id="@+id/action_startScreenFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
@@ -37,7 +41,11 @@
         tools:layout="@layout/fragment_task_list">
         <action
             android:id="@+id/action_taskListFragment_to_pointFragment"
-            app:destination="@id/navPoint" />
+            app:destination="@id/navPoint"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
         <action
             android:id="@+id/action_taskListFragment_to_polygonListFragment"
             app:destination="@id/polygonListFragment" />
@@ -123,7 +131,13 @@
                 app:argType="ru.transservice.routemanager.data.local.entities.PointFileParams" />
         </fragment>
     </navigation>
-    <action android:id="@+id/action_global_photoListFragment" app:destination="@id/navGallery" />
+    <action
+        android:id="@+id/action_global_photoListFragment"
+        app:destination="@id/navGallery"
+        app:enterAnim="@android:anim/fade_in"
+        app:exitAnim="@android:anim/fade_out"
+        app:popEnterAnim="@android:anim/fade_in"
+        app:popExitAnim="@android:anim/fade_out" />
     <navigation android:id="@+id/navRouteSettings"
         app:startDestination="@id/routeSettingsFragment">
         <fragment
@@ -209,10 +223,12 @@
             <argument
                 android:name="point"
                 app:argType="ru.transservice.routemanager.data.local.entities.PointItem"
-                app:nullable="true" />
+                app:nullable="true"
+                android:defaultValue="@null" />
             <argument
                 android:name="photoOrder"
-                app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder" />
+                app:argType="ru.transservice.routemanager.data.local.entities.PhotoOrder"
+                android:defaultValue="DONT_SET" />
             <action
                 android:id="@+id/action_photoListFragment_to_galleryFragment"
                 app:destination="@id/galleryFragment" />

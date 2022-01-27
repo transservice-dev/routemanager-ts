@@ -19,6 +19,7 @@ import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import ru.transservice.routemanager.workmanager.UploadResultWorker
 import java.lang.IllegalArgumentException
+import java.lang.RuntimeException
 import java.util.*
 
 class StartScreenViewModel : ViewModel() {
@@ -75,7 +76,6 @@ class StartScreenViewModel : ViewModel() {
     //Check if there is any incomplete work
     fun checkForIncompleteWork()  {
         viewModelScope.launch {
-            delay(1000)
             val workInfo =
                 WorkManager.getInstance(AppClass.appliactionContext())
                     .getWorkInfosByTag(UploadResultWorker.workerTag)

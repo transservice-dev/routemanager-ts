@@ -5,6 +5,8 @@ plugins {
 
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: "kotlin-kapt"
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 31
@@ -136,5 +138,12 @@ dependencies {
 
     //splash screen
     implementation 'androidx.core:core-splashscreen:1.0.0-beta01'
+
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:29.0.4')
+    // Add the dependency for the Firebase SDK for Google Analytics
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics'
 
 }

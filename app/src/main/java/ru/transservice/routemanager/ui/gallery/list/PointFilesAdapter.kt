@@ -47,17 +47,17 @@ class PointFilesAdapter(
 
         with(holder.binding){
             ivPointPhoto.setOnClickListener {
-                handleSelection(false,root,position)
+                handleSelection(false,ivPointPhotoSelected,position)
             }
             root.setOnClickListener {
-                handleSelection(false,root,position)
+                handleSelection(false,ivPointPhotoSelected,position)
             }
             ivPointPhoto.setOnLongClickListener {
-                handleSelection(true,root,position)
+                handleSelection(true,ivPointPhotoSelected,position)
                 true
             }
             root.setOnLongClickListener {
-                handleSelection(true,root,position)
+                handleSelection(true,ivPointPhotoSelected,position)
                 true
             }
         }
@@ -79,6 +79,8 @@ class PointFilesAdapter(
                state.navRequest(pointItem,position,currentList)
            }
         }
+
+        view.visibility = if (view.isSelected) View.VISIBLE else View.GONE
     }
 
 }

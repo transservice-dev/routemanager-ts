@@ -56,8 +56,6 @@ class TaskListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialElevationScale(false).setDuration(1000L)
-        reenterTransition = MaterialElevationScale(true).setDuration(1000L)
         setHasOptionsMenu(true)
         initViewModel()
 

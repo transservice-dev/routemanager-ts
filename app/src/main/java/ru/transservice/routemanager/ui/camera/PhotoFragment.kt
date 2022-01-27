@@ -23,9 +23,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -75,6 +77,8 @@ class PhotoFragment : Fragment() {
         //initViewModel()
         val resource = currentFile ?: R.drawable.ic_photo
         val imageView = view.findViewById<ImageView>(R.id.photoPreview)
+        val ltControl = view.findViewById<LinearLayout>(R.id.lt_control)
+        ltControl.isGone = true
         val location: Location? = NavigationServiceConnection.getLocation()
         if (location == null) {
             viewPointModel.geoIsRequired.value = true
@@ -91,6 +95,7 @@ class PhotoFragment : Fragment() {
                 ImageFileProcessing().createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
                 Glide.with(requireContext()).load(resource).into(imageView as ImageView)
                 view.findViewById<ShimmerFrameLayout>(R.id.tv_shimmer).isGone = true
+                ltControl.isVisible = true
             }
         }
 

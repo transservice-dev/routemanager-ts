@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "127675405341",
+    "project_id": "routemanager-ts",
+    "storage_bucket": "routemanager-ts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127675405341:android:dfb4d88ba85ab1037462f4",
+        "android_client_info": {
+          "package_name": "ru.transservice.routemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127675405341-4u95esj4fav43i3atm777fi0vn49n2rk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXC-nqvM1IU00AGv1gZz2HCx6m3nKTczs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "127675405341-4u95esj4fav43i3atm777fi0vn49n2rk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

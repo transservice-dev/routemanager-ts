@@ -17,10 +17,12 @@ import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkManager
@@ -48,7 +50,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var swipeLayout: SwipeRefreshLayout
     lateinit var navMenu: BottomNavigationView
     var backPressedBlock = false
-    private lateinit var channel: NotificationChannel
     var locationServiceIntent: Intent? = null
 
     private val mPrefsListener =
@@ -89,13 +90,10 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(R.id.permissionFragment, R.id.startScreenFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
         swipeLayout = binding.swipe
-        createNotificationChannel()
-        initNavMenuButtons()
+        binding.bottomMenu.setupWithNavController(navController)
+        //initNavMenuButtons()
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
         RootRepository.setPreferences()
-
-        //binding.toolbar.setupWithNavController(navController, AppBarConfiguration(navController.graph))
-
     }
 
     override fun onDestroy() {
@@ -136,23 +134,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        channel = NotificationChannel(
-            "UPLOAD_ROUTE_DATA",
-            "upload route data",
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {  description = "Выгрузка данных и фотографий на сервер" }
-
-        // Register the channel with the system
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    fun getNotificationChannel() = channel
-
     fun getDisplayWidth(): Int{
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             windowManager.currentWindowMetrics.bounds.width()
@@ -161,113 +142,6 @@ class MainActivity : AppCompatActivity() {
             windowManager.defaultDisplay.getRealMetrics(displayMetrics)
             displayMetrics.widthPixels
         }
-    }
-
-    /*@SuppressLint("RestrictedApi")
-    override fun onBackPressed() {
-        if(backPressedBlock){
-            return
-        }
-        if (navController.previousBackStackEntry != null) {
-            navController.popBackStack()
-            return
-        }
-
-        if (doubleBackClick) {
-            super.onBackPressed()
-            return
-        }
-
-        doubleBackClick = true
-        Toast.makeText(this, "Два раза нажмите для выхода", Toast.LENGTH_SHORT).show()
-
-        Handler().postDelayed({ doubleBackClick = false }, 2000)
-    }*/
-
-    @SuppressLint("RestrictedApi")
-    fun initNavMenuButtons(){
-        with(binding){
-            bottomMenu.setOnItemSelectedListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.home -> {
-                        navController.navigate(R.id.startScreenFragment)
-                        return@setOnItemSelectedListener true
-                    }
-                    R.id.list -> {
-                        navController.navigate(R.id.taskListFragment)
-                        return@setOnItemSelectedListener true
-                    }
-                    R.id.photos -> {
-                        val bundle = bundleOf(
-                            "point" to null,
-                            "photoOrder" to PhotoOrder.DONT_SET
-                        )
-                        navController.navigate(R.id.photoListFragment, bundle)
-                        return@setOnItemSelectedListener false
-                    }
-                    R.id.settings -> {
-                        try {
-                            navController.navigate(R.id.settingsFragment)
-                        } catch (e: Exception) {
-                            Log.d(TAG, "nav error: $e")
-                            return@setOnItemSelectedListener false
-                        }
-
-                        return@setOnItemSelectedListener true
-                    }
-                }
-                false
-            }
-        }
-
-        navController.addOnDestinationChangedListener { _, destanation, _ ->
-            //log
-            Log.i(TAG, "nav destination " + destanation.displayName)
-
-            findViewById<View>(R.id.bottom_menu).visibility = View.VISIBLE
-
-            navController.backStack.removeIf {
-                it.destination.id == destanation.id
-                        && navController.backStack.last != it && navController.backStack.first != it
-            }
-
-            when (destanation.id) {
-                /*R.id.route_list -> {
-                    bottomMenu.menu.findItem(R.id.list).isChecked = true
-                    val animateView = AnimateView(guideLine, this, true)
-                    animateView.showHeight()
-                    return@addOnDestinationChangedListener
-                }*/
-                R.id.startScreenFragment -> {
-                    binding.bottomMenu.menu.findItem(R.id.home).isChecked = true
-                    val animateView = AnimateView(binding.guidelineMain, this, true)
-                    animateView.showHeight()
-                    return@addOnDestinationChangedListener
-
-                }
-                R.id.settingsFragment -> {
-                    binding.bottomMenu.menu.findItem(R.id.settings).isChecked = true
-                    val animateView = AnimateView(binding.guidelineMain, this, true)
-                    animateView.showHeight()
-                    return@addOnDestinationChangedListener
-
-                }
-                R.id.photoListFragment -> {
-                    binding.bottomMenu.menu.findItem(R.id.photos).isChecked = true
-                    val animateView = AnimateView(binding.guidelineMain, this, true)
-                    animateView.showHeight()
-                    return@addOnDestinationChangedListener
-
-                }
-                else -> {
-                    val animateView = AnimateView(binding.guidelineMain, this, true)
-                    animateView.hideHeight()
-                    //bottomMenu.visibility = View.GONE
-                }
-            }
-
-        }
-
     }
 
     companion object {

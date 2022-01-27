@@ -3,14 +3,14 @@
 
     <item android:title="@string/home"
         android:icon="@drawable/ic_home_24"
-        android:id="@+id/home"/>
-    <item android:id="@+id/list"
+        android:id="@+id/startScreenFragment"/>
+    <item android:id="@+id/taskListFragment"
         android:icon="@drawable/ic_list_24"
         android:title="@string/list"/>
-    <item android:id="@+id/photos"
+    <item android:id="@+id/navGallery"
         android:icon="@drawable/ic_photo_library_24"
         android:title="@string/photos"/>
-    <item android:id="@+id/settings"
+    <item android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_settings_24"
         android:title="@string/settings"/>
 
