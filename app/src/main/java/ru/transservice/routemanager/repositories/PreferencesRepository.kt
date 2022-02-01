@@ -3,11 +3,8 @@ package ru.transservice.routemanager.repositories
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.RegionItem
 import ru.transservice.routemanager.data.local.RouteItem

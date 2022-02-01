@@ -8,9 +8,8 @@ import cat.ereza.customactivityoncrash.config.CaocConfig
 import ru.transservice.routemanager.database.AppDatabase
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
-import java.util.concurrent.TimeUnit
 
-class AppClass: Application(), Configuration.Provider {
+class AppClass: Application() {
 
     companion object {
         var appVersion: String = ""
@@ -73,9 +72,7 @@ class AppClass: Application(), Configuration.Provider {
     }
 
 
-    override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
-        .setMinimumLoggingLevel(android.util.Log.INFO)
-        .build()
+
 
 
 }

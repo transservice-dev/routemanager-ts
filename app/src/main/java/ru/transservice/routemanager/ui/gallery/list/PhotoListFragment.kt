@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -102,8 +101,6 @@ class PhotoListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
-        (requireActivity() as MainActivity).navMenu.visibility = View.GONE
-        (requireActivity() as MainActivity).supportActionBar?.show()
 
         with(binding){
             recyclerviewAllFiles.adapter = photoListAdapter

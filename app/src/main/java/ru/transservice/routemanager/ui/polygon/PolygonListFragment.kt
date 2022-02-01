@@ -8,7 +8,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavArgs
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
@@ -18,7 +17,6 @@ import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentPolygonListBinding
 import ru.transservice.routemanager.extensions.hideKeyboard
-import ru.transservice.routemanager.ui.task.TaskListFragment
 
 class PolygonListFragment : Fragment()  {
     private var _binding: FragmentPolygonListBinding? = null

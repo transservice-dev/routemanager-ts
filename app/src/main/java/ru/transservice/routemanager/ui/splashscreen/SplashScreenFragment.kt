@@ -15,7 +15,6 @@ import android.widget.TextView
 import com.google.android.material.transition.MaterialElevationScale
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.BaseFragment
-import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.FragmentSplashScreenBinding
 
@@ -57,7 +56,6 @@ class SplashScreenFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as MainActivity).supportActionBar?.hide()
         val animation = ValueAnimator.ofObject(ArgbEvaluator(), Color.WHITE, Color.RED)
         animation.repeatMode = ObjectAnimator.REVERSE
         animation.repeatCount = ObjectAnimator.INFINITE

@@ -1,6 +1,5 @@
 package ru.transservice.routemanager.ui.task
 
-import android.util.Log
 import androidx.lifecycle.*
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.*
@@ -29,7 +28,6 @@ class TaskListViewModel : ViewModel() {
 
     fun setCurrentPoint(point: PointItem){
         currentPoint.value = point
-        Log.d(TAG,"Current point changed ${currentPoint.value}")
     }
 
     fun updateCurrentPoint(pointItem: PointItem){

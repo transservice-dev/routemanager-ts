@@ -10,7 +10,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.R
-import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.repositories.RootRepository
 import java.io.BufferedInputStream
 import java.io.InputStream

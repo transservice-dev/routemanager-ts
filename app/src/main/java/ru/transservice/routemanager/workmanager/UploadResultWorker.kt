@@ -12,7 +12,6 @@ import ru.transservice.routemanager.R
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
 import android.os.*
-import kotlinx.coroutines.delay
 import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.service.errorDescription
 import java.util.*
@@ -55,9 +54,7 @@ class UploadResultWorker(context: Context, workerParams: WorkerParameters): Coro
         val id = NOTIFICATION_ID
         val title = applicationContext.getString(R.string.uploading_result)
         // Create a Notification channel if necessary
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel()
-        }
+        createChannel()
         val notification = NotificationCompat.Builder(applicationContext, id)
             .setContentTitle(title)
             .setTicker(title)

@@ -15,7 +15,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.databinding.FragmentGalleryBinding
@@ -40,12 +39,8 @@ class GalleryFragment internal constructor() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Mark this as a retain fragment, so the lifecycle does not get restarted on config change
         //retainInstance = true
-        (requireActivity() as MainActivity).supportActionBar?.hide()
-        (requireActivity() as MainActivity).navMenu.visibility = View.GONE
-
         // Get root directory of media from navigation arguments
         mediaList = viewModel.getPointFilesList().value?: listOf()
         // Walk through all files in the root directory

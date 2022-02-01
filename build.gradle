@@ -3,7 +3,7 @@ buildscript {
     ext.kotlin_version = "1.5.20"
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     ext{
         navigtionVersion = '2.2.0'
@@ -23,7 +23,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 

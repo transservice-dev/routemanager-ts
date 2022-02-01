@@ -2,7 +2,6 @@ package ru.transservice.routemanager.data.local.entities
 
 import androidx.core.text.isDigitsOnly
 import androidx.room.*
-import org.jetbrains.annotations.NotNull
 import ru.transservice.routemanager.data.remote.res.task.TaskUploadBody
 import ru.transservice.routemanager.extensions.longFormat
 import java.io.Serializable

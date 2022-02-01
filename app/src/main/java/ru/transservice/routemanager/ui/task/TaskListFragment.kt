@@ -6,7 +6,6 @@ import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.CompoundButton
 import android.widget.Toast
@@ -15,16 +14,12 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.transition.MaterialElevationScale
-import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.MainNavigationDirections
 import ru.transservice.routemanager.R
@@ -140,8 +135,6 @@ class TaskListFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as MainActivity).navMenu.visibility = View.GONE
-        (requireActivity() as MainActivity).supportActionBar?.show()
         navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
         initViews()
         initBottomSheetActions()
@@ -334,7 +327,7 @@ class TaskListFragment : Fragment() {
         val endlon = point.addressLon
         if (endlat == 0.0 || endlon == 0.0) {
             Toast.makeText(
-                    activity,
+                    requireActivity(),
                     "Отмена.Для данной точки не заданы координаты",
                     Toast.LENGTH_LONG
             ).show()
@@ -356,7 +349,7 @@ class TaskListFragment : Fragment() {
         }
 
         if (uriString.isEmpty() || packageName.isEmpty()) {
-            Toast.makeText(activity,"Отмена. Неизвестное приложение навигации", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireActivity(),"Отмена. Неизвестное приложение навигации", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -395,8 +388,6 @@ class TaskListFragment : Fragment() {
     }
 
     companion object {
-
-        private const val TAG = "${AppClass.TAG}: TaskListFragment"
 
         @JvmStatic
         fun newInstance() =

@@ -44,7 +44,6 @@ class PointFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPointBinding.inflate(inflater,container,false)
-        (requireActivity() as MainActivity).supportActionBar?.show()
         return binding.root
     }
 

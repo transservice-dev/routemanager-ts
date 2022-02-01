@@ -1,23 +1,16 @@
 package ru.transservice.routemanager
 
-import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.util.Log
 import android.view.KeyEvent
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
-import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -25,22 +18,18 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.window.layout.WindowMetricsCalculator
 import androidx.work.WorkManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import ru.transservice.routemanager.animation.AnimateView
-import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.databinding.ActivityMainBinding
 import ru.transservice.routemanager.location.NavigationService
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.repositories.PreferencesRepository
 import ru.transservice.routemanager.repositories.RootRepository
-import java.util.*
-
 
 const val KEY_EVENT_ACTION = "key_event_action"
 const val KEY_EVENT_EXTRA = "key_event_extra"
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     lateinit var swipeLayout: SwipeRefreshLayout
-    lateinit var navMenu: BottomNavigationView
+    private lateinit var navMenu: BottomNavigationView
     var backPressedBlock = false
     var locationServiceIntent: Intent? = null
 
@@ -76,24 +65,44 @@ class MainActivity : AppCompatActivity() {
             }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             //setKeepOnScreenCondition()
         }
+        super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         navMenu = binding.bottomMenu
         binding.swipe.isEnabled = false
+        swipeLayout = binding.swipe
+        setupNavigation()
+        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
+        RootRepository.setPreferences()
+    }
+
+    private fun setupNavigation() {
         val navHostFragment =
-                supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         appBarConfiguration = AppBarConfiguration(setOf(R.id.permissionFragment, R.id.startScreenFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
         swipeLayout = binding.swipe
         binding.bottomMenu.setupWithNavController(navController)
-        //initNavMenuButtons()
-        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
-        RootRepository.setPreferences()
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.startScreenFragment -> navMenu.isVisible = true
+                R.id.settingsFragment -> navMenu.isVisible = true
+                R.id.navGallery -> navMenu.isVisible = true
+                else -> navMenu.isGone = true
+            }
+
+            when (destination.id) {
+                R.id.cameraFragment -> supportActionBar?.hide()
+                R.id.photoFragment -> supportActionBar?.hide()
+                R.id.galleryFragment -> supportActionBar?.hide()
+                R.id.splashScreenFragment -> supportActionBar?.hide()
+                else -> supportActionBar?.show()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -135,13 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getDisplayWidth(): Int{
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            windowManager.currentWindowMetrics.bounds.width()
-        } else {
-            val displayMetrics = DisplayMetrics()
-            windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-            displayMetrics.widthPixels
-        }
+        return WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds.width()
     }
 
     companion object {

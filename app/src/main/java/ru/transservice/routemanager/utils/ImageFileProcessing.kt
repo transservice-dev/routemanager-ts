@@ -7,12 +7,9 @@ import android.location.Geocoder
 import android.location.Location
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointFileParams
-import ru.transservice.routemanager.data.local.entities.PointItem
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

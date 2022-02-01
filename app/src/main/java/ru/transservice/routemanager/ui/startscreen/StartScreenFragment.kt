@@ -11,10 +11,8 @@ import android.view.Window
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import android.window.SplashScreen
 import androidx.annotation.RequiresApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -31,7 +29,6 @@ import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.service.errorDescription
-import ru.transservice.routemanager.workmanager.UploadResultWorker
 
 class StartScreenFragment : BaseFragment() {
 
@@ -80,9 +77,6 @@ class StartScreenFragment : BaseFragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        (requireActivity() as MainActivity).navMenu.visibility = View.VISIBLE
-        (requireActivity() as MainActivity).supportActionBar?.show()
 
         initViews()
         initActionButtons()

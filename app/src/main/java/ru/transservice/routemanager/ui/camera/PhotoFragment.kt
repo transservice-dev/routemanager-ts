@@ -22,9 +22,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -39,8 +36,8 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.MainActivity
+import ru.transservice.routemanager.databinding.FragmentPhotoPriviewBinding
+import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.ui.point.PointItemViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
@@ -48,9 +45,12 @@ import java.io.File
 
 class PhotoFragment : Fragment() {
 
+    private var _binding: FragmentPhotoPriviewBinding? = null
+    private val binding get() = _binding!!
+
     private var currentFile: File? = null
 
-    lateinit var navController: NavController
+    private val navController: NavController by lazy { Navigation.findNavController(requireActivity(), R.id.nav_host_fragment) }
     private val args: PhotoFragmentArgs by navArgs()
     private val viewPointModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.params.lineUID) }
 
@@ -61,7 +61,7 @@ class PhotoFragment : Fragment() {
             Toast.makeText(requireContext(), "Ошибка получения фото, неверное имя файла",Toast.LENGTH_LONG).show()
             navController.popBackStack()
         }
-        Log.d(TAG, "current file: ${currentFile?.absolutePath}")
+        Log.d(tag(), "current file: ${currentFile?.absolutePath}")
     }
 
 
@@ -69,62 +69,49 @@ class PhotoFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_photo_priview, container, false)
+    ): View {
+        _binding = FragmentPhotoPriviewBinding.inflate(inflater,container,false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        //initViewModel()
-        val resource = currentFile ?: R.drawable.ic_photo
-        val imageView = view.findViewById<ImageView>(R.id.photoPreview)
-        val ltControl = view.findViewById<LinearLayout>(R.id.lt_control)
-        ltControl.isGone = true
+
         val location: Location? = NavigationServiceConnection.getLocation()
         if (location == null) {
             viewPointModel.geoIsRequired.value = true
         }else{
-            Log.d(TAG, "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
+            Log.d(tag(), "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
         }
 
-        //For testing null location
-        // location = null
-        //viewPointModel.geoIsRequired.value = true
-
+        val resource = currentFile ?: R.drawable.ic_photo
+        binding.ltControl.isGone = true
         if (currentFile!=null && location!=null){
             CoroutineScope(Dispatchers.Main).launch {
                 ImageFileProcessing().createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
-                Glide.with(requireContext()).load(resource).into(imageView as ImageView)
+                Glide.with(requireContext()).load(resource).into(binding.photoPreview)
                 view.findViewById<ShimmerFrameLayout>(R.id.tv_shimmer).isGone = true
-                ltControl.isVisible = true
+                binding.ltControl.isVisible = true
             }
         }
 
-        view.findViewById<TextView>(R.id.tv_confirm).setOnClickListener {
+        binding.tvConfirm.setOnClickListener {
             currentFile?.let {
                 viewPointModel.savePointFile(it,location, args.params.fileOrder)
             }
             navController.popBackStack(R.id.cameraFragment,true)
         }
 
-        view.findViewById<TextView>(R.id.tv_cancel).setOnClickListener {
+        binding.tvCancel.setOnClickListener {
             currentFile?.delete()
             navController.popBackStack()
         }
 
-        (requireActivity() as MainActivity).supportActionBar?.hide()
-    }
-
-    fun initViewModel() {
-       /* viewPointModel = ViewModelProvider(
-            navController.getViewModelStoreOwner(R.id.navigation),
-            PointItemViewModelFactory(args.params.lineUID)
-        ).get(PointItemViewModel::class.java)*/
-
-        // viewPointModel = ViewModelProvider(requireActivity(), TaskListViewModel.TaskListViewModelFactory(requireActivity().application)).get(TaskListViewModel::class.java)
-    }
-
-    companion object {
-        private const val TAG = "${AppClass.TAG}: Photo_Preview"
     }
 }
 

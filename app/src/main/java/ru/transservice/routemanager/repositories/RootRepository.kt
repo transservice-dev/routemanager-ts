@@ -9,6 +9,8 @@ import androidx.core.os.HandlerCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.*
@@ -56,6 +58,7 @@ object RootRepository {
         println("Caught $exception")
         Log.e(TAG, "Caught $exception")
         Log.e(TAG, " ${exception.stackTraceToString()}" )
+        Firebase.crashlytics.recordException(exception)
 
     }
     private val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())

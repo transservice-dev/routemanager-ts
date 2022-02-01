@@ -7,32 +7,35 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
+import android.view.KeyEvent
 import android.view.*
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.window.layout.*
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.AppClass.Companion.getOutputDirectory
 import ru.transservice.routemanager.R
+import ru.transservice.routemanager.databinding.CameraUiContainerBinding
+import ru.transservice.routemanager.databinding.FragmentCameraBinding
 import ru.transservice.routemanager.extensions.simulateClick
+import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.ui.permission.PermissionFragment
 import java.io.File
 import java.nio.ByteBuffer
@@ -45,15 +48,23 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
 
-//TODO move to using camerax with binding
+/**
+ * Main fragment for this app. Implements all camera operations including:
+ * - Viewfinder
+ * - Photo taking
+ * - Image analysis
+ */
 class CameraFragment : Fragment() {
 
-    private lateinit var container: ConstraintLayout
-    private lateinit var viewFinder: PreviewView
+    private var _fragmentCameraBinding: FragmentCameraBinding? = null
+
+    private val fragmentCameraBinding get() = _fragmentCameraBinding!!
+
+    private var cameraUiContainerBinding: CameraUiContainerBinding? = null
+
     private lateinit var outputDirectory: File
     private lateinit var broadcastManager: LocalBroadcastManager
 
@@ -69,13 +80,6 @@ class CameraFragment : Fragment() {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     }
 
-    lateinit var navController: NavController
-    private val args:CameraFragmentArgs by navArgs()
-
-    private lateinit var fileName: String
-    private lateinit var ivFocus: ImageView
-
-
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
@@ -85,13 +89,20 @@ class CameraFragment : Fragment() {
             when (intent.getIntExtra(KEY_EVENT_EXTRA, KeyEvent.KEYCODE_UNKNOWN)) {
                 // When the volume down button is pressed, simulate a shutter button click
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    val shutter = container
-                        .findViewById<ImageButton>(R.id.camera_capture_button)
-                    shutter.simulateClick()
+                    cameraUiContainerBinding?.cameraCaptureButton?.simulateClick()
                 }
             }
         }
     }
+
+    /**
+     * margarita_dev add vals
+     */
+    private val navController: NavController by lazy {Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)}
+    private val args:CameraFragmentArgs by navArgs()
+    private lateinit var fileName: String
+    private var focusStart: Drawable? = null
+    private var focusStop: Drawable? = null
 
     /**
      * We need a display listener for orientation changes that do not trigger a configuration
@@ -110,7 +121,6 @@ class CameraFragment : Fragment() {
         } ?: Unit
     }
 
-
     override fun onResume() {
         super.onResume()
         // Make sure that all permissions are still present, since the
@@ -123,10 +133,12 @@ class CameraFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        _fragmentCameraBinding = null
         super.onDestroyView()
 
         // Shut down our background executor
         cameraExecutor.shutdown()
+
         // Unregister the broadcast receivers and listeners
         broadcastManager.unregisterReceiver(volumeDownReceiver)
         displayManager.unregisterDisplayListener(displayListener)
@@ -136,19 +148,20 @@ class CameraFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_camera, container, false)
+    ): View {
+        _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
+        return fragmentCameraBinding.root
+    }
 
     @SuppressLint("MissingPermission", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)
-        container = view as ConstraintLayout
-        viewFinder = container.findViewById(R.id.view_finder)
 
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         broadcastManager = LocalBroadcastManager.getInstance(view.context)
+
         // Set up the intent filter that will receive events from our main activity
         val filter = IntentFilter().apply { addAction(KEY_EVENT_ACTION) }
         broadcastManager.registerReceiver(volumeDownReceiver, filter)
@@ -160,10 +173,10 @@ class CameraFragment : Fragment() {
         outputDirectory = getOutputDirectory()
 
         // Wait for the views to be properly laid out
-        viewFinder.post {
+        fragmentCameraBinding.viewFinder.post {
 
             // Keep track of the display in which this view is attached
-            displayId = viewFinder.display.displayId
+            displayId = fragmentCameraBinding.viewFinder.display.displayId
 
             // Build UI controls
             updateCameraUi()
@@ -172,6 +185,9 @@ class CameraFragment : Fragment() {
             setUpCamera()
         }
 
+        /**
+         * margarita_dev
+         */
 
         // Pinch to zoom
         val scaleGestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -191,15 +207,15 @@ class CameraFragment : Fragment() {
 
         val scaleGestureDetector = ScaleGestureDetector(context, scaleGestureListener)
 
-        // Tap to focus and Pinch to zoom
-        viewFinder.setOnTouchListener(View.OnTouchListener { _, event ->
+        // Tap to focus
+        fragmentCameraBinding.viewFinder.setOnTouchListener(View.OnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     return@OnTouchListener true
                 }
                 MotionEvent.ACTION_UP -> {
                     //val factory = viewFinder.meteringPointFactory
-                    val point = viewFinder.meteringPointFactory.createPoint(event.x, event.y)
+                    val point = fragmentCameraBinding.viewFinder.meteringPointFactory.createPoint(event.x, event.y)
 
                     // Create a MeteringAction from the MeteringPoint, you can configure it to specify the metering mode
                     val action = FocusMeteringAction.Builder(point).build()
@@ -216,8 +232,9 @@ class CameraFragment : Fragment() {
             }
         })
 
-        (requireActivity() as MainActivity).supportActionBar?.hide()
-      }
+        focusStart = AppCompatResources.getDrawable(requireContext(),R.drawable.ic_focus_start)
+        focusStop =  AppCompatResources.getDrawable(requireContext(),R.drawable.ic_focus_stop)
+    }
 
     /**
      * Inflate camera controls and update the UI manually upon config changes to avoid removing
@@ -230,8 +247,8 @@ class CameraFragment : Fragment() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        // Redraw the camera UI controls
-        updateCameraUi()
+        // Rebind the camera with the updated display metrics
+        bindCameraUseCases()
 
         // Enable or disable switching between cameras
         updateCameraSwitchButton()
@@ -240,7 +257,7 @@ class CameraFragment : Fragment() {
     /** Initialize CameraX, and prepare to bind the camera use cases  */
     private fun setUpCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-        cameraProviderFuture.addListener( {
+        cameraProviderFuture.addListener({
 
             // CameraProvider
             cameraProvider = cameraProviderFuture.get()
@@ -264,57 +281,57 @@ class CameraFragment : Fragment() {
     private fun bindCameraUseCases() {
 
         // Get screen metrics used to setup camera for full screen resolution
-        val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
-        Log.d(TAG, "Screen metrics: ${metrics.widthPixels} x ${metrics.heightPixels}")
+        val metrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity()).bounds
+        Log.d(TAG, "Screen metrics: ${metrics.width()} x ${metrics.height()}")
 
-        val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
+        val screenAspectRatio = aspectRatio(metrics.width(), metrics.height())
         Log.d(TAG, "Preview aspect ratio: $screenAspectRatio")
 
-        val rotation = viewFinder.display.rotation
+        val rotation = fragmentCameraBinding.viewFinder.display.rotation
 
         // CameraProvider
         val cameraProvider = cameraProvider
-                ?: throw IllegalStateException("Camera initialization failed.")
+            ?: throw IllegalStateException("Camera initialization failed.")
 
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
         // Preview
         preview = Preview.Builder()
-                // We request aspect ratio but no resolution
-                .setTargetAspectRatio(screenAspectRatio)
-                // Set initial target rotation
-                .setTargetRotation(rotation)
-                .build()
+            // We request aspect ratio but no resolution
+            .setTargetAspectRatio(screenAspectRatio)
+            // Set initial target rotation
+            .setTargetRotation(rotation)
+            .build()
 
         // ImageCapture
         imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                // We request aspect ratio but no resolution to match preview config, but letting
-                // CameraX optimize for whatever specific resolution best fits our use cases
-                .setTargetAspectRatio(screenAspectRatio)
-                // Set initial target rotation, we will have to call this again if rotation changes
-                // during the lifecycle of this use case
-                .setTargetRotation(rotation)
-                .build()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            // We request aspect ratio but no resolution to match preview config, but letting
+            // CameraX optimize for whatever specific resolution best fits our use cases
+            .setTargetAspectRatio(screenAspectRatio)
+            // Set initial target rotation, we will have to call this again if rotation changes
+            // during the lifecycle of this use case
+            .setTargetRotation(rotation)
+            .build()
 
         // ImageAnalysis
         imageAnalyzer = ImageAnalysis.Builder()
-                // We request aspect ratio but no resolution
-                .setTargetAspectRatio(screenAspectRatio)
-                // Set initial target rotation, we will have to call this again if rotation changes
-                // during the lifecycle of this use case
-                .setTargetRotation(rotation)
-                .build()
-                // The analyzer can then be assigned to the instance
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-                        // Values returned from our analyzer are passed to the attached listener
-                        // We log image analysis results here - you should do something useful
-                        // instead!
-                        //Log.d(TAG, "Average luminosity: $luma")
-                    })
-                }
+            // We request aspect ratio but no resolution
+            .setTargetAspectRatio(screenAspectRatio)
+            // Set initial target rotation, we will have to call this again if rotation changes
+            // during the lifecycle of this use case
+            .setTargetRotation(rotation)
+            .build()
+            // The analyzer can then be assigned to the instance
+            .also {
+                it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
+                    // Values returned from our analyzer are passed to the attached listener
+                    // We log image analysis results here - you should do something useful
+                    // instead!
+                    Log.d(TAG, "Average luminosity: $luma")
+                })
+            }
 
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
@@ -323,18 +340,109 @@ class CameraFragment : Fragment() {
             // A variable number of use-cases can be passed here -
             // camera provides access to CameraControl & CameraInfo
             camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageCapture, imageAnalyzer
-            )
+                this, cameraSelector, preview, imageCapture, imageAnalyzer)
 
             // Attach the viewfinder's surface provider to preview use case
-            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
+            preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
+            //observeCameraState(camera?.cameraInfo!!) // margarita-dev remove observing state, but let it in the code for possible future use
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
 
+    /*private fun observeCameraState(cameraInfo: CameraInfo) {
+        cameraInfo.cameraState.observe(viewLifecycleOwner) { cameraState ->
+            run {
+                when (cameraState.type) {
+                    CameraState.Type.PENDING_OPEN -> {
+                        // Ask the user to close other camera apps
+                        Toast.makeText(context,
+                            "CameraState: Pending Open",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.Type.OPENING -> {
+                        // Show the Camera UI
+                        Toast.makeText(context,
+                            "CameraState: Opening",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.Type.OPEN -> {
+                        // Setup Camera resources and begin processing
+                        Toast.makeText(context,
+                            "CameraState: Open",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.Type.CLOSING -> {
+                        // Close camera UI
+                        Toast.makeText(context,
+                            "CameraState: Closing",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.Type.CLOSED -> {
+                        // Free camera resources
+                        Toast.makeText(context,
+                            "CameraState: Closed",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            cameraState.error?.let { error ->
+                when (error.code) {
+                    // Open errors
+                    CameraState.ERROR_STREAM_CONFIG -> {
+                        // Make sure to setup the use cases properly
+                        Toast.makeText(context,
+                            "Stream config error",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    // Opening errors
+                    CameraState.ERROR_CAMERA_IN_USE -> {
+                        // Close the camera or ask user to close another camera app that's using the
+                        // camera
+                        Toast.makeText(context,
+                            "Camera in use",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.ERROR_MAX_CAMERAS_IN_USE -> {
+                        // Close another open camera in the app, or ask the user to close another
+                        // camera app that's using the camera
+                        Toast.makeText(context,
+                            "Max cameras in use",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.ERROR_OTHER_RECOVERABLE_ERROR -> {
+                        Toast.makeText(context,
+                            "Other recoverable error",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    // Closing errors
+                    CameraState.ERROR_CAMERA_DISABLED -> {
+                        // Ask the user to enable the device's cameras
+                        Toast.makeText(context,
+                            "Camera disabled",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    CameraState.ERROR_CAMERA_FATAL_ERROR -> {
+                        // Ask the user to reboot the device to restore camera function
+                        Toast.makeText(context,
+                            "Fatal error",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                    // Closed errors
+                    CameraState.ERROR_DO_NOT_DISTURB_MODE_ENABLED -> {
+                        // Ask the user to disable the "Do Not Disturb" mode, then reopen the camera
+                        Toast.makeText(context,
+                            "Do not disturb mode enabled",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }*/
+
     /**
-     *  [androidx.camera.core.ImageAnalysisConfig] requires enum value of
+     *  [androidx.camera.core.ImageAnalysis.Builder] requires enum value of
      *  [androidx.camera.core.AspectRatio]. Currently it has values of 4:3 & 16:9.
      *
      *  Detecting the most suitable ratio for dimensions provided in @params by counting absolute
@@ -356,31 +464,33 @@ class CameraFragment : Fragment() {
     private fun updateCameraUi() {
 
         // Remove previous UI if any
-        container.findViewById<ConstraintLayout>(R.id.camera_ui_container)?.let {
-            container.removeView(it)
+        cameraUiContainerBinding?.root?.let {
+            fragmentCameraBinding.root.removeView(it)
         }
 
-        // Inflate a new view containing all UI for controlling the camera
-        val controls = View.inflate(requireContext(), R.layout.camera_ui_container, container)
+        cameraUiContainerBinding = CameraUiContainerBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            fragmentCameraBinding.root,
+            true
+        )
 
-        // In the background, load latest photo taken (if any) for gallery thumbnail
-        /*lifecycleScope.launch(Dispatchers.IO) {
+        /* In the background, load latest photo taken (if any) for gallery thumbnail
+        lifecycleScope.launch(Dispatchers.IO) {
             outputDirectory.listFiles { file ->
                 EXTENSION_WHITELIST.contains(file.extension.toUpperCase(Locale.ROOT))
-            }?.max()?.let {
+            }?.maxOrNull()?.let {
                 setGalleryThumbnail(Uri.fromFile(it))
             }
         }*/
 
-        ivFocus = controls.findViewById(R.id.iv_focus)
         // Listener for button used to capture photo
-        controls.findViewById<ImageButton>(R.id.camera_capture_button).setOnClickListener {
+        cameraUiContainerBinding?.cameraCaptureButton?.setOnClickListener {
 
             // Get a stable reference of the modifiable image capture use case
             imageCapture?.let { imageCapture ->
 
-                // Create output file to hold the image
                 fileName = generateFileName()
+                // Create output file to hold the image
                 val photoFile = createFile(outputDirectory, fileName, PHOTO_EXTENSION)
 
                 // Setup image capture metadata
@@ -392,25 +502,25 @@ class CameraFragment : Fragment() {
 
                 // Create output options object which contains file + metadata
                 val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)
-                        .setMetadata(metadata)
-                        .build()
+                    .setMetadata(metadata)
+                    .build()
 
                 // Setup image capture listener which is triggered after photo has been taken
                 imageCapture.takePicture(
                     outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                         override fun onError(exc: ImageCaptureException) {
-                            Log.e(TAG, "Photo capture failed: ${exc.message} location ${photoFile.absolutePath}", exc)
+                            Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                         }
 
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                            Log.d(TAG, "Photo capture succeeded: $savedUri")
+                            Log.d(tag(), "Photo capture succeeded: $savedUri")
 
                             // We can only change the foreground Drawable using API level 23+ API
                             // Update the gallery thumbnail with latest picture taken
                             view?.post {
                                 if (photoFile.absolutePath.isNullOrBlank()) {
-                                    Log.d(TAG,"Error while saving the target file, file name: $fileName")
+                                    Log.d(tag(),"Error while saving the target file, file name: $fileName")
                                     Toast.makeText(requireContext(),"Ошибка при сохранении файла, неверное имя файла",Toast.LENGTH_LONG).show()
                                     return@post
                                 }
@@ -422,47 +532,66 @@ class CameraFragment : Fragment() {
                                     )
                                 )
                             }
-                            //setGalleryThumbnail(savedUri)
                         }
                     })
 
+                /*// We can only change the foreground Drawable using API level 23+ API
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                    // Display flash animation to indicate that photo was captured
+                    fragmentCameraBinding.root.postDelayed({
+                        fragmentCameraBinding.root.foreground = ColorDrawable(Color.WHITE)
+                        fragmentCameraBinding.root.postDelayed(
+                            { fragmentCameraBinding.root.foreground = null }, ANIMATION_FAST_MILLIS)
+                    }, ANIMATION_SLOW_MILLIS)
+                }*/
             }
         }
 
         // Listener for zoom slider
-        val zoomSlider = controls.findViewById<SeekBar>(R.id.sbZoom)
-        zoomSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                camera!!.cameraControl.setLinearZoom(progress / zoomSlider.max.toFloat())
+        cameraUiContainerBinding?.sbZoom?.let {
+            it.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    camera!!.cameraControl.setLinearZoom(progress / it.max.toFloat())
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+        }
+
+
+        cameraUiContainerBinding?.ivFlashMode?.let {
+            it.setOnClickListener { _ ->
+                if (camera!!.cameraInfo.torchState.value == TorchState.ON) {
+                    camera!!.cameraControl.enableTorch(false)
+                } else {
+                    camera!!.cameraControl.enableTorch(true)
+                }
+
+                val icon = if (camera!!.cameraInfo.torchState.value == TorchState.ON) {
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_flash_on,
+                        requireActivity().theme
+                    )
+                } else {
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.ic_flash_off,
+                        requireActivity().theme
+                    )
+                }
+                it.setImageDrawable(icon)
             }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
-        val flashMode = controls.findViewById<ImageView>(R.id.ivFlashMode)
-        flashMode.setOnClickListener {
-            if (camera!!.cameraInfo.torchState.value == TorchState.ON){
-                camera!!.cameraControl.enableTorch(false)
-            }else{
-                camera!!.cameraControl.enableTorch(true)
-            }
-
-            val icon = if (camera!!.cameraInfo.torchState.value == TorchState.ON){
-                ResourcesCompat.getDrawable(resources, R.drawable.ic_flash_on, requireActivity().theme)
-            }else{
-                ResourcesCompat.getDrawable(resources, R.drawable.ic_flash_off, requireActivity().theme)
-            }
-            flashMode.setImageDrawable(icon)
         }
 
         // Setup for button used to switch cameras
-        controls.findViewById<ImageButton>(R.id.camera_switch_button).visibility = View.INVISIBLE
-        controls.findViewById<ImageButton>(R.id.camera_switch_button).let {
+        cameraUiContainerBinding?.cameraSwitchButton?.let {
 
             // Disable the button until the camera is set up
             it.isEnabled = false
+            it.isGone = true // use only back camera
 
             // Listener for button used to switch cameras. Only called if the button is enabled
             it.setOnClickListener {
@@ -475,18 +604,17 @@ class CameraFragment : Fragment() {
                 bindCameraUseCases()
             }
         }
-
     }
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
     private fun updateCameraSwitchButton() {
-        val switchCamerasButton = container.findViewById<ImageButton>(R.id.camera_switch_button)
-        switchCamerasButton.isEnabled = false // allow only back camera
-        /*try {
-            switchCamerasButton.isEnabled = hasBackCamera() && hasFrontCamera()
+        try {
+            cameraUiContainerBinding?.cameraSwitchButton?.isEnabled = false
+            // margarita-dev always use Back Camera
+            //cameraUiContainerBinding?.cameraSwitchButton?.isEnabled = hasBackCamera() && hasFrontCamera()
         } catch (exception: CameraInfoUnavailableException) {
-            switchCamerasButton.isEnabled = false
-        }*/
+            cameraUiContainerBinding?.cameraSwitchButton?.isEnabled = false
+        }
     }
 
     /** Returns true if the device has an available back camera. False otherwise */
@@ -498,8 +626,6 @@ class CameraFragment : Fragment() {
     private fun hasFrontCamera(): Boolean {
         return cameraProvider?.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
     }
-
-
 
     /**
      * Our custom image analysis class.
@@ -588,9 +714,65 @@ class CameraFragment : Fragment() {
         }
     }
 
+    /**
+     * margarita_dev
+     */
+
+    private fun generateFileName(): String {
+        val timeCreated = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU")).format(Date())
+        var fName = "${args.params.routeName}__{$timeCreated}__${args.params.addressName}"
+            .filter { it.isLetterOrDigit() || it.isWhitespace() || it.toString() == "_" }
+        val filePostfixSize = "_${args.params.fileOrder.string}${PHOTO_EXTENSION}".toByteArray().size
+        while (fName.toByteArray().size + filePostfixSize > 255) {
+            fName = fName.dropLast(1)
+        }
+        return "${fName}_${args.params.fileOrder.string}"
+    }
+
+    private fun animateFocus(x: Float, y: Float) {
+        // Move the focus ring so that its center is at the tap location (x, y)
+        cameraUiContainerBinding?.ivFocus?.let{ focus ->
+            val width = focus.width.toFloat()
+            val height = focus.height.toFloat()
+            focus.x = x - width / 2
+            focus.y = y - height / 2
+
+            // Show focus ring
+            focus.visibility = View.VISIBLE
+            focus.alpha = 1f
+
+            focus.animate()
+                .setStartDelay(500)
+                .setDuration(300)
+                .alpha(0f)
+                .setListener(object: Animator.AnimatorListener {
+                    override fun onAnimationEnd(animator: Animator?) {
+                        focus.visibility = View.INVISIBLE
+
+                        focus.setImageDrawable(focusStart)
+                        //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_start,null))
+                        //resources.getDrawable(R.drawable.ic_focus_start,requireActivity().theme))
+                    }
+
+                    override fun onAnimationStart(animation: Animator?) {
+                        focus.setImageDrawable(focusStop)
+                        //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_stop,null))
+                        //resources.getDrawable(R.drawable.ic_focus_stop,requireActivity().theme))
+                    }
+
+                    override fun onAnimationCancel(animation: Animator?) {
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {
+                    }
+                })
+        }
+
+    }
+
     companion object {
 
-        private const val TAG = "${AppClass.TAG}: Camera"
+        private const val TAG = "CameraXBasic"
         private const val PHOTO_EXTENSION = ".jpg"
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
@@ -605,53 +787,4 @@ class CameraFragment : Fragment() {
             return outputFile
         }
     }
-
-    private fun generateFileName(): String {
-        val timeCreated = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU")).format(Date())
-        var fName = "${args.params.routeName}__{$timeCreated}__${args.params.addressName}"
-            .filter { it.isLetterOrDigit() || it.isWhitespace() || it.toString() == "_" }
-        val filePostfixSize = "_${args.params.fileOrder.string}$PHOTO_EXTENSION".toByteArray().size
-        while (fName.toByteArray().size + filePostfixSize > 255) {
-            fName = fName.dropLast(1)
-        }
-        return "${fName}_${args.params.fileOrder.string}"
-    }
-
-    private fun animateFocus(x: Float, y: Float) {
-        // Move the focus ring so that its center is at the tap location (x, y)
-        val width = ivFocus.width.toFloat()
-        val height = ivFocus.height.toFloat()
-        ivFocus.x = x - width / 2
-        ivFocus.y = y - height / 2
-
-        // Show focus ring
-        ivFocus.visibility = View.VISIBLE
-        ivFocus.alpha = 1f
-
-       ivFocus.animate()
-            .setStartDelay(500)
-            .setDuration(300)
-            .alpha(0f)
-            .setListener(object: Animator.AnimatorListener {
-                override fun onAnimationEnd(animator: Animator?) {
-                    ivFocus.visibility = View.INVISIBLE
-                    ivFocus.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_focus_start))
-                    //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_start,null))
-                        //resources.getDrawable(R.drawable.ic_focus_start,requireActivity().theme))
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                    ivFocus.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_focus_stop))
-                    //ivFocus.setImageDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_focus_stop,null))
-                        //resources.getDrawable(R.drawable.ic_focus_stop,requireActivity().theme))
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-            })
-    }
-
 }

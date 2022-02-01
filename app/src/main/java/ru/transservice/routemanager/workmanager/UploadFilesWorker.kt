@@ -2,14 +2,10 @@ package ru.transservice.routemanager.workmanager
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.transservice.routemanager.AppClass
-import ru.transservice.routemanager.data.local.entities.PointFile
-import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
 import java.util.concurrent.TimeUnit

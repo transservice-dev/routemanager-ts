@@ -47,6 +47,7 @@
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_camera.xml" value="0.21041666666666667" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_fact_dialog.xml" value="0.17831813576494426" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_gallery.xml" value="0.17831813576494426" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_photo_list.xml" value="0.2078125" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_photo_priview.xml" value="0.26358695652173914" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_point.xml" value="0.33" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_point_photos.xml" value="0.14764492753623187" />
@@ -57,6 +58,7 @@
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_splash_screen.xml" value="0.28442028985507245" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_start_screen.xml" value="0.24728260869565216" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_task_list.xml" value="0.17346014492753623" />
+        <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_task_list_test.xml" value="0.2078125" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/fragment_vehicle_list.xml" value="0.13652482269503546" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_point_photo.xml" value="0.22" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/item_polygon_list.xml" value="0.24139492753623187" />

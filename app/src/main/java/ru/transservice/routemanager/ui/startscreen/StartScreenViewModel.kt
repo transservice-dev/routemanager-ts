@@ -2,24 +2,16 @@ package ru.transservice.routemanager.ui.startscreen
 
 import androidx.lifecycle.*
 import androidx.work.ExistingWorkPolicy
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
-
 import ru.transservice.routemanager.data.local.entities.TaskWithData
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import ru.transservice.routemanager.workmanager.UploadResultWorker
-import java.lang.IllegalArgumentException
-import java.lang.RuntimeException
 import java.util.*
 
 class StartScreenViewModel : ViewModel() {

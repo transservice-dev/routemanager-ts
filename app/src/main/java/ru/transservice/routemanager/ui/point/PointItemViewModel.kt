@@ -13,7 +13,6 @@ import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.*
 
 class PointItemViewModel(pointId: String) : ViewModel() {

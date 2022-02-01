@@ -1,16 +1,10 @@
 package ru.transservice.routemanager.ui.polygon
 
 import androidx.lifecycle.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.data.local.entities.PolygonItem
-import ru.transservice.routemanager.data.local.entities.Task
-import ru.transservice.routemanager.data.local.entities.TaskWithData
 import ru.transservice.routemanager.repositories.RootRepository
 import java.util.*
 
