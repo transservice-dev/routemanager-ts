@@ -76,7 +76,7 @@ class PointFilesAdapter(
                    state.handleSelection(getItem(position), true)
                }
            }else{
-               state.navRequest(pointItem,position,currentList)
+               state.navRequest(state.pointItem,position,currentList)
            }
         }
 

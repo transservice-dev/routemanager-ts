@@ -245,6 +245,7 @@
                 app:destination="@id/photoListFragment" />
             <argument
                 android:name="point"
+                app:nullable="true"
                 app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
         </fragment>
     </navigation>

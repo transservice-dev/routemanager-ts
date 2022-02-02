@@ -66,7 +66,7 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
         val pointItem: PointItem?,
         var selectedItems: MutableList<PointFile>,
         val handleSelection: (pointFile: PointFile, remove: Boolean) -> Unit,
-        val navRequest: (PointItem, Int, List<PointFile>) -> Unit
+        val navRequest: (PointItem?, Int, List<PointFile>) -> Unit
     )
 
     private fun handleSelection(pointFile: PointFile, remove: Boolean = false) {

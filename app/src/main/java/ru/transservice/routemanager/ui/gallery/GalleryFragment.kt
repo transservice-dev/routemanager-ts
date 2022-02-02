@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.core.view.doOnAttach
 import ru.transservice.routemanager.extensions.padWithDisplayCutout
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -34,7 +35,8 @@ class GalleryFragment internal constructor() : Fragment() {
     /** Adapter class used to present a fragment containing one photo or video as a page */
     private inner class MediaPagerAdapter(fm: Fragment) : FragmentStateAdapter(fm) {
         override fun getItemCount(): Int = mediaList.size
-        override fun createFragment(position: Int): Fragment = PhotoShowFragment.create(mediaList[position])
+        override fun createFragment(position: Int): Fragment =
+            PhotoShowFragment.create(mediaList[position])
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +68,7 @@ class GalleryFragment internal constructor() : Fragment() {
             photoViewPager.apply {
                 offscreenPageLimit = 2
                 adapter = MediaPagerAdapter(this@GalleryFragment)
-                currentItem = args.currentItem
+                setCurrentItem(args.currentItem,false) //margarita-dev doesn't work with smoothScroll = true
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

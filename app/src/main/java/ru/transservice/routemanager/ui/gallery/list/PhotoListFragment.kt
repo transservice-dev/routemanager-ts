@@ -42,8 +42,8 @@ class PhotoListFragment : Fragment() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.navParams.collectLatest{
-                    if (it.isRequired && it.pointItem != null) {
-                        navController.navigate(PhotoListFragmentDirections.actionPhotoListFragmentToGalleryFragment(it.position,it.pointItem))
+                    if (it.isRequired ) {
+                        navController.navigate(PhotoListFragmentDirections.actionPhotoListFragmentToGalleryFragment(it.position,args.point))
                     }
                 }
             }
