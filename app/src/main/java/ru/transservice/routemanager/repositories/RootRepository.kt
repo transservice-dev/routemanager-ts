@@ -270,6 +270,8 @@ object RootRepository {
                         complete(LoadResult.Error("Загрузка данных завершилась с ошибкой. Ошибка установки статуса"))
                         return@launch
                     }
+                    //Set default mode for list, TODO move to another layer
+                    prefRepository.putValue(prefRepository.FULL_TASK_LIST to false)
                     //4. Notify about successful loading
                     complete(LoadResult.Success(insertResult))
                 }

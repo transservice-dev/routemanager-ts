@@ -40,6 +40,10 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
         loadPointList()
     }
 
+
+    //class Factory: ViewModelProvider.Factory
+
+
     fun loadPointList() : MutableLiveData<List<PointItem>>{
        if (pointItem != null){
           pointList.postValue(listOf(pointItem!!))

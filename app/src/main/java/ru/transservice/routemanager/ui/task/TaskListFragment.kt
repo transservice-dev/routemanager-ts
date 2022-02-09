@@ -31,6 +31,7 @@ import ru.transservice.routemanager.databinding.FragmentTaskListBinding
 import ru.transservice.routemanager.extensions.hideKeyboard
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.ui.polygon.PolygonSelectionDialog
+import ru.transservice.routemanager.ui.task.TaskListViewModel.Companion.KEY_FULL_LIST
 import java.util.*
 
 
@@ -89,6 +90,7 @@ class TaskListFragment : Fragment() {
 
         val fullListItem = menu.findItem(R.id.action_fulllist)
         fullListItem.isVisible = true
+        fullListItem.title = if (viewModel.getFullList()) "Невыполненные" else getString(R.string.fullList)
 
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -174,7 +176,8 @@ class TaskListFragment : Fragment() {
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = true
         }
 
-        viewModel.setFullList(binding.btsPointList.listSwitcher.isChecked)
+
+        //viewModel.setFullList(binding.btsPointList.listSwitcher.isChecked)
 
         btsBehavior = BottomSheetBehavior.from(binding.btsPointList.bottomSheetRoute)
         setBottomSheetButtonsVisibility(viewModel.getCurrentPoint().value)
@@ -386,6 +389,12 @@ class TaskListFragment : Fragment() {
             }
         }
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_FULL_LIST, viewModel.getFullList())
+    }
+
 
     companion object {
 

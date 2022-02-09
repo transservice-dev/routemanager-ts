@@ -3,11 +3,13 @@ package ru.transservice.routemanager.ui.task
 import androidx.lifecycle.*
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.*
+import ru.transservice.routemanager.repositories.PreferencesRepository
 import ru.transservice.routemanager.repositories.RootRepository
 
 class TaskListViewModel : ViewModel() {
 
     private val repository = RootRepository
+    private val prefRepository = PreferencesRepository
     private var pointList : LiveData<List<PointItem>> = repository.observePointList().asLiveData()
 
     var unloadingAvailable = Transformations.map(
@@ -18,7 +20,9 @@ class TaskListViewModel : ViewModel() {
 
     private var currentPoint: MutableLiveData<PointItem> = MutableLiveData()
     private val query = MutableLiveData("")
-    private val fullList = MutableLiveData(true)
+    private val fullList = MutableLiveData(
+        PreferencesRepository.getFullList()
+    )
 
     val mediatorListResult = MediatorLiveData<List<PointItem>>()
 
@@ -50,10 +54,14 @@ class TaskListViewModel : ViewModel() {
 
     fun setFullList(value: Boolean){
         fullList.value = value
+        PreferencesRepository.putValue(PreferencesRepository.FULL_TASK_LIST to value)
     }
+
+    fun getFullList() : Boolean = fullList.value ?: false
 
     fun changeFullList(): Boolean {
         fullList.value = ! (fullList.value?: false)
+        PreferencesRepository.putValue(PreferencesRepository.FULL_TASK_LIST to (fullList.value ?: true))
         return fullList.value ?: true
     }
 
@@ -85,7 +93,10 @@ class TaskListViewModel : ViewModel() {
         mediatorListResult.removeSource(fullList)
     }
 
+
     companion object {
         private const val TAG = "${AppClass.TAG}: TaskList_View_Model"
+
+        const val KEY_FULL_LIST = "fullList"
     }
 }

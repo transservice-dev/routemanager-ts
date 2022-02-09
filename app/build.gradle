@@ -16,8 +16,8 @@ android {
         applicationId "ru.transservice.routemanager"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 24
-        versionName "1.0.21"
+        versionCode 25
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

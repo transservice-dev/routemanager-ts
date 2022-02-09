@@ -26,6 +26,7 @@ object PreferencesRepository {
     private const val ROUTE_DATE = "ROUTE_DATE"
     private const val SEARCH_BY_ROUTE = "SEARCH_BY_ROUTE"
     private const val USE_GOOGLE_NAV = "USE_GOOGLE_NAV"
+    const val FULL_TASK_LIST = "FULL_TASK_LIST"
 
     private val prefs: SharedPreferences by lazy {
         val ctx = AppClass.appliactionContext()
@@ -88,6 +89,10 @@ object PreferencesRepository {
         return prefs.getBoolean(USE_GOOGLE_NAV,false)
     }
 
+    fun getFullList(): Boolean {
+        return prefs.getBoolean(FULL_TASK_LIST,false)
+    }
+
     fun getDate(): Date? {
         val currentValue = prefs.getString(ROUTE_DATE,null)
         return currentValue?.let {
@@ -119,7 +124,7 @@ object PreferencesRepository {
         return taskWithDataFlow
     }
 
-    private fun putValue(pair: Pair<String,Any>) = with(prefs.edit()) {
+    fun putValue(pair: Pair<String,Any>) = with(prefs.edit()) {
         val key = pair.first
         val value = pair.second
         when (value){

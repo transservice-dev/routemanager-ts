@@ -297,7 +297,9 @@ class PointFragment : BaseFragment() {
             when {
                 viewModel.pointStatus == PointStatuses.DONE || viewModel.pointStatus == PointStatuses.NOT_VISITED  && !goBack -> {
                     when {
-                        pointState.point.done ->  navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                        pointState.point.done ->
+                            navController.popBackStack()
+                        //navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
                         else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
                     }
                 }
@@ -316,7 +318,8 @@ class PointFragment : BaseFragment() {
                         }
                         viewModel.reasonComment != "" -> {
                             viewModel.updateUndonePoint()
-                            navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
+                            navController.popBackStack()
+                            //navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
                         }
                         else -> {}
                     }

@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 <resources>
+    <dimen name="margin_tiny">4dp</dimen>
     <dimen name="margin_small8">8dp</dimen>
     <dimen name="margin_small16">16dp</dimen>
     <dimen name="margin_small24">24dp</dimen>

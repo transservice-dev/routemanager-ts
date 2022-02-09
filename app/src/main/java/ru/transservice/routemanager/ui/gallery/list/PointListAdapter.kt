@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.skillbranch.skillarticles.extensions.dpToPx
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
@@ -17,13 +18,13 @@ import ru.transservice.routemanager.repositories.RootRepository
 
 class PointListAdapter(
     val photoOrder: PhotoOrder,
-    val displayWidth: Int,
+    private val displayWidth: Int,
     val state: PhotoListViewModel.PhotoListState
     ) : ListAdapter<PointItem, PointListAdapter.PhotoListViewHolder> (PointListAdapter.PhotoListCallback()) {
 
     class PhotoListViewHolder(
         val binding: FragmentPointPhotosBinding,
-        val displayWidth: Int,
+        private val displayWidth: Int,
         val state: PhotoListViewModel.PhotoListState) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
             pointData: PointItem,
@@ -33,7 +34,7 @@ class PointListAdapter(
             with(binding) {
                 pointNameText.text = pointData.addressName
                 //settings for recycle view
-                val countOfImages = (displayWidth / 200) // grid size
+                val countOfImages = (displayWidth / AppClass.appliactionContext().dpToPx(100)).toInt() // grid size
                 rvPointsPhotos.layoutManager =
                     GridLayoutManager(AppClass.appliactionContext(), countOfImages)
                 rvPointsPhotos.isVerticalScrollBarEnabled = false
@@ -41,7 +42,7 @@ class PointListAdapter(
                 rvPointsPhotos.adapter = PointFilesAdapter(pointData,state)
 
                 rvPointsPhotos.addItemDecoration(
-                    SpaceItemDecoration(AppClass.appliactionContext().resources.getDimensionPixelSize(R.dimen.margin_small8)))
+                    SpaceItemDecoration(AppClass.appliactionContext().resources.getDimensionPixelSize(R.dimen.margin_tiny)))
 
                 //(rvPointsPhotos.adapter as PointPhotosAdapter).submitList(pointData.second)
                 repository.getPointFilesForGallery(pointData,photoOrder) {
