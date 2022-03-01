@@ -251,7 +251,7 @@ class TaskListFragment : Fragment() {
                 }else{
                     startNavService()
                     viewModel.getCurrentPoint().value?.let{
-                        navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(it))
+                        navController.navigate(TaskListFragmentDirections.actionTaskListFragmentToPointFragment(it)) //FIXME
                     }
                 }
                 btsBehavior.state  = BottomSheetBehavior.STATE_COLLAPSED

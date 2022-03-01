@@ -390,12 +390,16 @@ object RootRepository {
             listOf(pointFile)
         }else{
             dbDao.getRouteNotUploadedPointFiles()
+        }.filter {
+            deleteUploaded || it.lat != 0.0 // when uploading picture before finishing the route check for location
         }
 
         //calculating worker progress
         val countFiles = dbDao.countFiles()
         var countUploadedFiles = countFiles - data.size
         worker.updateProgressValue(WorkInfoKeys.Progress,(countUploadedFiles.toFloat()/countFiles*100).toInt())
+
+
 
         if (data.isNotEmpty()) {
             // uploading in portion
@@ -759,7 +763,7 @@ object RootRepository {
         }
     }
 
-    fun getNextPolygon(complete: (polygon: PolygonItem) -> Unit) {
+    fun getNextPolygon(complete: (polygon: PolygonItem?) -> Unit) {
         scope.launch {
             complete(dbDao.getNextPolygon())
         }

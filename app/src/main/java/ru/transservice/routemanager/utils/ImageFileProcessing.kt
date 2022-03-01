@@ -5,14 +5,16 @@ import android.content.Context
 import android.graphics.*
 import android.location.Geocoder
 import android.location.Location
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PointFileParams
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import ru.transservice.routemanager.extensions.tag
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
@@ -48,17 +50,33 @@ class ImageFileProcessing {
         )
 
     @SuppressLint("InflateParams")
-    suspend fun createResultImageFile(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) = with(Dispatchers.Default){
+    fun createResultImageFile(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
         processImage(filePath, lat, lon, params, context)
     }
 
-    private suspend fun processImage(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
+    private fun getBitmapFromFile(filePath: String): Bitmap? {
+       try {
+           return BitmapFactory.decodeFile(filePath)
+       } catch(e: OutOfMemoryError) {
+           val options = BitmapFactory.Options().apply { inSampleSize = 2 }
+           return BitmapFactory.decodeFile(filePath,options)
+       } catch (e: java.lang.Exception) {
+           Log.e(tag(), e.stackTraceToString())
+           Firebase.crashlytics.recordException(e)
+           return null
+       }
+    }
+
+    private fun processImage(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
         // Основное изображение
         val currentFile = File(filePath)
         if (currentFile.absolutePath.isNullOrEmpty()){
             return // Проблема с обработкой файла, файл не найден
         }
-        var originalBitmap: Bitmap = BitmapFactory.decodeFile(currentFile.absolutePath)
+
+        var originalBitmap: Bitmap = getBitmapFromFile(currentFile.absolutePath)
+            ?: return
+
         val degree = getRotateDegreeFromExif(currentFile.absolutePath)
         //Если угол не нулевой, то сначала повернем картинку
         if (degree != 0) {
@@ -141,11 +159,13 @@ class ImageFileProcessing {
 
         //Сохранение в файл
         val exifData = getExifData(currentFile)
-        currentFile.delete()
-        val out = FileOutputStream(currentFile)
-        overlayBitmap.compress(Bitmap.CompressFormat.JPEG, 50, out)
-        out.flush()
-        out.close()
+        val bos = ByteArrayOutputStream()
+        overlayBitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+        //write the bytes in file
+        val fos = BufferedOutputStream(FileOutputStream(currentFile))
+        fos.write(bos.toByteArray())
+        fos.flush()
+        fos.close()
         setExifData(currentFile,exifData)
     }
 

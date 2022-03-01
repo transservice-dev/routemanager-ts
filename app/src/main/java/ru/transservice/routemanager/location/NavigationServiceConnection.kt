@@ -4,6 +4,9 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.location.Location
 import android.os.IBinder
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object NavigationServiceConnection: ServiceConnection {
 
@@ -28,16 +31,28 @@ object NavigationServiceConnection: ServiceConnection {
         }
     }
 
+    fun getLocationFlow() : StateFlow<Location?>{
+        return if (bound) {
+            navService.locationFlow
+        }else{
+            MutableStateFlow(null).asStateFlow()
+        }
+    }
+
     fun getlocationAvailable(): Boolean{
         return navService.getlocationAvailable()
     }
 
     fun isActive():Boolean{
-        return navService.isActive
+        return if (bound) navService.isActive else {
+            false
+        }
     }
 
     fun setNavClient(){
-        navService.setNavClient()
+        if (bound) {
+            navService.setNavClient()
+        }
     }
 
     fun startTracking() {

@@ -11,6 +11,8 @@ import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.*
@@ -22,11 +24,13 @@ import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.os.HandlerCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import androidx.window.layout.*
 import ru.transservice.routemanager.*
@@ -219,6 +223,7 @@ class CameraFragment : Fragment() {
 
                     // Create a MeteringAction from the MeteringPoint, you can configure it to specify the metering mode
                     val action = FocusMeteringAction.Builder(point).build()
+                    //TODO check for null
                     camera!!.cameraControl.startFocusAndMetering(action)
                     //ivFocus.setImageDrawable(resources.getDrawable(R.drawable.ic_focus_stop, requireActivity().theme))
                     animateFocus(event.x,event.y)
@@ -516,21 +521,16 @@ class CameraFragment : Fragment() {
                             val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
                             Log.d(tag(), "Photo capture succeeded: $savedUri")
 
-                            // We can only change the foreground Drawable using API level 23+ API
-                            // Update the gallery thumbnail with latest picture taken
-                            view?.post {
-                                if (photoFile.absolutePath.isNullOrBlank()) {
-                                    Log.d(tag(),"Error while saving the target file, file name: $fileName")
-                                    Toast.makeText(requireContext(),"Ошибка при сохранении файла, неверное имя файла",Toast.LENGTH_LONG).show()
-                                    return@post
-                                }
-
-                                navController.navigate(
-                                    CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
-                                        photoFile.absolutePath,
-                                        args.params
+                            val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
+                            mainThreadHandler.post{
+                                if (navController.currentDestination?.id == R.id.cameraFragment) {
+                                    navController.navigate(
+                                        CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
+                                            photoFile.absolutePath,
+                                            args.params
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     })

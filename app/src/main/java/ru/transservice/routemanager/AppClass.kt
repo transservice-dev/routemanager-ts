@@ -9,7 +9,7 @@ import ru.transservice.routemanager.database.AppDatabase
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.File
 
-class AppClass: Application() {
+class AppClass: Application(), Configuration.Provider  {
 
     companion object {
         var appVersion: String = ""
@@ -71,8 +71,8 @@ class AppClass: Application() {
         setupWorkManager()
     }
 
-
-
-
+    override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
+        .setMinimumLoggingLevel(android.util.Log.INFO)
+        .build()
 
 }

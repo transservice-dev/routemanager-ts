@@ -47,8 +47,10 @@ class PolygonViewModel : ViewModel()  {
     }
 
     fun setPolygonByDefault() {
-        repository.getNextPolygon {
-            currentItem.postValue(it)
+        repository.getNextPolygon { polygon ->
+            polygon?.let {
+                currentItem.postValue(it)
+            }
         }
     }
 

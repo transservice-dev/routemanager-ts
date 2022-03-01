@@ -251,7 +251,7 @@ class PointFragment : BaseFragment() {
             }
         })
 
-        viewModel.geoIsRequired.observe(viewLifecycleOwner, { required ->
+        /*viewModel.geoIsRequired.observe(viewLifecycleOwner, { required ->
             if (required) {
                 NavigationServiceConnection.getLocation()?.let {
                     Log.d(
@@ -261,7 +261,7 @@ class PointFragment : BaseFragment() {
                     viewModel.setPointFilesGeodata(it)
                 }
             }
-        })
+        })*/
     }
 
     private fun takePicture(fileOrder: PhotoOrder) {

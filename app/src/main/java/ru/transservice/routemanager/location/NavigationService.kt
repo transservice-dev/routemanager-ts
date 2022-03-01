@@ -14,6 +14,8 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.MainActivity
 import ru.transservice.routemanager.repositories.PreferencesRepository
@@ -34,6 +36,10 @@ class NavigationService : Service() {
     private var locationAvailable: Boolean = false
     private lateinit var trackerClient: BaseTracker
     var isActive = false
+
+    private val _locationFlow: MutableStateFlow<Location?> = MutableStateFlow(null)
+    val locationFlow: StateFlow<Location?> get() = _locationFlow
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     private val binder = ServiceBinder()
 
@@ -151,16 +157,20 @@ class NavigationService : Service() {
 
         val locationListenerGPS: LocationListener = LocationListener { newLocation ->
             locationGPS = newLocation
-            location = newLocation
-            Log.d(TAG, "Location changed: $newLocation ${Date()}")
+            setLocation(newLocation)
         }
 
         val locationListenerNetwork: LocationListener =
             LocationListener { newLocation ->
                 locationNetwork = newLocation
-                location = newLocation
-                Log.d(TAG, "Location changed: $newLocation ${Date()}")
+                setLocation(newLocation)
             }
+
+        fun setLocation(newLocation: Location) {
+            location = newLocation
+            scope.launch { _locationFlow.emit(location) }
+            Log.d(TAG, "Location changed: $newLocation ${Date()}")
+        }
 
         // Declaring a Location Manager
         var locationManager: LocationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -221,6 +231,7 @@ class NavigationService : Service() {
         private val locationUpdatesCallback = object : LocationCallback() {
             override fun onLocationResult(lr: LocationResult) {
                 location = lr.locations.last()
+                scope.launch { _locationFlow.emit(location) }
                 Log.d(TAG, "Location changed: $location ${Date()}")
             }
         }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.data.local.entities.*
+import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
@@ -22,9 +23,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
     var pointStatus: PointStatuses = PointStatuses.NOT_VISITED
     var reasonComment: String = ""
 
-    //TODO redo the algorithm with geoless files
-
-    var geoIsRequired = MutableLiveData(false)
     companion object {
         private const val TAG = "${AppClass.TAG}: TaskList_View_Model"
     }
@@ -35,8 +33,11 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         }
     }
 
+    init {
+        setGeoDataForGeolessFiles()
+    }
+
     fun initPointData() {
-        updateGeoIsRequired()
         if (reasonComment.isEmpty()) {
             reasonComment = state.value?.point?.reasonComment ?: ""
         }
@@ -61,6 +62,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
             //Toast.makeText(getApplication(), "Предупреждение, местоположение не определено", Toast.LENGTH_LONG).show()
         }
 
+        //TODO check for null
         val pointFile = PointFile(
             state.value!!.point.docUID, state.value!!.point.lineUID, Date(file.lastModified()), fileOrder,
             lat,
@@ -77,6 +79,39 @@ class PointItemViewModel(pointId: String) : ViewModel() {
                     val resultPoint = it.point.copy()
                     updatePointAndDoneStatus(resultPoint)
                 }
+            }
+        }
+    }
+
+    //TODO move to data layer
+    private fun setGeoDataForGeolessFiles() {
+        viewModelScope.launch {
+            NavigationServiceConnection.getLocationFlow().collect { location ->
+                if (location == null || state.value == null) return@collect
+                repository.getGeolessPointFiles(state.value!!.point) { list ->
+                    list.forEach {
+                        if (it.filePath.isNotEmpty()) {
+                            val lon = location.longitude
+                            val lat = location.latitude
+                            val imageProcessing = ImageFileProcessing()
+                            imageProcessing.createResultImageFile(
+                                it.filePath,
+                                lat,
+                                lon,
+                                state.value!!.toPointFileParams(it.photoOrder),
+                                AppClass.appliactionContext()
+                            )
+                            imageProcessing.setGeoTag(location, it.filePath)
+                            repository.updatePointFileLocation(it, lat, lon) {
+                                Log.d(
+                                    TAG,
+                                    "update point file location, point file: ${it.filePath}, lat: $lat, lon: $lon"
+                                )
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -104,40 +139,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         }
     }
 
-    fun setPointFilesGeodata(location: Location) {
-        state.value?.let{ currentState ->
-            viewModelScope.launch {
-                repository.getGeolessPointFiles(currentState.point) { list ->
-                    list.forEach {
-                        if (it.filePath.isNotEmpty()) {
-                            val lon = location.longitude
-                            val lat = location.latitude
-                            val imageProcessing = ImageFileProcessing()
-                            viewModelScope.launch {
-                                imageProcessing.createResultImageFile(
-                                    it.filePath,
-                                    lat,
-                                    lon,
-                                    currentState.toPointFileParams(it.photoOrder),
-                                    AppClass.appliactionContext()
-                                )
-                            }
-                            imageProcessing.setGeoTag(location, it.filePath)
-                            repository.updatePointFileLocation(it, lat, lon) {
-                                Log.d(
-                                    TAG,
-                                    "update point file location, point file: ${it.filePath}, lat: $lat, lon: $lon"
-                                )
-                            }
-                        }
-                    }
-                    updateGeoIsRequired()
-                }
-            }
-        }
-
-    }
-
     fun setFact(fact: Double){
         state.value?.let { pointState ->
             val resultPoint = pointState.point.copy(countFact = fact)
@@ -155,14 +156,6 @@ class PointItemViewModel(pointId: String) : ViewModel() {
 
     fun getPhoneNumber() : String{
         return state.value?.point?.getPhoneFromComment() ?: ""
-    }
-
-    private fun updateGeoIsRequired(){
-        state.value?.let {
-            repository.getGeolessPointFiles(it.point) { list ->
-                geoIsRequired.postValue(list.isNotEmpty())
-            }
-        }
     }
 
     //TODO move to data layer

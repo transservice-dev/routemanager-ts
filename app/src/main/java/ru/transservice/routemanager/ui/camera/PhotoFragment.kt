@@ -23,8 +23,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -32,10 +30,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import ru.transservice.routemanager.R
 import com.bumptech.glide.Glide
-import com.facebook.shimmer.ShimmerFrameLayout
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import ru.transservice.routemanager.databinding.FragmentPhotoPriviewBinding
 import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.location.NavigationServiceConnection
@@ -83,35 +77,30 @@ class PhotoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val location: Location? = NavigationServiceConnection.getLocation()
-        if (location == null) {
-            viewPointModel.geoIsRequired.value = true
-        }else{
-            Log.d(tag(), "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
-        }
-
         val resource = currentFile ?: R.drawable.ic_photo
-        binding.ltControl.isGone = true
-        if (currentFile!=null && location!=null){
-            CoroutineScope(Dispatchers.Main).launch {
-                ImageFileProcessing().createResultImageFile(currentFile!!.absolutePath,location.latitude,location.longitude,args.params,requireContext())
-                Glide.with(requireContext()).load(resource).into(binding.photoPreview)
-                view.findViewById<ShimmerFrameLayout>(R.id.tv_shimmer).isGone = true
-                binding.ltControl.isVisible = true
+        if (currentFile != null && location != null) {
+            Log.d(tag(), "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
+            ImageFileProcessing().createResultImageFile(
+                currentFile!!.absolutePath,
+                location.latitude,
+                location.longitude,
+                args.params,
+                requireContext()
+            )
+        }
+        Glide.with(requireContext()).load(resource).into(binding.photoPreview)
+        with(binding) {
+            tvConfirm.setOnClickListener {
+                currentFile?.let {
+                    viewPointModel.savePointFile(it, location, args.params.fileOrder)
+                }
+                navController.popBackStack(R.id.cameraFragment, true)
+            }
+            tvCancel.setOnClickListener {
+                currentFile?.delete()
+                navController.popBackStack()
             }
         }
-
-        binding.tvConfirm.setOnClickListener {
-            currentFile?.let {
-                viewPointModel.savePointFile(it,location, args.params.fileOrder)
-            }
-            navController.popBackStack(R.id.cameraFragment,true)
-        }
-
-        binding.tvCancel.setOnClickListener {
-            currentFile?.delete()
-            navController.popBackStack()
-        }
-
     }
 }
 
