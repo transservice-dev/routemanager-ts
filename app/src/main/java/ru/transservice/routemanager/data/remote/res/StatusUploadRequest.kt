@@ -12,5 +12,6 @@ class StatusUploadBody(
     val routeUID: String,
     val dateStart: String,
     val dateEnd: String,
-    val app_version: String
+    val app_version: String,
+    val vehicle_defects: String = ""
 )

@@ -1,0 +1,474 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "b49f2f0d550c9968143e3f543aeab9a1",
+    "entities": [
+      {
+        "tableName": "pointList_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`docUID` TEXT NOT NULL, `lineUID` TEXT NOT NULL, `rowNumber` INTEGER NOT NULL, `addressName` TEXT NOT NULL, `addressLon` REAL NOT NULL, `addressLat` REAL NOT NULL, `containerName` TEXT NOT NULL, `containerSize` REAL NOT NULL, `agentName` TEXT NOT NULL, `countPlan` REAL NOT NULL, `countFact` REAL NOT NULL, `countOver` REAL NOT NULL, `done` INTEGER NOT NULL, `tripNumber` INTEGER NOT NULL, `polygon` INTEGER NOT NULL, `routeName` TEXT NOT NULL, `comment` TEXT NOT NULL, `noPhotoAllowed` INTEGER NOT NULL, `noEditFact` INTEGER NOT NULL, `reasonComment` TEXT NOT NULL, `polygonUID` TEXT NOT NULL DEFAULT '', `polygonName` TEXT NOT NULL DEFAULT '', `polygonByRow` INTEGER NOT NULL DEFAULT 0, `tripNumberFact` INTEGER NOT NULL DEFAULT 1000, `timestamp` INTEGER, `status` TEXT NOT NULL, PRIMARY KEY(`docUID`, `lineUID`))",
+        "fields": [
+          {
+            "fieldPath": "docUID",
+            "columnName": "docUID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lineUID",
+            "columnName": "lineUID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rowNumber",
+            "columnName": "rowNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addressName",
+            "columnName": "addressName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addressLon",
+            "columnName": "addressLon",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addressLat",
+            "columnName": "addressLat",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "containerName",
+            "columnName": "containerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "containerSize",
+            "columnName": "containerSize",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "agentName",
+            "columnName": "agentName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countPlan",
+            "columnName": "countPlan",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countFact",
+            "columnName": "countFact",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countOver",
+            "columnName": "countOver",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "done",
+            "columnName": "done",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tripNumber",
+            "columnName": "tripNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "polygon",
+            "columnName": "polygon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeName",
+            "columnName": "routeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "noPhotoAllowed",
+            "columnName": "noPhotoAllowed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "noEditFact",
+            "columnName": "noEditFact",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reasonComment",
+            "columnName": "reasonComment",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "polygonUID",
+            "columnName": "polygonUID",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "polygonName",
+            "columnName": "polygonName",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "polygonByRow",
+            "columnName": "polygonByRow",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "tripNumberFact",
+            "columnName": "tripNumberFact",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1000"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "docUID",
+            "lineUID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_pointList_table_docUID_lineUID_docUID_lineUID",
+            "unique": false,
+            "columnNames": [
+              "docUID",
+              "lineUID",
+              "docUID",
+              "lineUID"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pointList_table_docUID_lineUID_docUID_lineUID` ON `${TABLE_NAME}` (`docUID`, `lineUID`, `docUID`, `lineUID`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "currentRoute_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`docUid` TEXT NOT NULL, `routeDate` INTEGER NOT NULL, `search_type` INTEGER NOT NULL, `countPoint` INTEGER NOT NULL, `countPointDone` INTEGER NOT NULL, `dateStart` INTEGER, `dateEnd` INTEGER, `lastTripNumber` INTEGER NOT NULL DEFAULT 0, `polygonByRow` INTEGER NOT NULL DEFAULT 0, `vehicle_name` TEXT, `vehicle_uid` TEXT, `vehicle_number` TEXT, `route_name` TEXT, `route_uid` TEXT, PRIMARY KEY(`docUid`))",
+        "fields": [
+          {
+            "fieldPath": "docUid",
+            "columnName": "docUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeDate",
+            "columnName": "routeDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "search_type",
+            "columnName": "search_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countPoint",
+            "columnName": "countPoint",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countPointDone",
+            "columnName": "countPointDone",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateStart",
+            "columnName": "dateStart",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dateEnd",
+            "columnName": "dateEnd",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastTripNumber",
+            "columnName": "lastTripNumber",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "polygonByRow",
+            "columnName": "polygonByRow",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "vehicle.name",
+            "columnName": "vehicle_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "vehicle.uid",
+            "columnName": "vehicle_uid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "vehicle.number",
+            "columnName": "vehicle_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "route.name",
+            "columnName": "route_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "route.uid",
+            "columnName": "route_uid",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "docUid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "pointFiles_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`docUID` TEXT NOT NULL, `lineUID` TEXT NOT NULL, `timeDate` INTEGER NOT NULL, `photoOrder` INTEGER NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `filePath` TEXT NOT NULL, `fileName` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `uploaded` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, FOREIGN KEY(`docUID`, `lineUID`) REFERENCES `pointList_table`(`docUID`, `lineUID`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "docUID",
+            "columnName": "docUID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lineUID",
+            "columnName": "lineUID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeDate",
+            "columnName": "timeDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "photoOrder",
+            "columnName": "photoOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lat",
+            "columnName": "lat",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lon",
+            "columnName": "lon",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "filePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "fileName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileExtension",
+            "columnName": "fileExtension",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uploaded",
+            "columnName": "uploaded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_pointFiles_table_docUID_lineUID_docUID_lineUID",
+            "unique": false,
+            "columnNames": [
+              "docUID",
+              "lineUID",
+              "docUID",
+              "lineUID"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pointFiles_table_docUID_lineUID_docUID_lineUID` ON `${TABLE_NAME}` (`docUID`, `lineUID`, `docUID`, `lineUID`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pointList_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "docUID",
+              "lineUID"
+            ],
+            "referencedColumns": [
+              "docUID",
+              "lineUID"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "polygon_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER NOT NULL, `docUID` TEXT NOT NULL, `uid` TEXT NOT NULL, `name` TEXT NOT NULL, `tripNumber` INTEGER NOT NULL, `by_default` INTEGER NOT NULL, `done` INTEGER NOT NULL, PRIMARY KEY(`pk`))",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "docUID",
+            "columnName": "docUID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tripNumber",
+            "columnName": "tripNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "by_default",
+            "columnName": "by_default",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "done",
+            "columnName": "done",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [
+      {
+        "viewName": "PointWithData",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT points.*,\n                IFNULL(files_before.count_files,0) as count_files_before, \n                IFNULL(files_after.count_files,0) as count_files_after,\n                IFNULL(files_cantdone.count_files,0) as count_files_cantdone\n            FROM pointList_table as points \n            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=0 group by lineUID ) as files_before \n            ON points.lineUID = files_before.lineUID\n            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=1 group by lineUID ) as files_after \n            ON points.lineUID = files_after.lineUID\n            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=2 group by lineUID ) as files_cantdone \n            ON points.lineUID = files_cantdone.lineUID"
+      },
+      {
+        "viewName": "TaskWithData",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT task.*, points_all.count_points as taskCountPoint, points_done.count_points as taskCountPointDone, 1 as isLoaded    \n    FROM currentRoute_table as task\n    LEFT JOIN (SELECT COUNT(1) as count_points, docUID FROM pointList_table WHERE NOT polygon GROUP BY docUID) as points_all\n    ON task.docUid = points_all.docUID\n    LEFT JOIN (SELECT COUNT(1) as count_points, docUID FROM pointList_table WHERE NOT polygon AND done GROUP BY docUID) as points_done\n    ON task.docUid = points_done.docUID"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b49f2f0d550c9968143e3f543aeab9a1')"
+    ]
+  }
+}

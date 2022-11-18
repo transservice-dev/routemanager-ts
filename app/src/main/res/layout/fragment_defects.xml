@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_list">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_small8"
+        android:padding="@dimen/margin_small8"
+        android:text="@string/defects_title"/>
+
+    <EditText
+        android:id="@+id/fragment_defects_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_small8"
+        android:background="@color/backgroundWhite"
+        android:gravity="top|start"
+        android:hint="@string/defects_description"
+        android:inputType="textMultiLine"
+        android:lines="8"
+        android:minLines="6"
+        android:paddingHorizontal="@dimen/margin_tiny" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/margin_small8"
+        android:gravity="end"
+        android:background="@color/backgroundWhite">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fragment_defects_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/DialogButton"
+            android:text="@string/defects_cancel"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fragment_defects_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/DialogButton"
+            android:text="@string/defects_confirm"/>
+
+    </LinearLayout>
+
+</LinearLayout>

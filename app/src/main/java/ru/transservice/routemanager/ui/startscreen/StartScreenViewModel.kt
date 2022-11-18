@@ -19,7 +19,7 @@ class StartScreenViewModel : ViewModel() {
     private val repository = RootRepository
     private val currentTask = repository.observeTask().asLiveData()
 
-    private var uploadWorkerId: UUID? = null
+    private val uploadWorkerId: MutableLiveData<UUID?> = MutableLiveData()
 
     val version get() = AppClass.appVersion
 
@@ -47,11 +47,18 @@ class StartScreenViewModel : ViewModel() {
         return result
     }
 
+    fun finishRoute(defectsInfo: String) = viewModelScope.launch {
+        repository.updateTask(
+            currentTask.value!!.task.copy(defects = defectsInfo)
+        )
+        startUploadWorker()
+    }
+
     fun startUploadWorker(){
         // cancel all previous work for uploading files
         WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadFilesWorker.workerTag)
         val request = UploadResultWorker.requestOneTimeWorkExpedited()
-        uploadWorkerId = request.id
+        uploadWorkerId.value = request.id
         WorkManager.getInstance(AppClass.appliactionContext())
             .enqueueUniqueWork(
                 UploadResultWorker.workerTag,
@@ -61,7 +68,7 @@ class StartScreenViewModel : ViewModel() {
 
     fun cancelUploadWorker() {
         WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadResultWorker.workerTag)
-        uploadWorkerId = null
+        uploadWorkerId.value = null
         checkForIncompleteWork()
     }
 
@@ -79,7 +86,7 @@ class StartScreenViewModel : ViewModel() {
                         !it.state.isFinished
                     }
                 )
-                uploadWorkerId = workInfo.lastOrNull { !it.state.isFinished }?.id
+                uploadWorkerId.value = workInfo.lastOrNull { !it.state.isFinished }?.id
             }
             _isLoading.value = false
 

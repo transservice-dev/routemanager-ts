@@ -14,6 +14,7 @@ import com.google.firebase.ktx.Firebase
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.*
 import retrofit2.HttpException
 import retrofit2.Response
@@ -553,7 +554,8 @@ object RootRepository {
                 "",
                 task.dateStart?.longFormat() ?: "",
                 task.dateEnd?.longFormat() ?: "",
-                AppClass.appVersion
+                AppClass.appVersion,
+                vehicle_defects = task.defects
             )
         )
         val response = RetrofitClient
@@ -647,6 +649,10 @@ object RootRepository {
         scope.launch {
             dbDao.updatePointWithRoute(pointItem)
         }
+    }
+
+    suspend fun updateTask(task: Task) = withContext(IO) {
+        dbDao.updateTask(task)
     }
 
     fun addPolygon(pointItem: PointItem, task: Task){

@@ -9,9 +9,10 @@ import ru.transservice.routemanager.data.local.entities.*
 @Database(
     entities = [PointItem::class, Task::class, PointFile::class, PolygonItem::class],
     views = [PointWithData::class, TaskWithData::class],
-    version = 3,
+    version = 4,
     autoMigrations = [
-        AutoMigration (from = 2, to = 3)
+        AutoMigration (from = 2, to = 3) ,
+        AutoMigration (from = 3, to = 4)
     ],
     exportSchema = true
 )

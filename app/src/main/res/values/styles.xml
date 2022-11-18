@@ -19,6 +19,13 @@
         <item name="colorOnSurface">@color/color_primary_selector</item>
     </style>
 
+    <style name="DialogButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="materialThemeOverlay">@style/AppTheme</item>
+        <item name="android:padding">12dp</item>
+        <item name="rippleColor">@color/colorPrimaryLight</item>
+        <item name="colorOnSurface">@color/color_primary_selector</item>
+    </style>
+
     <style name="AppTheme.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/colorPrimaryDark</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo_mini_splash</item>

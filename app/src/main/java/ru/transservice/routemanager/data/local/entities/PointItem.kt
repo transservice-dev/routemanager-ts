@@ -150,40 +150,6 @@ data class PointItem(
 }
 
 @DatabaseView("""
-            SELECT  points.lineUID as lineUID, addressName, containerName, containerSize, agentName, 
-               countPlan, countFact,  done, comment, status, reasonComment, timestamp, polygonByRow, polygonName,
-               IFNULL(files_before.count_files,0) as count_files_before, IFNULL(files_after.count_files,0) as count_files_after
-            FROM pointList_table as points 
-            LEFT JOIN( SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder IN (0,2)  group by lineUID ) as files_before 
-            ON points.lineUID = files_before.lineUID
-            LEFT JOIN(SELECT lineUID,  COUNT(1) as count_files from pointFiles_table where  photoOrder=1 group by lineUID ) as files_after 
-            ON points.lineUID = files_after.lineUID
-""")
-data class PointItemState(
-        val lineUID: String,
-        val addressName: String,
-        val containerName: String,
-        val containerSize: Double,
-        val agentName: String,
-        val countPlan: Double,
-        var countFact: Double,
-        var done: Boolean,
-        val comment: String,
-        val status: PointStatuses,
-        var timestamp: Date?,
-        var reasonComment: String,
-        val polygonName: String,
-        val polygonByRow: Boolean,
-        @ColumnInfo(name = "count_files_before")
-        val countFilesBefore: Int,
-        @ColumnInfo(name = "count_files_after")
-        val countFilesAfter: Int
-): Serializable {
-
-
-}
-
-@DatabaseView("""
             SELECT points.*,
                 IFNULL(files_before.count_files,0) as count_files_before, 
                 IFNULL(files_after.count_files,0) as count_files_after,

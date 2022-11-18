@@ -17,7 +17,9 @@ data class Task(
     @Embedded(prefix = "route_")
     val route:RouteItem? = null,
     val routeDate: Date = Date(),
-    val search_type: SearchType = SearchType.BY_VEHICLE
+    val search_type: SearchType = SearchType.BY_VEHICLE,
+    @ColumnInfo(defaultValue = "")
+    val defects: String = ""
 ){
     var countPoint: Int = 0
     var countPointDone: Int = 0

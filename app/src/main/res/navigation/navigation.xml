@@ -33,6 +33,9 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_startScreenFragment_to_defectsFragment"
+            app:destination="@id/defectsFragment" />
     </fragment>
     <fragment
         android:id="@+id/taskListFragment"
@@ -249,4 +252,12 @@
                 app:argType="ru.transservice.routemanager.data.local.entities.PointItem" />
         </fragment>
     </navigation>
+    <dialog
+        android:id="@+id/defectsFragment"
+        android:name="ru.transservice.routemanager.ui.defects.DefectsFragment"
+        android:label="DefectsFragment" >
+        <argument
+            android:name="requestCode"
+            app:argType="string" />
+    </dialog>
 </navigation>

@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.work.*
@@ -29,6 +30,7 @@ import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.service.errorDescription
+import ru.transservice.routemanager.ui.defects.DefectsFragment
 
 class StartScreenFragment : BaseFragment() {
 
@@ -90,6 +92,7 @@ class StartScreenFragment : BaseFragment() {
             }
         }
 
+        setDefectsInputListener()
     }
 
     private fun initViews(){
@@ -233,8 +236,7 @@ class StartScreenFragment : BaseFragment() {
             setTitle("Подтвердите действие")
             setMessage("Вы уверены, что хотите завершить маршрут?")
             setPositiveButton("Да, завершить") { _,_ ->
-                viewModel.startUploadWorker()
-                showAndObserveUploadProgress()
+                navController.navigate(StartScreenFragmentDirections.actionStartScreenFragmentToDefectsFragment(DefectsFragment.REQUEST_CODE))
             }
             setNegativeButton("Нет, отменить") { _,_ ->
                 showHideButtonClose()
@@ -243,6 +245,15 @@ class StartScreenFragment : BaseFragment() {
         }
         val alert = alertBuilder.create()
         alert.show()
+    }
+
+    private fun setDefectsInputListener() {
+        setFragmentResultListener(DefectsFragment.REQUEST_CODE) { _, bundle ->
+            bundle.getString(DefectsFragment.DEFECTS_RESULT)?.let {
+                viewModel.finishRoute(it)
+                showAndObserveUploadProgress()
+            }
+        }
     }
 
     private fun showAndObserveUploadProgress() {
@@ -264,14 +275,17 @@ class StartScreenFragment : BaseFragment() {
     }
 
     private fun observeUpload() {
-        viewModel.getUploadWorkerId()?.let { requestId ->
-            WorkManager.getInstance(AppClass.appliactionContext())
-                .getWorkInfoByIdLiveData(requestId)
-                .observe(requireActivity(), Observer { workInfo ->
-                    workInfo?.let {
-                        updateProgressDialog(it)
-                    }
-                })
+        viewModel.getUploadWorkerId().removeObservers(viewLifecycleOwner)
+        viewModel.getUploadWorkerId().observe(viewLifecycleOwner) { requestId ->
+            requestId?.let {
+                WorkManager.getInstance(AppClass.appliactionContext())
+                    .getWorkInfoByIdLiveData(requestId)
+                    .observe(requireActivity(), Observer { workInfo ->
+                        workInfo?.let {
+                            updateProgressDialog(it)
+                        }
+                    })
+            }
         }
     }
 

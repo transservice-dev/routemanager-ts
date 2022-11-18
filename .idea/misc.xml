@@ -70,10 +70,12 @@
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/layout/switch_item.xml" value="0.290625" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/menu/bottom_menu_navigation.xml" value="0.23697916666666666" />
         <entry key="..\:/Users/Rita/AndroidStudioProjects/Routemanager/app/src/main/res/menu/menu_search.xml" value="0.21666666666666667" />
+        <entry key="..\:/Users/sorokina/AndroidStudioProjects/routemanager-ts/app/src/main/res/layout/dialog_polygon_selection.xml" value="0.24342105263157895" />
+        <entry key="..\:/Users/sorokina/AndroidStudioProjects/routemanager-ts/app/src/main/res/layout/fragment_defects.xml" value="0.25" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="ProjectType">

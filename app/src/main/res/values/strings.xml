@@ -93,5 +93,9 @@
     <string name="uploading_result">Выгрузка задания</string>
     <string name="cancel">Отменить</string>
     <string name="UploadAwaiting">Ожидание выгрузки</string>
+    <string name="defects_title">Информация для линейного механика</string>
+    <string name="defects_description">Опишите неполадки в работе ТС</string>
+    <string name="defects_cancel">ОТМЕНА</string>
+    <string name="defects_confirm">ОК</string>
 
 </resources>

@@ -34,7 +34,7 @@ interface PostgrestApi {
     @POST("rpc/loadTaskResult_v2")
     suspend fun uploadTask(@Body taskUploadRequest: TaskUploadRequest): Response<ResponseBody>
 
-    @POST("rpc/updateDocStatus_v2")
+    @POST("rpc/updateDocStatus_v3")
     suspend fun setStatus(@Body statusUploadRequest: StatusUploadRequest): Response<ResponseBody>
 
 }
