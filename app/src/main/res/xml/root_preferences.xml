@@ -11,7 +11,6 @@
             android:singleLine="true"
             android:summary="@string/URLName_Description"
             android:title="@string/serverAddress"
-            app:defaultValue="mobile.eko-ekb.ru"
             app:useSimpleSummaryProvider="true" />
         <androidx.preference.EditTextPreference
             android:defaultValue="443"
@@ -22,7 +21,6 @@
             android:title="@string/PortText"
             app:useSimpleSummaryProvider="true" />
         <androidx.preference.EditTextPreference
-            android:defaultValue="z5FYg733jGUwjmabuGdmZvfAkDHnh2Wj"
             android:inputType="textPassword"
             android:key="URL_AUTHPASS"
             android:selectAllOnFocus="true"
