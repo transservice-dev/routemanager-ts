@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <androidx.preference.PreferenceCategory
         android:title="@string/connectionPref">
@@ -11,6 +10,7 @@
             android:singleLine="true"
             android:summary="@string/URLName_Description"
             android:title="@string/serverAddress"
+            app:defaultValue="mobile.eko-ekb.ru"
             app:useSimpleSummaryProvider="true" />
         <androidx.preference.EditTextPreference
             android:defaultValue="443"
@@ -21,6 +21,7 @@
             android:title="@string/PortText"
             app:useSimpleSummaryProvider="true" />
         <androidx.preference.EditTextPreference
+            android:defaultValue="z5FYg733jGUwjmabuGdmZvfAkDHnh2Wj"
             android:inputType="textPassword"
             android:key="URL_AUTHPASS"
             android:selectAllOnFocus="true"
