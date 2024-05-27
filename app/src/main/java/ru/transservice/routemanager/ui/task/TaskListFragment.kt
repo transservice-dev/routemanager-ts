@@ -367,7 +367,11 @@ class TaskListFragment : Fragment() {
         } else {
             // Открываем страницу приложения Яндекс.Карты в Google Play.
             intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse("market://details?id=$packageName")
+            //intent.data = Uri.parse("market://details?id=$packageName")
+            when (naviApp) {
+                "2gis" -> intent.data = Uri.parse("https://apk.2gis.ru")
+               else -> intent.data = Uri.parse("market://details?id=$packageName")
+            }
             startActivity(intent)
         }
     }

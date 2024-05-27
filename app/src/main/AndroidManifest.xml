@@ -77,5 +77,8 @@
         </provider>
 
     </application>
-
+    <queries>
+        <package android:name="ru.dublgis.dgismobile" />
+        <package android:name="ru.yandex.yandexnavi" />
+    </queries>
 </manifest>
