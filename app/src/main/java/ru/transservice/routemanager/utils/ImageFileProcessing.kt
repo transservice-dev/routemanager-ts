@@ -77,6 +77,20 @@ class ImageFileProcessing {
         var originalBitmap: Bitmap = getBitmapFromFile(currentFile.absolutePath)
             ?: return
 
+        //Сожмем файл если его размер > 100 Кб
+        if (currentFile.length() > 100*1024) {
+            if ((originalBitmap.height>=originalBitmap.width) and (originalBitmap.height > 1024))
+            {
+                var NewWidth = (originalBitmap.width*1024/originalBitmap.height).toInt();
+                originalBitmap = Bitmap.createScaledBitmap(originalBitmap,NewWidth,1024,false)
+            }
+            else if ((originalBitmap.width>=originalBitmap.height) and (originalBitmap.width > 1024))
+            {
+                var NewHeight = (originalBitmap.height*1024/originalBitmap.width).toInt()
+                originalBitmap = Bitmap.createScaledBitmap(originalBitmap,1024,NewHeight,false)
+            }
+        }
+
         val degree = getRotateDegreeFromExif(currentFile.absolutePath)
         //Если угол не нулевой, то сначала повернем картинку
         if (degree != 0) {

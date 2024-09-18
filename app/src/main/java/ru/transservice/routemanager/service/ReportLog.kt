@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import ru.transservice.routemanager.AppClass
 import java.io.File
 import java.text.SimpleDateFormat
@@ -38,17 +39,13 @@ class ReportLog(val context: Context) {
         val file = createLogFile()
         if(file != null){
             setLogInFile(file)
-            val imageUris : ArrayList<Uri> = arrayListOf()
-            imageUris.add(Uri.parse(file.absolutePath))
-
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND_MULTIPLE
-                putParcelableArrayListExtra(Intent.EXTRA_STREAM,imageUris)
-                type = "*/*"
-            }
-
+            val LogUri = FileProvider.getUriForFile(context,"ru.transservice.routemanager.fileprovider",file)
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            shareIntent.putExtra(Intent.EXTRA_STREAM, LogUri)
+            shareIntent.type = "text/plain"
             context.startActivity(Intent.createChooser(shareIntent,"Отправка лога"))
         }
     }
-
 }
