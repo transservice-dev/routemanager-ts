@@ -56,14 +56,14 @@ class FactDialog : DialogFragment() {
 
         binding.setHigh.setOnTouchListener(RepeatListener(400,100
         ) {
-            fact += 0.5
+            fact += 1
             tvfact.text = fact.toString()
         })
 
         binding.setLow.setOnTouchListener(RepeatListener(400,100
         ) {
-            if (fact >= 0.5){
-                fact -= 0.5
+            if (fact >= 1){
+                fact -= 1
                 tvfact.text = fact.toString()
             }
         })
