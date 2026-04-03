@@ -50,8 +50,8 @@ class ImageFileProcessing {
         )
 
     @SuppressLint("InflateParams")
-    fun createResultImageFile(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
-        processImage(filePath, lat, lon, params, context)
+    fun createResultImageFile(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context, geoExist: Boolean = true) {
+        processImage(filePath, lat, lon, params, context,geoExist)
     }
 
     private fun getBitmapFromFile(filePath: String): Bitmap? {
@@ -67,7 +67,7 @@ class ImageFileProcessing {
        }
     }
 
-    private fun processImage(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context) {
+    private fun processImage(filePath: String, lat: Double, lon: Double, params: PointFileParams, context: Context, geoExist: Boolean) {
         // Основное изображение
         val currentFile = File(filePath)
         if (currentFile.absolutePath.isNullOrEmpty()){
@@ -88,6 +88,16 @@ class ImageFileProcessing {
             {
                 var NewHeight = (originalBitmap.height*1024/originalBitmap.width).toInt()
                 originalBitmap = Bitmap.createScaledBitmap(originalBitmap,1024,NewHeight,false)
+            }
+            //Если геолокация отсутствует просто перезапишем сжатый файл
+            if (!geoExist) {
+                val bos = ByteArrayOutputStream()
+                originalBitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+                val fos = BufferedOutputStream(FileOutputStream(currentFile))
+                fos.write(bos.toByteArray())
+                fos.flush()
+                fos.close()
+                return
             }
         }
 

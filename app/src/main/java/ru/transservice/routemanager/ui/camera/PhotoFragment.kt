@@ -78,15 +78,30 @@ class PhotoFragment : Fragment() {
 
         val location: Location? = NavigationServiceConnection.getLocation()
         val resource = currentFile ?: R.drawable.ic_photo
-        if (currentFile != null && location != null) {
-            Log.d(tag(), "location successfully requested lat: ${location.latitude} lon: ${location.longitude}")
-            ImageFileProcessing().createResultImageFile(
-                currentFile!!.absolutePath,
-                location.latitude,
-                location.longitude,
-                args.params,
-                requireContext()
-            )
+        if (currentFile != null) {
+            if (location != null) {
+                Log.d(
+                    tag(),
+                    "location successfully requested lat: ${location.latitude} lon: ${location.longitude}"
+                )
+                ImageFileProcessing().createResultImageFile(
+                    currentFile!!.absolutePath,
+                    location.latitude,
+                    location.longitude,
+                    args.params,
+                    requireContext()
+                )
+            }
+            else {
+                ImageFileProcessing().createResultImageFile(
+                    currentFile!!.absolutePath,
+                    0.toDouble(),
+                    0.toDouble(),
+                    args.params,
+                    requireContext(),
+                    false
+                )
+            }
         }
         Glide.with(requireContext()).load(resource).into(binding.photoPreview)
         with(binding) {
