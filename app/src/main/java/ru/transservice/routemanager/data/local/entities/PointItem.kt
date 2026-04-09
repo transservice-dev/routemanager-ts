@@ -204,6 +204,7 @@ enum class FailureReasons(val reasonTitle: String){
     NO_EQUIPMENT("нет контейнерного оборудования"),
     EQUIPMENT_LOCKED("контейнер(а) на замке"),
     WEATHER_CONDITIONS("погодные условия"),
+    BROKEN_FACILITY("Поврежденное КО (эксплуатация невозможна)"),
     OTHER("другое")
 }
 

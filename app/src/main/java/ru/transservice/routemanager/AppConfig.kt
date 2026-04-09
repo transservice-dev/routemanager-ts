@@ -13,6 +13,7 @@ object AppConfig {
         FailureReasons.NO_EQUIPMENT.reasonTitle,
         FailureReasons.EQUIPMENT_LOCKED.reasonTitle,
         FailureReasons.WEATHER_CONDITIONS.reasonTitle,
+        FailureReasons.BROKEN_FACILITY.reasonTitle,
         FailureReasons.OTHER.reasonTitle
     )
 }
