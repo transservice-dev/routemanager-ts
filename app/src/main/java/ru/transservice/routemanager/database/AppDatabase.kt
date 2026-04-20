@@ -1,6 +1,7 @@
 package ru.transservice.routemanager.database
 
 import android.content.Context
+import android.util.Log
 import androidx.room.*
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -9,9 +10,9 @@ import ru.transservice.routemanager.data.local.entities.*
 @Database(
     entities = [PointItem::class, Task::class, PointFile::class, PolygonItem::class],
     views = [PointWithData::class, TaskWithData::class],
-    version = 4,
+    version = 5,
     autoMigrations = [
-        AutoMigration (from = 2, to = 3) ,
+        AutoMigration (from = 2, to = 3),
         AutoMigration (from = 3, to = 4)
     ],
     exportSchema = true
@@ -45,13 +46,12 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        private val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+        private val MIGRATION_4_5: Migration = object : Migration(4, 5) {
             override fun migrate(database: SupportSQLiteDatabase) {
-
+                Log.d("DB.Migration","4 >> 5")
+                database.execSQL("ALTER TABLE pointList_table ADD COLUMN uploaded INTEGER")
             }
-
         }
-
 
         fun getDatabase(context: Context): AppDatabase {
             val tempInstance = INSTANCE
@@ -64,7 +64,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "routemanager.db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2,MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 return instance

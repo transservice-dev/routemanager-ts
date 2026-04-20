@@ -7,6 +7,7 @@ import androidx.work.*
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import ru.transservice.routemanager.database.AppDatabase
 import ru.transservice.routemanager.workmanager.UploadFilesWorker
+import ru.transservice.routemanager.workmanager.SyncTasksUnloaded
 import java.io.File
 
 class AppClass: Application(), Configuration.Provider  {
@@ -57,7 +58,7 @@ class AppClass: Application(), Configuration.Provider  {
     override fun onCreate() {
         super.onCreate()
         appVersion = BuildConfig.VERSION_NAME
-        db= AppDatabase.getDatabase(applicationContext)
+        db = AppDatabase.getDatabase(applicationContext)
 
         CaocConfig.Builder.create()
             .enabled(true)
@@ -69,6 +70,7 @@ class AppClass: Application(), Configuration.Provider  {
         //region WorkManager
         // Work manager: configure schedule and rules for periodic files upload
         setupWorkManager()
+        SyncTasksUnloaded.start(appliactionContext())
     }
 
     override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()

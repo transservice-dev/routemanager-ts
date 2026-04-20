@@ -41,6 +41,9 @@ interface DaoInterface {
     @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")
     fun getPointList(): List<PointItem>
 
+    @Query("SELECT * from pointList_table where NOT uploaded ORDER BY tripNumberFact, tripNumber, rowNumber")
+    fun tasksToUpload(): List<PointItem>
+
     @Update
     fun updatePoint(point: PointItem)
 

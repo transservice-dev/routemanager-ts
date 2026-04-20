@@ -14,6 +14,7 @@ object AppConfig {
         FailureReasons.EQUIPMENT_LOCKED.reasonTitle,
         FailureReasons.WEATHER_CONDITIONS.reasonTitle,
         FailureReasons.BROKEN_FACILITY.reasonTitle,
+        FailureReasons.BUILDING_MATERIALS.reasonTitle,
         FailureReasons.OTHER.reasonTitle
     )
 }

@@ -2,6 +2,7 @@ package ru.transservice.routemanager.workmanager
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
@@ -83,4 +84,30 @@ class UploadFilesWorker(appContext: Context, workerParams: WorkerParameters):
     }
 
 
+}
+
+class SyncTasksUnloaded(
+    context: Context,
+    workerParams: WorkerParameters
+) : CoroutineWorker(context, workerParams) {
+    companion object {
+        const val TAG = "SyncTasksUnloaded"
+        private val r = RootRepository
+        fun start(context: Context) {
+            Log.d(TAG,"start")
+            val requestConstraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+            val syncRequest = PeriodicWorkRequestBuilder<SyncTasksUnloaded>(15, TimeUnit.MINUTES).
+            addTag(TAG).
+            setConstraints(requestConstraints).
+            build()
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.KEEP,syncRequest)
+        }
+    }
+    override suspend fun doWork(): Result {
+        Log.d(TAG,".tick")
+        RootRepository.tasksUpload();
+        return Result.success()
+    }
 }

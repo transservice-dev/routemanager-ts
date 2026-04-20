@@ -526,22 +526,62 @@ object RootRepository {
             uploadTaskRow(pointItem)
         }
     }
-    private suspend fun uploadTaskRow(pointItem: PointItem):LoadResult<List<PointItem>>{
+    private suspend fun uploadTaskRow(pointItem: PointItem): LoadResult<List<PointItem>> {
         Log.d(TAG, "update task row ${pointItem.addressName} START")
         val taskList = listOf(pointItem)
         val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
-        val response = RetrofitClient
-            .getPostgrestApi()
-            .uploadTask(taskUploadRequest)
-        val result = responseResult(response)
-        return if (result is LoadResult.Success) {
-            if (response.body() != null) {
-                Log.d(TAG, "update task row ${pointItem.addressName} FINISHED")
-                LoadResult.Success(taskList)
-            } else
-                LoadResult.Error("Ошибка при выгрузке задания")
-        } else
-            LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
+        val pREST = RetrofitClient.getPostgrestApi()
+        //val response = RetrofitClient
+        //        .getPostgrestApi()
+        //        .uploadTask(taskUploadRequest)
+        try {
+            val response = pREST.uploadTask(taskUploadRequest)
+
+            val result = responseResult(response)
+            return if (result is LoadResult.Success) {
+                if (response.body() != null) {
+                    Log.d(TAG, "update task row ${pointItem.addressName} FINISHED")
+                    for (task in taskList) {
+                        task.uploaded = true
+                        dbDao.updatePoint(task)
+                    }
+                    LoadResult.Success(taskList)
+                } else {
+                    for (task in taskList) {
+                        task.uploaded = false
+                        dbDao.updatePoint(task)
+                    }
+                    LoadResult.Error("Ошибка при выгрузке задания")
+                }
+            } else {
+                for (task in taskList) {
+                    task.uploaded = false
+                    dbDao.updatePoint(task)
+                }
+                LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
+            }
+        } catch (e: Exception) {
+            for (task in taskList) {
+                task.uploaded = false
+                dbDao.updatePoint(task)
+            }
+            return LoadResult.Error("Ошибка при выгрузке задания")
+        }
+    }
+
+    suspend fun tasksUpload() {
+        val tasks = dbDao.tasksToUpload()
+        if (tasks.size == 0) {
+            Log.d("tasksUpload()","Нет заданий к выгрузке")
+            return;
+        }
+        else {
+            Log.d("tasksUpload()","Выгружаем " + tasks.size + " заданий")
+            for (task in tasks) {
+                Log.d("tasksUpload()",">>")
+                uploadTaskRow(task);
+            }
+        }
     }
 
     private suspend fun setStatus(task: Task, status: Int): LoadResult<Boolean> {

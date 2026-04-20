@@ -17,7 +17,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.animation.AnimateView
@@ -27,6 +30,7 @@ import ru.transservice.routemanager.databinding.FragmentStartScreenBinding
 import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.extensions.shortFormat
 import ru.transservice.routemanager.extensions.tag
+import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.ErrorAlert
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.service.errorDescription
@@ -68,6 +72,7 @@ class StartScreenFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentStartScreenBinding.inflate(inflater,container,false)
+        binding.testLayout.visibility = View.INVISIBLE
         return binding.root
     }
 
@@ -198,6 +203,18 @@ class StartScreenFragment : BaseFragment() {
            handleFinishRoute()
         }
 
+        binding.testLayout.setOnClickListener {
+            test();
+        }
+
+
+    }
+
+    private fun test() {
+        Log.d("HERE","test");
+        GlobalScope.launch {
+            RootRepository.tasksUpload();
+        }
     }
 
     private fun syncTask() {

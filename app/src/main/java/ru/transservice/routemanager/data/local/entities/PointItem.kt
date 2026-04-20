@@ -39,7 +39,8 @@ data class PointItem(
     @ColumnInfo(defaultValue = "1000")
     var tripNumberFact: Int,
     var timestamp: Date? = null,
-    var status : PointStatuses = PointStatuses.NOT_VISITED
+    var status : PointStatuses = PointStatuses.NOT_VISITED,
+    var uploaded: Boolean? = null
 ) : Serializable {
     @Ignore
     var pointActionsArray: ArrayList<PointActions> = ArrayList()
@@ -95,7 +96,7 @@ data class PointItem(
     }
 
     //get phone number from comment
-    fun getPhoneFromComment () : String{
+    fun getPhoneFromComment() : String{
         var phoneNumber = ""
         for (char in this.comment){
             if(char.isDigit() || (char == '+' && phoneNumber == "")) {
@@ -205,6 +206,7 @@ enum class FailureReasons(val reasonTitle: String){
     EQUIPMENT_LOCKED("контейнер(а) на замке"),
     WEATHER_CONDITIONS("погодные условия"),
     BROKEN_FACILITY("Поврежденное КО (эксплуатация невозможна)"),
+    BUILDING_MATERIALS("Строительные материалы"),
     OTHER("другое")
 }
 

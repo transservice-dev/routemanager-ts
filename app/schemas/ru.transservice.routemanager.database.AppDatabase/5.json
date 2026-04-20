@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 4,
-    "identityHash": "73c4e840cb323039d1ed3fa44b0a94c2",
+    "version": 5,
+    "identityHash": "cb0342f4e5f1428800cb0b5ff5df36c0",
     "entities": [
       {
         "tableName": "pointList_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`docUID` TEXT NOT NULL, `lineUID` TEXT NOT NULL, `rowNumber` INTEGER NOT NULL, `addressName` TEXT NOT NULL, `addressLon` REAL NOT NULL, `addressLat` REAL NOT NULL, `containerName` TEXT NOT NULL, `containerSize` REAL NOT NULL, `agentName` TEXT NOT NULL, `countPlan` REAL NOT NULL, `countFact` REAL NOT NULL, `countOver` REAL NOT NULL, `done` INTEGER NOT NULL, `tripNumber` INTEGER NOT NULL, `polygon` INTEGER NOT NULL, `routeName` TEXT NOT NULL, `comment` TEXT NOT NULL, `noPhotoAllowed` INTEGER NOT NULL, `noEditFact` INTEGER NOT NULL, `reasonComment` TEXT NOT NULL, `polygonUID` TEXT NOT NULL DEFAULT '', `polygonName` TEXT NOT NULL DEFAULT '', `polygonByRow` INTEGER NOT NULL DEFAULT 0, `tripNumberFact` INTEGER NOT NULL DEFAULT 1000, `timestamp` INTEGER, `status` TEXT NOT NULL, `enabled` INTEGER, PRIMARY KEY(`docUID`, `lineUID`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`docUID` TEXT NOT NULL, `lineUID` TEXT NOT NULL, `rowNumber` INTEGER NOT NULL, `addressName` TEXT NOT NULL, `addressLon` REAL NOT NULL, `addressLat` REAL NOT NULL, `containerName` TEXT NOT NULL, `containerSize` REAL NOT NULL, `agentName` TEXT NOT NULL, `countPlan` REAL NOT NULL, `countFact` REAL NOT NULL, `countOver` REAL NOT NULL, `done` INTEGER NOT NULL, `tripNumber` INTEGER NOT NULL, `polygon` INTEGER NOT NULL, `routeName` TEXT NOT NULL, `comment` TEXT NOT NULL, `noPhotoAllowed` INTEGER NOT NULL, `noEditFact` INTEGER NOT NULL, `reasonComment` TEXT NOT NULL, `polygonUID` TEXT NOT NULL DEFAULT '', `polygonName` TEXT NOT NULL DEFAULT '', `polygonByRow` INTEGER NOT NULL DEFAULT 0, `tripNumberFact` INTEGER NOT NULL DEFAULT 1000, `timestamp` INTEGER, `status` TEXT NOT NULL, `uploaded` INTEGER, PRIMARY KEY(`docUID`, `lineUID`))",
         "fields": [
           {
             "fieldPath": "docUID",
@@ -169,8 +169,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "enabled",
-            "columnName": "enabled",
+            "fieldPath": "uploaded",
+            "columnName": "uploaded",
             "affinity": "INTEGER",
             "notNull": false
           }
@@ -481,7 +481,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73c4e840cb323039d1ed3fa44b0a94c2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cb0342f4e5f1428800cb0b5ff5df36c0')"
     ]
   }
 }
