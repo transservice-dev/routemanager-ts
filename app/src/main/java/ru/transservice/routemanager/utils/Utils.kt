@@ -1,8 +1,10 @@
 package ru.transservice.routemanager.utils
 
+import com.google.gson.Gson
 import java.util.*
 
 object Utils {
+    private val gson = Gson()
     private val translitarationDictionary = mapOf(
         "а" to "a",
         "б" to "b",
@@ -84,4 +86,6 @@ object Utils {
         }
     }
 
+    fun toJson(obj: Any): String = gson.toJson(obj)
+    fun <T> fromJson(json: String, type: Class<T>): T = gson.fromJson(json, type)
 }

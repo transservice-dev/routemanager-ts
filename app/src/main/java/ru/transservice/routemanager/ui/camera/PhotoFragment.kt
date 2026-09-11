@@ -1,19 +1,3 @@
-/*
- * Copyright 2020 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ru.transservice.routemanager.ui.camera
 
 import android.location.Location
@@ -33,6 +17,7 @@ import com.bumptech.glide.Glide
 import ru.transservice.routemanager.databinding.FragmentPhotoPriviewBinding
 import ru.transservice.routemanager.extensions.tag
 import ru.transservice.routemanager.location.NavigationServiceConnection
+import ru.transservice.routemanager.model.Photo
 import ru.transservice.routemanager.ui.point.PointItemViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
 import java.io.File
@@ -42,7 +27,7 @@ class PhotoFragment : Fragment() {
     private var _binding: FragmentPhotoPriviewBinding? = null
     private val binding get() = _binding!!
 
-    private var currentFile: File? = null
+    private lateinit var photo: Photo
 
     private val navController: NavController by lazy { Navigation.findNavController(requireActivity(), R.id.nav_host_fragment) }
     private val args: PhotoFragmentArgs by navArgs()
@@ -50,12 +35,8 @@ class PhotoFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentFile = File(args.fileName)
-        if (currentFile == null) {
-            Toast.makeText(requireContext(), "Ошибка получения фото, неверное имя файла",Toast.LENGTH_LONG).show()
-            navController.popBackStack()
-        }
-        Log.d(tag(), "current file: ${currentFile?.absolutePath}")
+        photo = Photo.unpack(args.fileName)
+        Log.d(tag(), "current file: ${photo.file.absolutePath}")
     }
 
     override fun onCreateView(
@@ -76,45 +57,40 @@ class PhotoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val location: Location? = NavigationServiceConnection.getLocation()
-        val resource = currentFile ?: R.drawable.ic_photo
-        if (currentFile != null) {
-            if (location != null) {
-                Log.d(
-                    tag(),
-                    "location successfully requested lat: ${location.latitude} lon: ${location.longitude}"
-                )
-                ImageFileProcessing().createResultImageFile(
-                    currentFile!!.absolutePath,
-                    location.latitude,
-                    location.longitude,
-                    args.params,
-                    requireContext()
-                )
-            }
-            else {
-                ImageFileProcessing().createResultImageFile(
-                    currentFile!!.absolutePath,
-                    0.toDouble(),
-                    0.toDouble(),
-                    args.params,
-                    requireContext(),
-                    false
-                )
-            }
+        val resource = photo.file
+        if (location != null) {
+            Log.d(
+                tag(),
+                "location successfully requested lat: ${location.latitude} lon: ${location.longitude}"
+            )
+            ImageFileProcessing().createResultImageFile(
+                photo.file.absolutePath,
+                location.latitude,
+                location.longitude,
+                args.params,
+                requireContext()
+            )
+        }
+        else {
+            ImageFileProcessing().createResultImageFile(
+                photo.file.absolutePath,
+                0.toDouble(),
+                0.toDouble(),
+                args.params,
+                requireContext(),
+                false
+            )
         }
         Glide.with(requireContext()).load(resource).into(binding.photoPreview)
         with(binding) {
             tvConfirm.setOnClickListener {
-                currentFile?.let {
-                    viewPointModel.savePointFile(it, location, args.params.fileOrder)
-                }
+                viewPointModel.savePointFile(photo.file, location, args.params.fileOrder)
                 navController.popBackStack(R.id.cameraFragment, true)
             }
             tvCancel.setOnClickListener {
-                currentFile?.delete()
+                photo.file.delete()
                 navController.popBackStack()
             }
         }
     }
 }
-

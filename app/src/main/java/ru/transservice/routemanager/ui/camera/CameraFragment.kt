@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,7 +19,6 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
-import androidx.camera.core.ImageCapture.Metadata
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -37,11 +35,10 @@ import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.CameraUiContainerBinding
 import ru.transservice.routemanager.databinding.FragmentCameraBinding
 import ru.transservice.routemanager.extensions.simulateClick
-import ru.transservice.routemanager.extensions.tag
+import ru.transservice.routemanager.model.Photo
 import ru.transservice.routemanager.ui.permission.PermissionFragment
 import java.io.File
 import java.nio.ByteBuffer
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -102,7 +99,6 @@ class CameraFragment : Fragment() {
      */
     private val navController: NavController by lazy {Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)}
     private val args:CameraFragmentArgs by navArgs()
-    private lateinit var fileName: String
     private var focusStart: Drawable? = null
     private var focusStop: Drawable? = null
 
@@ -186,10 +182,6 @@ class CameraFragment : Fragment() {
             // Set up the camera and its use cases
             setUpCamera()
         }
-
-        /**
-         * margarita_dev
-         */
 
         // Pinch to zoom
         val scaleGestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -344,7 +336,6 @@ class CameraFragment : Fragment() {
         return AspectRatio.RATIO_16_9
     }
 
-    /** Method used to re-draw the camera UI controls, called every time configuration changes. */
     private fun updateCameraControls() {
         cameraControls?.root?.let { fragmentCameraBinding.root.removeView(it) }
 
@@ -368,37 +359,28 @@ class CameraFragment : Fragment() {
     private fun makePhoto() {
         val imageCapture = imageCapture ?: return
 
-        val photoFile = createFile(outputDirectory, generateFileName(), PHOTO_EXTENSION)
-        val metadata = Metadata().apply {
-            isReversedHorizontal = lensFacing == CameraSelector.LENS_FACING_FRONT
-        }
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)
-            .setMetadata(metadata)
-            .build()
+        val photo = Photo()
+        photo.routeName = args.params.routeName
+        photo.addressName = args.params.addressName
+        photo.fileOrder = args.params.fileOrder.string
+        photo.currentLens = lensFacing
+        photo.onOk = { photo -> gotoPhotoFragment(photo) }
+        photo.make(imageCapture,cameraExecutor)
 
-        imageCapture.takePicture(
-            outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-                }
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                    Log.d(tag(), "Photo capture succeeded: $savedUri")
+    }
 
-                    val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
-                    mainThreadHandler.post {
-                        if (navController.currentDestination?.id == R.id.cameraFragment) {
-                            navController.navigate(
-                                CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
-                                    photoFile.absolutePath,
-                                    args.params
-                                )
-                            )
-                        }
-                    }
-                }
+    private fun gotoPhotoFragment(photo: Photo) {
+        val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
+        mainThreadHandler.post {
+            if (navController.currentDestination?.id == R.id.cameraFragment) {
+                navController.navigate(
+                    CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
+                        photo.pack(),
+                        args.params
+                    )
+                )
             }
-        )
+        }
     }
 
     private fun toggleFlash(iconView: ImageView) {
@@ -480,21 +462,6 @@ class CameraFragment : Fragment() {
         }
     }
 
-    /**
-     * margarita_dev
-     */
-
-    private fun generateFileName(): String {
-        val timeCreated = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU")).format(Date())
-        var fName = "${args.params.routeName}__{$timeCreated}__${args.params.addressName}"
-            .filter { it.isLetterOrDigit() || it.isWhitespace() || it.toString() == "_" }
-        val filePostfixSize = "_${args.params.fileOrder.string}${PHOTO_EXTENSION}".toByteArray().size
-        while (fName.toByteArray().size + filePostfixSize > 255) {
-            fName = fName.dropLast(1)
-        }
-        return "${fName}_${args.params.fileOrder.string}"
-    }
-
     private fun animateFocus(x: Float, y: Float) {
         // Move the focus ring so that its center is at the tap location (x, y)
         cameraControls?.ivFocus?.let{ focus ->
@@ -534,19 +501,9 @@ class CameraFragment : Fragment() {
     companion object {
 
         private const val TAG = "CameraXBasic"
-        private const val PHOTO_EXTENSION = ".jpg"
         private const val RATIO_4_3_VALUE = 4.0 / 3.0
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
 
-        /** Helper function used to create a timestamped file */
-        private fun createFile(baseFolder: File, fileName: String, extension: String) : File {
-            var outputFile = File(baseFolder, "$fileName$extension")
-            if (outputFile.exists()) {
-                outputFile.delete()
-                outputFile = File(baseFolder, "$fileName$extension")
-            }
-            return outputFile
-        }
     }
 }
 
