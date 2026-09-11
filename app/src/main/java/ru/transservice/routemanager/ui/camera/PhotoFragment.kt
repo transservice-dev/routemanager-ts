@@ -58,7 +58,6 @@ class PhotoFragment : Fragment() {
         Log.d(tag(), "current file: ${currentFile?.absolutePath}")
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

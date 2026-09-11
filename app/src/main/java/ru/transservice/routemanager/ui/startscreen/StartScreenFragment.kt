@@ -17,7 +17,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.work.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -46,7 +45,7 @@ class StartScreenFragment : BaseFragment() {
     private var progressDialog: AlertDialog? = null
 
     override fun handleExit() {
-        val backToast = Toast.makeText(AppClass.appliactionContext(), "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
+        val backToast = Toast.makeText(AppClass.instance, "Нажмите еще раз для выхода из приложения.", Toast.LENGTH_LONG)
         if (backPressedTime + 2000 > System.currentTimeMillis()) {
             backToast.cancel()
             root.moveTaskToBack(true)
@@ -295,7 +294,7 @@ class StartScreenFragment : BaseFragment() {
         viewModel.getUploadWorkerId().removeObservers(viewLifecycleOwner)
         viewModel.getUploadWorkerId().observe(viewLifecycleOwner) { requestId ->
             requestId?.let {
-                WorkManager.getInstance(AppClass.appliactionContext())
+                WorkManager.getInstance(AppClass.instance)
                     .getWorkInfoByIdLiveData(requestId)
                     .observe(requireActivity(), Observer { workInfo ->
                         workInfo?.let {

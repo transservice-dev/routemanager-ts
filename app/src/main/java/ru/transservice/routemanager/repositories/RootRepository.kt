@@ -51,7 +51,7 @@ object RootRepository {
     var baseUrl = ""
     var authPass = ""
 
-    private val dbDao: DaoInterface = AppClass.getDatabase()!!.dbDao()
+    private val dbDao: DaoInterface = AppClass.db.dbDao()
     private val prefRepository = PreferencesRepository
 
     //Coroutines params

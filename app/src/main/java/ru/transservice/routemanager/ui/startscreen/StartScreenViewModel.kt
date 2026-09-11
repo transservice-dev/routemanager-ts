@@ -56,10 +56,10 @@ class StartScreenViewModel : ViewModel() {
 
     fun startUploadWorker(){
         // cancel all previous work for uploading files
-        WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadFilesWorker.workerTag)
+        WorkManager.getInstance(AppClass.instance).cancelAllWorkByTag(UploadFilesWorker.workerTag)
         val request = UploadResultWorker.requestOneTimeWorkExpedited()
         uploadWorkerId.value = request.id
-        WorkManager.getInstance(AppClass.appliactionContext())
+        WorkManager.getInstance(AppClass.instance)
             .enqueueUniqueWork(
                 UploadResultWorker.workerTag,
                 ExistingWorkPolicy.KEEP,
@@ -67,7 +67,7 @@ class StartScreenViewModel : ViewModel() {
     }
 
     fun cancelUploadWorker() {
-        WorkManager.getInstance(AppClass.appliactionContext()).cancelAllWorkByTag(UploadResultWorker.workerTag)
+        WorkManager.getInstance(AppClass.instance).cancelAllWorkByTag(UploadResultWorker.workerTag)
         uploadWorkerId.value = null
         checkForIncompleteWork()
     }
@@ -76,7 +76,7 @@ class StartScreenViewModel : ViewModel() {
     fun checkForIncompleteWork()  {
         viewModelScope.launch {
             val workInfo =
-                WorkManager.getInstance(AppClass.appliactionContext())
+                WorkManager.getInstance(AppClass.instance)
                     .getWorkInfosByTag(UploadResultWorker.workerTag)
                     .get()
 

@@ -34,15 +34,15 @@ class PointListAdapter(
             with(binding) {
                 pointNameText.text = pointData.addressName
                 //settings for recycle view
-                val countOfImages = (displayWidth / AppClass.appliactionContext().dpToPx(100)).toInt() // grid size
+                val countOfImages = (displayWidth / AppClass.instance.dpToPx(100)).toInt() // grid size
                 rvPointsPhotos.layoutManager =
-                    GridLayoutManager(AppClass.appliactionContext(), countOfImages)
+                    GridLayoutManager(AppClass.instance, countOfImages)
                 rvPointsPhotos.isVerticalScrollBarEnabled = false
                 rvPointsPhotos.isNestedScrollingEnabled = false
                 rvPointsPhotos.adapter = PointFilesAdapter(pointData,state)
 
                 rvPointsPhotos.addItemDecoration(
-                    SpaceItemDecoration(AppClass.appliactionContext().resources.getDimensionPixelSize(R.dimen.margin_tiny)))
+                    SpaceItemDecoration(AppClass.instance.resources.getDimensionPixelSize(R.dimen.margin_tiny)))
 
                 //(rvPointsPhotos.adapter as PointPhotosAdapter).submitList(pointData.second)
                 repository.getPointFilesForGallery(pointData,photoOrder) {

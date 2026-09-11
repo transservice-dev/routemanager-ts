@@ -71,7 +71,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
         )
 
         repository.insertPointFile(pointFile) {
-            WorkManager.getInstance(AppClass.appliactionContext())
+            WorkManager.getInstance(AppClass.instance)
                 .enqueue(UploadFilesWorker.requestOneTimeWork(workDataOf(UploadFilesWorker.fileId to pointFile.id)))
 
             if (fileOrder == PhotoOrder.PHOTO_AFTER || fileOrder == PhotoOrder.PHOTO_CANTDONE) {
@@ -99,7 +99,7 @@ class PointItemViewModel(pointId: String) : ViewModel() {
                                 lat,
                                 lon,
                                 state.value!!.toPointFileParams(it.photoOrder),
-                                AppClass.appliactionContext()
+                                AppClass.instance
                             )
                             imageProcessing.setGeoTag(location, it.filePath)
                             repository.updatePointFileLocation(it, lat, lon) {

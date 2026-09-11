@@ -85,7 +85,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun doRestartWork(mainActivity: MainActivity) {
-        val workManager = WorkManager.getInstance(AppClass.appliactionContext())
+        val workManager = WorkManager.getInstance(AppClass.instance)
         workManager.pruneWork()
         workManager.cancelUniqueWork("uploadFiles")
         AppClass.setupWorkManager()

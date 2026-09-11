@@ -13,36 +13,14 @@ import java.io.File
 class AppClass: Application(), Configuration.Provider  {
 
     companion object {
-        var appVersion: String = ""
-        private var instance:AppClass? = null
-
         const val TAG ="RouteManager"
 
-        fun appliactionContext(): Context {
-            return instance!!.applicationContext
-        }
-
-
-        var db: AppDatabase? = null
-        /*var gps: GPSTracker? = null
-        var gpsGoogle: GoogleLocationClient? = null*/
-
-        fun getDatabase(): AppDatabase? {
-            return db
-        }
-
-        fun getOutputDirectory(): File {
-            val appContext = instance!!.applicationContext
-            // appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val mediaDir = instance!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            //val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-            //    File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() } }
-            return if (mediaDir != null && mediaDir.exists())
-                mediaDir else appContext.filesDir
-        }
+        lateinit var instance: AppClass
+        lateinit var db: AppDatabase
+        val appVersion: String get() = BuildConfig.VERSION_NAME
 
         fun setupWorkManager(){
-            WorkManager.getInstance(appliactionContext())
+            WorkManager.getInstance(instance)
                 .enqueueUniquePeriodicWork(
                     UploadFilesWorker.workerPeriodicTag,
                     ExistingPeriodicWorkPolicy.KEEP,
@@ -51,13 +29,9 @@ class AppClass: Application(), Configuration.Provider  {
         }
     }
 
-    init {
-        instance = this
-    }
-
     override fun onCreate() {
         super.onCreate()
-        appVersion = BuildConfig.VERSION_NAME
+        instance = this
         db = AppDatabase.getDatabase(applicationContext)
 
         CaocConfig.Builder.create()
@@ -67,10 +41,8 @@ class AppClass: Application(), Configuration.Provider  {
             .logErrorOnRestart(true)
             .apply()
 
-        //region WorkManager
-        // Work manager: configure schedule and rules for periodic files upload
         setupWorkManager()
-        SyncTasksUnloaded.start(appliactionContext())
+        SyncTasksUnloaded.start(instance)
     }
 
     override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
@@ -78,3 +50,9 @@ class AppClass: Application(), Configuration.Provider  {
         .build()
 
 }
+
+val Context.photoDir: File
+    get() {
+        val mediaDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return if (mediaDir?.exists() == true) mediaDir else filesDir
+    }

@@ -29,7 +29,7 @@ object PreferencesRepository {
     const val FULL_TASK_LIST = "FULL_TASK_LIST"
 
     private val prefs: SharedPreferences by lazy {
-        val ctx = AppClass.appliactionContext()
+        val ctx = AppClass.instance
         PreferenceManager.getDefaultSharedPreferences(ctx)
     }
 

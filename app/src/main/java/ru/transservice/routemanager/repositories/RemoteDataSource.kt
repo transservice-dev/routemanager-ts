@@ -97,7 +97,7 @@ class RemoteDataSource {
 
     private fun customSSL(): Pair<SSLSocketFactory, X509TrustManager> {
         //val keyStoreType = KeyStore.getDefaultType()
-        val cert = AppClass.appliactionContext().resources.openRawResource(R.raw.apache_selfsigned)
+        val cert = AppClass.instance.resources.openRawResource(R.raw.apache_selfsigned)
         val caInput: InputStream = BufferedInputStream(cert)
         val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
         val ca: X509Certificate = caInput.use {

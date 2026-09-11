@@ -39,7 +39,7 @@ class PointFilesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PointPhotoViewHolder {
         val binding = ItemPointPhotoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PointPhotoViewHolder(binding,AppClass.appliactionContext())
+        return PointPhotoViewHolder(binding,AppClass.instance)
     }
 
     override fun onBindViewHolder(holder: PointPhotoViewHolder, position: Int) {

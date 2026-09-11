@@ -26,7 +26,7 @@ class NavigationService : Service() {
 
     private val googlePlayServicesAvailable: Boolean =
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-            AppClass.appliactionContext()
+            AppClass.instance
         ) == ConnectionResult.SUCCESS
 
     private lateinit var channel: NotificationChannel
@@ -93,9 +93,10 @@ class NavigationService : Service() {
     fun setNavClient() {
         trackerClient =
             if (googlePlayServicesAvailable && PreferencesRepository.getUseNavGoogle()) {
-                GoogleLocationTracker(AppClass.appliactionContext())
-            } else {
-                LocationManagerTracker(AppClass.appliactionContext())
+                GoogleLocationTracker(AppClass.instance)
+            }
+            else {
+                LocationManagerTracker(AppClass.instance)
             }
     }
 
