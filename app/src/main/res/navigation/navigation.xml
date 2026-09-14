@@ -127,7 +127,7 @@
                 app:popUpTo="@id/pointFragment"
                 app:popUpToInclusive="true" />
             <argument
-                android:name="fileName"
+                android:name="photoJSON"
                 app:argType="string" />
             <argument
                 android:name="params"

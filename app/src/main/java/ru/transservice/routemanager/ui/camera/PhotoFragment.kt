@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -20,7 +19,6 @@ import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.model.Photo
 import ru.transservice.routemanager.ui.point.PointItemViewModel
 import ru.transservice.routemanager.utils.ImageFileProcessing
-import java.io.File
 
 class PhotoFragment : Fragment() {
 
@@ -35,7 +33,7 @@ class PhotoFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        photo = Photo.unpack(args.fileName)
+        photo = Photo.unpack(args.photoJSON)
         Log.d(tag(), "current file: ${photo.file.absolutePath}")
     }
 

@@ -15,7 +15,7 @@ suspend fun CoroutineWorker.updateProgressValue(key: String, value: Any?) {
             }
             setProgress(workDataOf(*newData.toTypedArray()))
         }
-    }catch (e: Exception) {
+    } catch (e: Exception) {
         Log.d(tag(), "Error while setting progress, $e")
     }
 }
