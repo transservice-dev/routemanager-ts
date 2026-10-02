@@ -9,6 +9,8 @@ import androidx.core.os.HandlerCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import io.jsonwebtoken.Jwts
@@ -34,11 +36,11 @@ import ru.transservice.routemanager.extensions.updateProgressValue
 import ru.transservice.routemanager.network.RetrofitClient
 import ru.transservice.routemanager.service.LoadResult
 import ru.transservice.routemanager.utils.Utils
+import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import ru.transservice.routemanager.workmanager.UploadResultWorker
 import java.io.File
 import java.net.SocketTimeoutException
 import java.security.Key
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -640,8 +642,8 @@ object RootRepository {
         return dbDao.observePointList()
     }
 
-    fun observePointItemState(pointId: String): Flow<PointWithData>{
-        return dbDao.observePointItemStateById(pointId)
+    fun observePointItemState(lineUID: String): Flow<PointWithData>{
+        return dbDao.observePointItemStateById(lineUID)
     }
 
     fun observeTask() : Flow<TaskWithData>{
@@ -708,13 +710,14 @@ object RootRepository {
         }
     }
 
-    fun insertPointFile(pointFile: PointFile, complete: () -> Unit){
+    fun insertPointFile(pf: PointFile, complete: () -> Unit){
         scope.launch {
-            Log.d(TAG, "Insert Point File START ${pointFile.filePath}")
-            val id = dbDao.insertPointFile(pointFile)
-            pointFile.id = id
-            Log.d(TAG, "Insert Point File FINISHED ${pointFile.filePath}")
+            Log.d(TAG, "Insert Point File START ${pf.filePath}")
+            val id = dbDao.insertPointFile(pf)
+            pf.id = id
+            Log.d(TAG, "Insert Point File FINISHED ${pf.filePath}")
             mainThreadHandler.post{complete()}
+            WorkManager.getInstance(AppClass.instance).enqueue(UploadFilesWorker.requestOneTimeWork(workDataOf(UploadFilesWorker.fileId to pf.id)))
         }
     }
 

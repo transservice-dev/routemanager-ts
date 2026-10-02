@@ -187,19 +187,10 @@ interface DaoInterface {
         updateLastTripNumber(getLastTripNumber())
     }
 
-
-    @Query("""
-        SELECT *
-        FROM PointWithData
-        WHERE lineUID=:pointId
-    """)
+    @Query("SELECT * FROM PointWithData WHERE lineUID=:pointId")
     fun observePointItemStateById(pointId: String): Flow<PointWithData>
 
-    @Query("""
-        SELECT *
-        FROM pointList_table
-        WHERE lineUID=:pointId
-    """)
+    @Query("SELECT * FROM pointList_table WHERE lineUID=:pointId")
     fun getPointById(pointId: String): PointItem
 
     @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")

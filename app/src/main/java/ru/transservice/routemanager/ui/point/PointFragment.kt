@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,15 +20,17 @@ import com.google.android.material.snackbar.Snackbar
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.data.local.entities.*
 import ru.transservice.routemanager.databinding.FragmentPointBinding
-import ru.transservice.routemanager.location.NavigationServiceConnection
+import ru.transservice.routemanager.model.PhotoViewModel
 
 class PointFragment : BaseFragment() {
 
     private var _binding: FragmentPointBinding? = null
     private val binding get() = _binding!!
     private val args: PointFragmentArgs by navArgs()
-    private val viewModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.point.lineUID) }
     private var lastPointDoneStatus: Boolean = false
+
+    private val viewModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.point.lineUID) }
+    private val vm: PhotoViewModel by navGraphViewModels(R.id.navPoint)
 
     private val requestKeyPolygon = "polygonForPoint"
 
@@ -136,11 +137,13 @@ class PointFragment : BaseFragment() {
                 ivPointStatus.setColorFilter(Color.GREEN)
                 ivPointStatus.visibility = View.VISIBLE
 
-            }else if (state.point.reasonComment != "" || state.point.countFact == 0.0) {
+            }
+            else if (state.point.reasonComment != "" || state.point.countFact == 0.0) {
                 ivPointStatus.setImageResource(R.drawable.ic_block_24_small)
                 ivPointStatus.visibility = View.VISIBLE
                 ivPointStatus.setColorFilter(Color.RED)
-            }else{
+            }
+            else {
                 ivPointStatus.visibility = View.GONE
             }
 
@@ -235,7 +238,6 @@ class PointFragment : BaseFragment() {
     }
 
     private fun initLiveDataObservers(){
-
         viewModel.state.observe(viewLifecycleOwner,{ state ->
             viewModel.initPointData()
             state?.let {
@@ -250,18 +252,6 @@ class PointFragment : BaseFragment() {
                 initViews(state)
             }
         })
-
-        /*viewModel.geoIsRequired.observe(viewLifecycleOwner, { required ->
-            if (required) {
-                NavigationServiceConnection.getLocation()?.let {
-                    Log.d(
-                        TAG,
-                        "UPDATE LOCATION location successfully requested lat: ${it.latitude} lon: ${it.longitude}"
-                    )
-                    viewModel.setPointFilesGeodata(it)
-                }
-            }
-        })*/
     }
 
     private fun takePicture(fileOrder: PhotoOrder) {
@@ -272,7 +262,6 @@ class PointFragment : BaseFragment() {
                 )
             )
         }
-
     }
 
     private fun initFragmentFactDialogListener() {
@@ -283,7 +272,6 @@ class PointFragment : BaseFragment() {
     }
 
     private fun initPolygonSelectionListener() {
-        // for Fragment (edit polygon)
         setFragmentResultListener(
             requestKeyPolygon
         ) { _, bundle ->
@@ -299,7 +287,6 @@ class PointFragment : BaseFragment() {
                     when {
                         pointState.point.done ->
                             navController.popBackStack()
-                        //navController.navigate(PointFragmentDirections.actionPointFragmentToTaskListFragment())
                         else -> Toast.makeText(requireContext(),"Точка не может считаться выполненной",Toast.LENGTH_LONG).show()
                     }
                 }

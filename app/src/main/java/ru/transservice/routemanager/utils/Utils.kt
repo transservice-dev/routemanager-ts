@@ -1,5 +1,6 @@
 package ru.transservice.routemanager.utils
 
+import android.graphics.Paint
 import com.google.gson.Gson
 import java.util.*
 
@@ -88,4 +89,29 @@ object Utils {
 
     fun toJson(obj: Any): String = gson.toJson(obj)
     fun <T> fromJson(json: String, type: Class<T>): T = gson.fromJson(json, type)
+}
+
+object TextUtils {
+    fun splitToLines(text: String, width: Float, paint: Paint): List<String> {
+        if (width <= 0f) return listOf(text)
+        val result = mutableListOf<String>()
+        var remainingText = text
+
+        while (remainingText.isNotEmpty()) {
+            val count = paint.breakText(
+                remainingText,
+                true,
+                width,
+                null
+            )
+            if (count <= 0) {
+                result.add(remainingText)
+                break
+            }
+            val chunk = if (count >= remainingText.length) remainingText else remainingText.substring(0, count)
+            result.add(chunk)
+            remainingText = if (count >= remainingText.length) "" else remainingText.substring(count)
+        }
+        return result
+    }
 }

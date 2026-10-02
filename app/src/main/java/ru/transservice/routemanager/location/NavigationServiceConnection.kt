@@ -34,7 +34,8 @@ object NavigationServiceConnection: ServiceConnection {
     fun getLocationFlow() : StateFlow<Location?>{
         return if (bound) {
             navService.locationFlow
-        }else{
+        }
+        else {
             MutableStateFlow(null).asStateFlow()
         }
     }
@@ -44,7 +45,8 @@ object NavigationServiceConnection: ServiceConnection {
     }
 
     fun isActive():Boolean{
-        return if (bound) navService.isActive else {
+        return if (bound) navService.isActive else
+        {
             false
         }
     }

@@ -1,41 +1,33 @@
 package ru.transservice.routemanager.ui.camera
 
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import ru.transservice.routemanager.R
-import com.bumptech.glide.Glide
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.databinding.FragmentPhotoPriviewBinding
-import ru.transservice.routemanager.extensions.tag
-import ru.transservice.routemanager.location.NavigationServiceConnection
-import ru.transservice.routemanager.model.Photo
+import ru.transservice.routemanager.model.PhotoProcessing
+import ru.transservice.routemanager.model.PhotoFacade
+import ru.transservice.routemanager.model.PhotoViewModel
 import ru.transservice.routemanager.ui.point.PointItemViewModel
-import ru.transservice.routemanager.utils.ImageFileProcessing
 
 class PhotoFragment : Fragment() {
-
     private var _binding: FragmentPhotoPriviewBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var photo: Photo
-
     private val navController: NavController by lazy { Navigation.findNavController(requireActivity(), R.id.nav_host_fragment) }
     private val args: PhotoFragmentArgs by navArgs()
     private val viewPointModel: PointItemViewModel by navGraphViewModels(R.id.navPoint) { PointItemViewModel.Factory(args.params.lineUID) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        photo = Photo.unpack(args.photoJSON)
-        Log.d(tag(), "current file: ${photo.file.absolutePath}")
-    }
+    private val vm: PhotoViewModel by navGraphViewModels(R.id.navPoint)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,41 +46,45 @@ class PhotoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val location: Location? = NavigationServiceConnection.getLocation()
-        val resource = photo.file
-        if (location != null) {
-            Log.d(
-                tag(),
-                "location successfully requested lat: ${location.latitude} lon: ${location.longitude}"
-            )
-            ImageFileProcessing().createResultImageFile(
-                photo.file.absolutePath,
-                location.latitude,
-                location.longitude,
-                args.params,
-                requireContext()
-            )
-        }
-        else {
-            ImageFileProcessing().createResultImageFile(
-                photo.file.absolutePath,
-                0.toDouble(),
-                0.toDouble(),
-                args.params,
-                requireContext(),
-                false
-            )
-        }
-        Glide.with(requireContext()).load(resource).into(binding.photoPreview)
         with(binding) {
-            tvConfirm.setOnClickListener {
-                viewPointModel.savePointFile(photo.file, location, args.params.fileOrder)
-                navController.popBackStack(R.id.cameraFragment, true)
-            }
-            tvCancel.setOnClickListener {
-                photo.file.delete()
-                navController.popBackStack()
-            }
+            tvConfirm.setOnClickListener { ok() }
+            tvCancel.setOnClickListener { cancel() }
         }
+
+
+        val ctx = requireContext()
+        val photoProcessing = PhotoProcessing(ctx,vm.photo)
+
+        photoProcessing.prepare()
+        binding.photoPreview.setImageBitmap(photoProcessing.bitmap)
+
+        lifecycleScope.launch {
+            val img = withContext(Dispatchers.Default) {
+                photoProcessing.execute()
+                photoProcessing.bitmap
+            }
+            binding.photoPreview.setImageBitmap(img)
+        }
+
     }
+
+    fun ok() = lifecycleScope.launch(Dispatchers.Default) {
+        PhotoFacade.saveInDb(vm.photo,::okDone)
+    }
+
+    fun okDone() {
+        val needUpdate = when (vm.photo.photoType) {
+            PhotoOrder.PHOTO_AFTER -> true
+            PhotoOrder.PHOTO_CANTDONE -> true
+            else -> false
+        }
+        if (needUpdate) viewPointModel.updatePointAndDoneStatus(vm.photo.point.copy())
+        navController.popBackStack(R.id.cameraFragment, true)
+    }
+
+    fun cancel() {
+        vm.photo.file.delete()
+        navController.popBackStack()
+    }
+
 }

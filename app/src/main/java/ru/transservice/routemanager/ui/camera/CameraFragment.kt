@@ -29,33 +29,30 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import androidx.window.layout.*
 import ru.transservice.routemanager.*
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.databinding.CameraUiContainerBinding
 import ru.transservice.routemanager.databinding.FragmentCameraBinding
 import ru.transservice.routemanager.extensions.simulateClick
-import ru.transservice.routemanager.model.Photo
+import ru.transservice.routemanager.model.PhotoFacade
+import ru.transservice.routemanager.model.PhotoViewModel
 import ru.transservice.routemanager.ui.permission.PermissionFragment
+import ru.transservice.routemanager.ui.point.PointItemViewModel
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
+import kotlin.getValue
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
 
-/**
- * Main fragment for this app. Implements all camera operations including:
- * - Viewfinder
- * - Photo taking
- * - Image analysis
- */
 class CameraFragment : Fragment() {
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -74,6 +71,9 @@ class CameraFragment : Fragment() {
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+
+    private val pvm: PointItemViewModel by navGraphViewModels(R.id.navPoint)
+    private val vm: PhotoViewModel by navGraphViewModels(R.id.navPoint)
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -286,26 +286,16 @@ class CameraFragment : Fragment() {
             .setTargetRotation(rotation)
             .build()
 
-        // ImageCapture
         imageCapture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-            // We request aspect ratio but no resolution to match preview config, but letting
-            // CameraX optimize for whatever specific resolution best fits our use cases
             .setTargetAspectRatio(screenAspectRatio)
-            // Set initial target rotation, we will have to call this again if rotation changes
-            // during the lifecycle of this use case
             .setTargetRotation(rotation)
             .build()
 
-        // ImageAnalysis
         imageAnalyzer = ImageAnalysis.Builder()
-            // We request aspect ratio but no resolution
             .setTargetAspectRatio(screenAspectRatio)
-            // Set initial target rotation, we will have to call this again if rotation changes
-            // during the lifecycle of this use case
             .setTargetRotation(rotation)
             .build()
-            // The analyzer can then be assigned to the instance
             .also {
                 it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
                     Log.d(TAG, "Average luminosity: $luma")
@@ -359,23 +349,26 @@ class CameraFragment : Fragment() {
     private fun makePhoto() {
         val imageCapture = imageCapture ?: return
 
-        val photo = Photo()
-        photo.routeName = args.params.routeName
-        photo.addressName = args.params.addressName
-        photo.fileOrder = args.params.fileOrder.string
-        photo.currentLens = lensFacing
-        photo.onOk = { photo -> gotoPhotoFragment(photo) }
-        photo.make(imageCapture,cameraExecutor)
-
+        val point = pvm.state.value!!.point
+        vm.photo = PhotoFacade.create(
+            point,
+            args.params.fileOrder
+        )
+        PhotoFacade.make(
+            vm.photo,
+            imageCapture,
+            cameraExecutor,
+            lensFacing
+            ) { gotoPhotoFragment() }
     }
 
-    private fun gotoPhotoFragment(photo: Photo) {
+    private fun gotoPhotoFragment() {
         val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
         mainThreadHandler.post {
             if (navController.currentDestination?.id == R.id.cameraFragment) {
                 navController.navigate(
                     CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
-                        photo.pack(),
+                        "",
                         args.params
                     )
                 )
