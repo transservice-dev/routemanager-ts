@@ -62,8 +62,8 @@ object RootRepository {
         Log.e(TAG, "Caught $exception")
         Log.e(TAG, " ${exception.stackTraceToString()}" )
         Firebase.crashlytics.recordException(exception)
-
     }
+
     private val mainThreadHandler: Handler = HandlerCompat.createAsync(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errHandler)
 
@@ -650,12 +650,6 @@ object RootRepository {
        return taskFlow
     }
 
-    fun getPointById(pointId: String, complete: (pointItem: PointItem) -> Unit) {
-        scope.launch {
-            complete(dbDao.getPointById(pointId))
-        }
-    }
-
     private fun insertPointRows(pointList: List<TaskRowRes>): Int{
         Log.d(TAG, "Insert point rows START")
         val insertRes = dbDao.insertPointList(pointList.map {
@@ -716,7 +710,7 @@ object RootRepository {
             val id = dbDao.insertPointFile(pf)
             pf.id = id
             Log.d(TAG, "Insert Point File FINISHED ${pf.filePath}")
-            mainThreadHandler.post{complete()}
+            mainThreadHandler.post{ complete() }
             WorkManager.getInstance(AppClass.instance).enqueue(UploadFilesWorker.requestOneTimeWork(workDataOf(UploadFilesWorker.fileId to pf.id)))
         }
     }
@@ -728,7 +722,7 @@ object RootRepository {
             val photoAndFactDone = pointItem.countFact > 0 && filesAfter.isNotEmpty() && filesBefore.isNotEmpty()
             val canBeDone = if (pointItem.polygonByRow) {
                 !pointItem.polygonNotFilled() && photoAndFactDone
-            }else{
+            } else {
                 photoAndFactDone
             }
             complete(canBeDone)
@@ -748,17 +742,6 @@ object RootRepository {
             mainThreadHandler.post { complete(result) }
         }
     }
-
-    fun getPointFilesData(pointItem: PointItem?, order: PhotoOrder, complete: (pointFiles: Map<PointItem,List<PointFile>>) -> Unit) {
-        scope.launch {
-            if (pointItem == null) {
-                complete(dbDao.getPointAndFiles())
-            }else{
-                complete(dbDao.getPointAndFilesByPoint(pointItem.lineUID))
-            }
-        }
-    }
-
 
     fun getPointFilesByOrder(pointItem: PointItem, order: PhotoOrder, complete: (pointFilesList: List<PointFile>) -> Unit){
         scope.launch {

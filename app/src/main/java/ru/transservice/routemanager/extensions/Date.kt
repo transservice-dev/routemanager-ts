@@ -16,3 +16,10 @@ fun Date.longFormat():String {
         Locale("ru")
     ).format(this)
 }
+
+fun Date.longWithWeekDayFormat():String {
+    return SimpleDateFormat(
+        "yyyy-MM-dd (EEE) HH:mm:ss",
+        Locale("ru")
+    ).format(this)
+}

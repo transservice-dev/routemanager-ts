@@ -122,8 +122,8 @@ class PointFragment : BaseFragment() {
 
     private fun setViewsVisibility(state: PointWithData) {
         with(binding) {
-
             val cannotDone = viewModel.pointStatus == PointStatuses.CANNOT_DONE
+
             layoutCantDone.visibility = View.VISIBLE
             layoutTakePhotoCantDone.visibility = if (cannotDone) View.VISIBLE else View.GONE
             reasonLayout.visibility = if (cannotDone || state.point.countFact == 0.0) View.VISIBLE else View.GONE
@@ -231,7 +231,7 @@ class PointFragment : BaseFragment() {
         }
     }
 
-    private fun navigateToPictures(){
+    private fun navigateToPictures() {
         viewModel.state.value?.let {
             navController.navigate(MainNavigationDirections.actionGlobalPhotoListFragment(it.point,PhotoOrder.DONT_SET))
         }

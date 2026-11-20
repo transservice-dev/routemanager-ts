@@ -19,18 +19,16 @@ import androidx.camera.core.ImageCaptureException
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModel
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointFile
 import ru.transservice.routemanager.data.local.entities.PointItem
+import ru.transservice.routemanager.extensions.longWithWeekDayFormat
 import ru.transservice.routemanager.location.NavigationServiceConnection
 import ru.transservice.routemanager.photoDir
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.utils.TextUtils
-import ru.transservice.routemanager.workmanager.UploadFilesWorker
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -55,7 +53,8 @@ class Photo(val point: PointItem,val photoType:PhotoOrder) {
     var address:String = ""
 
     val dateText: String
-        get() = SimpleDateFormat("yyyy-MM-dd (EEE) HH:mm:ss",Locale("ru")).format(date)
+        get() = date.longWithWeekDayFormat()
+
     val locText:String
         get() = if (lat != 0.0 && lon != 0.0) {String.format("%.6f", lat) + "   " +  String.format("%.6f", lon)} else ""
 

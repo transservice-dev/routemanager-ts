@@ -6,9 +6,7 @@ import java.io.Serializable
 
 @Entity(tableName = "polygon_table",primaryKeys = ["pk"])
 data class PolygonItem(
-    @NotNull
     val pk: Int,
-    @NotNull
     val docUID: String,
     val uid: String,
     val name: String,

@@ -93,12 +93,7 @@ class StartScreenViewModel : ViewModel() {
         }
     }
 
-    fun testCoroutines(){
-        repository.testCoroutines()
-    }
-
     fun getTaskParams(): LiveData<TaskWithData> {
         return currentTask
     }
-
 }

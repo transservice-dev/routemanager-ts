@@ -40,7 +40,9 @@ data class PointItem(
     var tripNumberFact: Int,
     var timestamp: Date? = null,
     var status : PointStatuses = PointStatuses.NOT_VISITED,
-    var uploaded: Boolean? = null
+    var uploaded: Boolean? = null,
+    var rlat: Double? = null,
+    var rlon: Double? = null
 ) : Serializable {
     @Ignore
     var pointActionsArray: ArrayList<PointActions> = ArrayList()
@@ -145,7 +147,9 @@ data class PointItem(
             polygonUID,
             polygonName,
             polygon,
-            tripNumberFact
+            tripNumberFact,
+            rlat,
+            rlon
         )
     }
 }

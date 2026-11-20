@@ -10,7 +10,6 @@ import java.util.*
 @Entity(tableName = "currentRoute_table")
 data class Task(
     @PrimaryKey
-    @NonNull
     val docUid: String,
     @Embedded(prefix = "vehicle_")
     val vehicle:VehicleItem? = null,

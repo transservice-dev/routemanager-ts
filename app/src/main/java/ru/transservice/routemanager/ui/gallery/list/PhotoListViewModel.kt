@@ -18,12 +18,8 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
     var selectedItems: MutableLiveData<MutableList<PointFile>> = MutableLiveData(mutableListOf())
     val state: PhotoListState = PhotoListState(pointItem, mutableListOf(), ::handleSelection, ::navRequest)
 
-    //private val _navParams = MutableStateFlow(NavParams())
-    //val navParams: StateFlow<NavParams> = _navParams.asStateFlow()
-
     private val _navParams = MutableSharedFlow<NavParams>()
     val navParams: SharedFlow<NavParams> = _navParams.asSharedFlow()
-
 
     class Factory(val pointItem: PointItem?) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -39,10 +35,6 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
     init {
         loadPointList()
     }
-
-
-    //class Factory: ViewModelProvider.Factory
-
 
     fun loadPointList() : MutableLiveData<List<PointItem>>{
        if (pointItem != null){
@@ -64,7 +56,6 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
     fun setPointFilesList(list: List<PointFile>){
         pointFilesList.value = list
     }
-
 
     data class PhotoListState(
         val pointItem: PointItem?,
@@ -94,14 +85,5 @@ class PhotoListViewModel(var pointItem: PointItem?) : ViewModel() {
         viewModelScope.launch {
             _navParams.emit(NavParams(pointItem,position,true))
         }
-        /*_navParams.update {
-            NavParams(pointItem,position,true)
-        }*/
-    }
-
-    fun navRequestComplete() {
-        /*_navParams.update {
-            _navParams.value.copy(isRequired = false)
-        }*/
     }
 }

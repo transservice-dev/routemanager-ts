@@ -2,7 +2,6 @@ package ru.transservice.routemanager.service
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -13,7 +12,7 @@ import java.util.*
 
 class ReportLog(val context: Context) {
 
-    private fun createLogFile () : File? {
+    private fun createLogFile() : File? {
         val storage = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         val fileName = "log" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale("RU"))
                 .format(Date())

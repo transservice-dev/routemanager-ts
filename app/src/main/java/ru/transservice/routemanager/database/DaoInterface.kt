@@ -64,22 +64,22 @@ interface DaoInterface {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertPointFile(pointFile: PointFile): Long
 
-    @Query("SELECT * from pointFiles_table where lineUID = :lineUID AND photoOrder =:photoOrder") //ORDER BY addressName ASC")
+    @Query("SELECT * from pointFiles_table where lineUID = :lineUID AND photoOrder =:photoOrder") //ORDER BY addressName ASC
     fun getPointFilesByOrder(lineUID: String, photoOrder: PhotoOrder): List<PointFile>
 
-    @Query("SELECT * from pointFiles_table where lineUID = :lineUID") //ORDER BY addressName ASC")
+    @Query("SELECT * from pointFiles_table where lineUID = :lineUID") //ORDER BY addressName ASC
     fun getAllPointFiles(lineUID: String): List<PointFile>
 
-    @Query("SELECT * from pointFiles_table where lineUID = :lineUID AND (lat = 0.0 OR lon = 0.0)")  //ORDER BY addressName ASC")
+    @Query("SELECT * from pointFiles_table where lineUID = :lineUID AND (lat = 0.0 OR lon = 0.0)")  //ORDER BY addressName ASC
     fun getGeolessPointFiles(lineUID: String): MutableList<PointFile>
 
     @Query("UPDATE pointFiles_table SET lat = :lat, lon = :lon WHERE id = :id")
     fun updatePointFileLocation(lat: Double, lon: Double, id: Long)
 
-    @Query("SELECT * from pointFiles_table") //ORDER BY addressName ASC")
+    @Query("SELECT * from pointFiles_table") //ORDER BY addressName ASC
     fun getRoutePointFiles(): List<PointFile>
 
-    @Query("SELECT * from pointFiles_table where NOT uploaded") //ORDER BY addressName ASC")
+    @Query("SELECT * from pointFiles_table where NOT uploaded") //ORDER BY addressName ASC
     fun getRouteNotUploadedPointFiles(): List<PointFile>
 
     @Transaction
@@ -196,23 +196,18 @@ interface DaoInterface {
     @Query("SELECT * from pointList_table ORDER BY tripNumberFact, tripNumber, rowNumber")
     fun observePointList() : Flow<List<PointItem>>
 
-    @Query("""
-        SELECT *
-        FROM TaskWithData
-    """)
+    @Query("SELECT * FROM TaskWithData")
     fun observeTaskWithData(): Flow<TaskWithData>
 
-    @Query("""
-        SELECT COUNT(1) from pointFiles_table
-    """)
+    @Query("SELECT COUNT(1) from pointFiles_table")
     fun countFiles() : Int
 
     @Query("SELECT * FROM pointFiles_table where id=:id")
     fun getFileById(id: Long): PointFile?
 
-    @Query("SELECT *FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID ")
+    @Query("SELECT * FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID ")
     fun getPointAndFiles(): Map<PointItem, List<PointFile>>
 
-    @Query("SELECT *FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID where points.lineUID=:pointId")
+    @Query("SELECT * FROM pointList_table as points INNER JOIN pointFiles_table as files on points.lineUID = files.lineUID where points.lineUID=:pointId")
     fun getPointAndFilesByPoint(pointId: String): Map<PointItem, List<PointFile>>
 }

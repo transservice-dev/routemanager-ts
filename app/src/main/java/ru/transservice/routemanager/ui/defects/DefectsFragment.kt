@@ -43,9 +43,7 @@ class DefectsFragment : DialogFragment() {
     }
 
     private fun initViews() = with(binding) {
-        fragmentDefectsConfirm.setOnClickListener {
-            confirm()
-        }
+        fragmentDefectsConfirm.setOnClickListener { confirm() }
         fragmentDefectsCancel.setOnClickListener { dismiss() }
     }
 

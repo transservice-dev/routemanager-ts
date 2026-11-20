@@ -11,10 +11,8 @@ import kotlinx.coroutines.withContext
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.repositories.RootRepository
 import ru.transservice.routemanager.service.LoadResult
-import android.os.*
 import ru.transservice.routemanager.extensions.WorkInfoKeys
 import ru.transservice.routemanager.service.errorDescription
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class UploadResultWorker(context: Context, workerParams: WorkerParameters): CoroutineWorker(context, workerParams) {

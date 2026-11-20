@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull
 import ru.transservice.routemanager.data.local.entities.PolygonItem
 
 data class PolygonRes(
-    @NotNull
     val pk: Int,
-    @NotNull
     val docUID: String,
     val uid: String,
     val name: String,

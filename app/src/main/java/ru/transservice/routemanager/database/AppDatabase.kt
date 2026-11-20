@@ -10,7 +10,7 @@ import ru.transservice.routemanager.data.local.entities.*
 @Database(
     entities = [PointItem::class, Task::class, PointFile::class, PolygonItem::class],
     views = [PointWithData::class, TaskWithData::class],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration (from = 2, to = 3),
         AutoMigration (from = 3, to = 4)
@@ -53,6 +53,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("DB.Migration","5 >> 6")
+                database.execSQL("ALTER TABLE pointList_table ADD COLUMN rlat REAL")
+                database.execSQL("ALTER TABLE pointList_table ADD COLUMN rlon REAL")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             val tempInstance = INSTANCE
             if (tempInstance != null) {
@@ -64,7 +72,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "routemanager.db"
                 )
-                    .addMigrations(MIGRATION_1_2,MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2,MIGRATION_4_5,MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 return instance

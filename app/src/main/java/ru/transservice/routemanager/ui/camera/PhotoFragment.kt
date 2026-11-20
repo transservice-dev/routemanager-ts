@@ -86,5 +86,4 @@ class PhotoFragment : Fragment() {
         vm.photo.file.delete()
         navController.popBackStack()
     }
-
 }

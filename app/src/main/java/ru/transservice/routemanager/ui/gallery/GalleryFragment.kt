@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.core.view.doOnAttach
 import ru.transservice.routemanager.extensions.padWithDisplayCutout
 import androidx.navigation.NavController
 import androidx.navigation.Navigation

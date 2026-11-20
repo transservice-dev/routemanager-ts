@@ -21,7 +21,6 @@ import ru.transservice.routemanager.databinding.FragmentFactDialogBinding
 
 
 class FactDialog : DialogFragment() {
-
     private var _binding: FragmentFactDialogBinding? = null
     private val binding get() = _binding!!
     private lateinit var point: PointItem

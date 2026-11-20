@@ -15,5 +15,7 @@ data class TaskUploadBody (
     val polygonUID: String,
     val polygonName: String,
     val polygon: Boolean,
-    val tripNumberFact: Int
+    val tripNumberFact: Int,
+    val rlat:Double?,
+    val rlon:Double?
 )
