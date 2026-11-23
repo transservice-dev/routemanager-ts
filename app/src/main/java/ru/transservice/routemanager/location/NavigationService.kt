@@ -23,7 +23,6 @@ import java.util.*
 import ru.transservice.routemanager.R
 
 class NavigationService : Service() {
-
     private val googlePlayServicesAvailable: Boolean =
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
             AppClass.instance
@@ -62,7 +61,7 @@ class NavigationService : Service() {
                 }
             }
         startForeground(1,createNotification())
-        // Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
         CoroutineScope(Dispatchers.Default).launch {
             trackerClient.startTrackingLocation()
         }
@@ -87,7 +86,6 @@ class NavigationService : Service() {
         } catch (e: Exception) {
             Log.e(TAG,"Service stopped without being started: ${e.message}")
         }
-
     }
 
     fun setNavClient() {

@@ -8,13 +8,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import ru.skillbranch.skillarticles.extensions.dpToPx
 import ru.transservice.routemanager.AppClass
 import ru.transservice.routemanager.R
 import ru.transservice.routemanager.data.local.entities.PhotoOrder
 import ru.transservice.routemanager.data.local.entities.PointItem
 import ru.transservice.routemanager.databinding.FragmentPointPhotosBinding
 import ru.transservice.routemanager.repositories.RootRepository
+import ru.transservice.routemanager.utils.dpToPx
 
 class PointListAdapter(
     val photoOrder: PhotoOrder,

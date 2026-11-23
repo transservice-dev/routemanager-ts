@@ -27,9 +27,6 @@ class FactDialog : DialogFragment() {
     private var plan: Double = 0.0
     private var fact: Double = 0.0
 
-    //var plan = point.value!!.getCountPlan()
-    //private var fact : Double = if (point.value!!.getCountFact()==-1.0) {0.0} else {point.value!!.getCountFact()}
-
     companion object {
         fun newInstance(point: PointItem):FactDialog {
             val args = Bundle()
@@ -111,7 +108,6 @@ class FactDialog : DialogFragment() {
                     wasLongClick = true
 
                 } else {
-                    // if the view was disabled by the clickListener, remove the callback
                     handler.removeCallbacks(this)
                     touchedView!!.isPressed = false
                     touchedView = null
@@ -141,7 +137,6 @@ class FactDialog : DialogFragment() {
 
         init {
             require(!(initialInterval < 0 || normalInterval < 0)) { "negative interval" }
-
         }
     }
 

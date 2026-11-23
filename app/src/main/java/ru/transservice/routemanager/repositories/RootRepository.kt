@@ -168,8 +168,6 @@ object RootRepository {
         worker.setProgress(data)
     }
 
-    //region RemoteConnections
-
     fun loadRegions(complete: (regions: List<RegionRes>) -> Unit){
         Log.d(TAG, "Loading Regions START")
         scope.launch {
@@ -177,17 +175,6 @@ object RootRepository {
             if (responseResult(response) is LoadResult.Success) {
                 if (!response.body().isNullOrEmpty()) {
                     Log.d(TAG, "Loading Regions FINISHED")
-                    complete.invoke(response.body()!!)
-                }
-            }
-        }
-    }
-
-    fun loadAllVehicles(complete: (vehicles: List<VehicleRes>) -> Unit){
-        scope.launch {
-            val response = RetrofitClient.getPostgrestApi().getVehicles(RegionParam())
-            if (responseResult(response) is LoadResult.Success) {
-                if (!response.body().isNullOrEmpty()) {
                     complete.invoke(response.body()!!)
                 }
             }
@@ -202,7 +189,7 @@ object RootRepository {
                 if (!response.body().isNullOrEmpty()) {
                     Log.d(TAG, "Loading Vehicles FINISHED")
                     complete.invoke(response.body()!!)
-                }else{
+                } else {
                     complete.invoke(listOf())
                 }
             }
@@ -219,23 +206,6 @@ object RootRepository {
                     complete.invoke(response.body()!!)
                 }
             }
-        }
-    }
-
-    fun testCoroutines() {
-        val scope1 = CoroutineScope(Dispatchers.Default + errHandler)
-        val scope2 = CoroutineScope(Dispatchers.Default + errHandler)
-        val job = scope1.launch {
-            scope1.launch {
-                delay(100)
-                Log.d(tag(),"task 1")
-                throw SocketTimeoutException()
-            }
-            scope2.launch {
-                delay(200)
-                Log.d(tag(),"task 2")
-            }
-            //delay(1000)
         }
     }
 
@@ -339,8 +309,6 @@ object RootRepository {
 
     suspend fun uploadResult(worker: UploadResultWorker): LoadResult<Boolean>{
         Log.d(TAG, "uploading result START")
-        //return LoadResult.Success(true)
-        //return LoadResult.Error("Ошибка!", SocketTimeoutException())
         try {
             //1. upload files first
             val resultFiles = uploadFiles(worker)
@@ -385,8 +353,6 @@ object RootRepository {
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun uploadFiles(worker: CoroutineWorker,deleteUploaded: Boolean = true, pointFile: PointFile? = null): LoadResult<Boolean> {
 
         val data = if (pointFile != null) {
@@ -401,8 +367,6 @@ object RootRepository {
         val countFiles = dbDao.countFiles()
         var countUploadedFiles = countFiles - data.size
         worker.updateProgressValue(WorkInfoKeys.Progress,(countUploadedFiles.toFloat()/countFiles*100).toInt())
-
-
 
         if (data.isNotEmpty()) {
             // uploading in portion
@@ -444,7 +408,6 @@ object RootRepository {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun uploadFilesPortion(
         data: List<PointFile>,
         startPos: Int,
@@ -503,24 +466,23 @@ object RootRepository {
         )
     }
 
-    private suspend fun uploadTask():LoadResult<List<PointItem>> {
-
-            Log.d(TAG, "uploading task START")
-            val taskList = dbDao.getPointList()
-            val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
-            //Log.d(TAG,taskUploadRequest.trackList.toString())
-            val response = RetrofitClient
-                .getPostgrestApi()
-                .uploadTask(taskUploadRequest)
-            val result = responseResult(response)
-            return if (result is LoadResult.Success) {
-                if (response.body() != null) {
-                    Log.d(TAG, "uploading task FINISHED")
-                    LoadResult.Success(taskList)
-                } else
-                    LoadResult.Error("Ошибка при выгрузке задания")
+    private suspend fun uploadTask(): LoadResult<List<PointItem>> {
+        Log.d(TAG, "uploading task START")
+        val taskList = dbDao.getPointList()
+        val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
+        //Log.d(TAG,taskUploadRequest.trackList.toString())
+        val response = RetrofitClient
+            .getPostgrestApi()
+            .uploadTask(taskUploadRequest)
+        val result = responseResult(response)
+        return if (result is LoadResult.Success) {
+            if (response.body() != null) {
+                Log.d(TAG, "uploading task FINISHED")
+                LoadResult.Success(taskList)
             } else
-                LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
+                LoadResult.Error("Ошибка при выгрузке задания")
+        } else
+            LoadResult.Error("Ошибка при выгрузке задания ${result.errorMessage}")
     }
 
     fun updatePointOnServer(pointItem: PointItem){
@@ -533,9 +495,7 @@ object RootRepository {
         val taskList = listOf(pointItem)
         val taskUploadRequest = TaskUploadRequest(taskList.map { it.toTaskUploadBody() })
         val pREST = RetrofitClient.getPostgrestApi()
-        //val response = RetrofitClient
-        //        .getPostgrestApi()
-        //        .uploadTask(taskUploadRequest)
+
         try {
             val response = pREST.uploadTask(taskUploadRequest)
 
@@ -634,10 +594,6 @@ object RootRepository {
         }
     }
 
-    //endregion
-
-    //region LocalDatabase
-
     fun observePointList(): Flow<List<PointItem>>{
         return dbDao.observePointList()
     }
@@ -680,7 +636,6 @@ object RootRepository {
         }
     }
 
-
     fun updatePoint(pointItem: PointItem){
         scope.launch {
             dbDao.updatePointWithRoute(pointItem)
@@ -695,7 +650,6 @@ object RootRepository {
         scope.launch {
             dbDao.addPolygon(pointItem)
         }
-
     }
 
     fun deletePolygon(pointItem: PointItem){
@@ -811,7 +765,4 @@ object RootRepository {
     suspend fun getPointFileById(id: Long): PointFile? {
         return dbDao.getFileById(id)
     }
-
-    //endregion
-
 }

@@ -66,19 +66,14 @@ class AnimateView (var view : View, var context : Context, val animate : Boolean
             view.visibility = View.VISIBLE
             view.requestLayout()
         }
-        /*else{
-            val show = AnimationUtils.loadAnimation(context,R.anim.hide_height)
-            view.startAnimation(show)
-            view.visibility = ViewGroup.VISIBLE
-        }*/
     }
 
-    fun rotate (){
+    fun rotate () {
         val rotate = AnimationUtils.loadAnimation(this.context, R.anim.routate_pict)
         view.startAnimation(rotate)
     }
 
-    fun rotateBack (){
+    fun rotateBack () {
         val rotate = AnimationUtils.loadAnimation(this.context, R.anim.rotate_pict_back)
         view.startAnimation(rotate)
     }

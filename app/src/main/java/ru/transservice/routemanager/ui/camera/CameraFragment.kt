@@ -94,19 +94,11 @@ class CameraFragment : Fragment() {
         }
     }
 
-    /**
-     * margarita_dev add vals
-     */
     private val navController: NavController by lazy {Navigation.findNavController(requireActivity(),R.id.nav_host_fragment)}
     private val args:CameraFragmentArgs by navArgs()
     private var focusStart: Drawable? = null
     private var focusStop: Drawable? = null
 
-    /**
-     * We need a display listener for orientation changes that do not trigger a configuration
-     * change, for example if we choose to override config change in manifest or for 180-degree
-     * orientation changes.
-     */
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = Unit
         override fun onDisplayRemoved(displayId: Int) = Unit
@@ -121,8 +113,6 @@ class CameraFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Make sure that all permissions are still present, since the
-        // user could have removed them while the app was in paused state.
         if (!PermissionFragment.hasPermissions(requireContext())) {
             navController.navigate(
                 MainNavigationDirections.actionGlobalPermissionFragment()
@@ -231,28 +221,17 @@ class CameraFragment : Fragment() {
         focusStop =  AppCompatResources.getDrawable(requireContext(),R.drawable.ic_focus_stop)
     }
 
-    /**
-     * Inflate camera controls and update the UI manually upon config changes to avoid removing
-     * and re-adding the view finder from the view hierarchy; this provides a seamless rotation
-     * transition on devices that support it.
-     *
-     * NOTE: The flag is supported starting in Android 8 but there still is a small flash on the
-     * screen for devices that run Android 9 or below.
-     */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         bindCameraUseCases()
     }
 
-    /** Initialize CameraX, and prepare to bind the camera use cases  */
     private fun setUpCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
 
-            // CameraProvider
             cameraProvider = cameraProviderFuture.get()
 
-            // Select lensFacing depending on the available cameras
             lensFacing = when {
                 hasBackCamera() -> CameraSelector.LENS_FACING_BACK
                 hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT

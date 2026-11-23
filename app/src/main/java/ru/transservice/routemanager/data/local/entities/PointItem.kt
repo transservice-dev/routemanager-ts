@@ -8,7 +8,11 @@ import java.io.Serializable
 import java.util.*
 import kotlin.math.max
 
-@Entity(tableName = "pointList_table",primaryKeys = ["docUID","lineUID"], indices = [Index("docUID","lineUID","docUID","lineUID")])
+@Entity(
+    tableName = "pointList_table",
+    primaryKeys = ["docUID","lineUID"],
+    indices = [Index("docUID","lineUID")]
+)
 data class PointItem(
     val docUID: String,
     val lineUID: String,

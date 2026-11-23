@@ -1,7 +1,5 @@
 package ru.transservice.routemanager.data.local.entities
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -19,7 +17,7 @@ import java.util.*
                 childColumns = ["docUID", "lineUID"],
                 onDelete = ForeignKey.CASCADE
         )],
-        indices = [Index("docUID", "lineUID", "docUID", "lineUID")]
+        indices = [Index("docUID", "lineUID")]
 )
 data class PointFile(
         val docUID: String,
@@ -41,14 +39,7 @@ data class PointFile(
         return f.exists()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getCompresedBase64(): String {
-
-        /*val mBitmap = BitmapFactory.decodeFile(this.filePath)
-        val stream = ByteArrayOutputStream()
-        mBitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream)
-        val imageBytes = stream.toByteArray()*/
-
         val f = File(this.filePath)
         return if (f.exists()) {
             val imageBytes = ByteArray(f.length().toInt())

@@ -47,10 +47,10 @@ class Photo(val point: PointItem,val photoType:PhotoOrder) {
     lateinit var date: Date
     lateinit var file: File
 
-    var hasLocation:Boolean = false
+    var hasLocation: Boolean = false
     var lat: Double = 0.0
     var lon: Double = 0.0
-    var address:String = ""
+    var address: String = ""
 
     val dateText: String
         get() = date.longWithWeekDayFormat()
